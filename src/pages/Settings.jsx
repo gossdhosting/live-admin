@@ -703,6 +703,33 @@ function Settings() {
                 </small>
               </div>
 
+              <div className="form-group">
+                <label htmlFor="title_box_padding">Box Padding (px)</label>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                  <input
+                    type="range"
+                    id="title_box_padding"
+                    min="0"
+                    max="20"
+                    value={settings.title_box_padding || '5'}
+                    onChange={(e) => handleChange('title_box_padding', e.target.value)}
+                    style={{ flex: 1 }}
+                  />
+                  <input
+                    type="number"
+                    className="form-control"
+                    value={settings.title_box_padding || '5'}
+                    onChange={(e) => handleChange('title_box_padding', e.target.value)}
+                    min="0"
+                    max="20"
+                    style={{ width: '80px' }}
+                  />
+                </div>
+                <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
+                  Padding around text inside the box. Lower = less CPU usage. Current: {settings.title_box_padding || '5'}px
+                </small>
+              </div>
+
               <div className="modal-actions">
                 <button type="submit" className="btn btn-primary" disabled={saving}>
                   {saving ? 'Saving...' : 'Save Settings'}
