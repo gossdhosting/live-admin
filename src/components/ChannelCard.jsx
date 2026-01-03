@@ -5,6 +5,10 @@ function ChannelCard({ channel, onUpdate, onDelete }) {
   const [loading, setLoading] = useState(false);
   const [showLogs, setShowLogs] = useState(false);
   const [logs, setLogs] = useState([]);
+  const [showPreview, setShowPreview] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const streamUrl = `${window.location.protocol}//${window.location.host}/hls/channel_${channel.id}/index.m3u8`;
 
   const handleStart = async () => {
     if (!confirm(`Start streaming for "${channel.name}"?`)) return;
@@ -61,9 +65,33 @@ function ChannelCard({ channel, onUpdate, onDelete }) {
     }
   };
 
+  const handleCopyUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(streamUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      alert('Failed to copy URL');
+    }
+  };
+
+  const handleOpenStream = () => {
+    window.open(streamUrl, '_blank');
+  };
+
   const getStatusBadge = () => {
     const statusClass = `status-badge status-${channel.status}`;
-    return <span className={statusClass}>{channel.status.toUpperCase()}</span>;
+    const statusText = channel.status === 'running' && channel.runtime_status?.uptime
+      ? `${channel.status.toUpperCase()} (${formatUptime(channel.runtime_status.uptime)})`
+      : channel.status.toUpperCase();
+    return <span className={statusClass}>{statusText}</span>;
+  };
+
+  const formatUptime = (seconds) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${hours}h ${minutes}m ${secs}s`;
   };
 
   return (
@@ -77,26 +105,96 @@ function ChannelCard({ channel, onUpdate, onDelete }) {
       </div>
 
       <div style={{ marginBottom: '1rem' }}>
-        <p style={{ fontSize: '0.9rem', color: '#7f8c8d', marginBottom: '0.5rem' }}>
-          <strong>Input URL:</strong> {channel.input_url}
-        </p>
-        {channel.status === 'running' && channel.output_path && (
-          <p style={{ fontSize: '0.9rem', color: '#7f8c8d', marginBottom: '0.5rem' }}>
-            <strong>HLS URL:</strong> /hls/channel_{channel.id}/index.m3u8
-          </p>
+        <div style={{ fontSize: '0.9rem', color: '#7f8c8d', marginBottom: '0.5rem' }}>
+          <strong>Input URL:</strong>
+          <a href={channel.input_url} target="_blank" rel="noopener noreferrer" style={{ marginLeft: '0.5rem', color: '#3498db' }}>
+            {channel.input_url.substring(0, 60)}...
+          </a>
+        </div>
+
+        {channel.status === 'running' && (
+          <div className="stream-url-section" style={{
+            backgroundColor: '#e8f5e9',
+            padding: '1rem',
+            borderRadius: '4px',
+            marginTop: '1rem',
+            marginBottom: '0.5rem'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <strong style={{ color: '#2c3e50' }}>🎥 Stream URL:</strong>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button
+                  className="btn btn-sm"
+                  onClick={handleCopyUrl}
+                  style={{
+                    padding: '0.25rem 0.75rem',
+                    fontSize: '0.8rem',
+                    backgroundColor: copied ? '#27ae60' : '#3498db',
+                    color: 'white'
+                  }}
+                >
+                  {copied ? '✓ Copied!' : '📋 Copy'}
+                </button>
+                <button
+                  className="btn btn-sm"
+                  onClick={handleOpenStream}
+                  style={{
+                    padding: '0.25rem 0.75rem',
+                    fontSize: '0.8rem',
+                    backgroundColor: '#9b59b6',
+                    color: 'white'
+                  }}
+                >
+                  🔗 Open
+                </button>
+                <button
+                  className="btn btn-sm"
+                  onClick={() => setShowPreview(!showPreview)}
+                  style={{
+                    padding: '0.25rem 0.75rem',
+                    fontSize: '0.8rem',
+                    backgroundColor: '#e67e22',
+                    color: 'white'
+                  }}
+                >
+                  {showPreview ? '👁️ Hide' : '👁️ Preview'}
+                </button>
+              </div>
+            </div>
+            <div style={{
+              backgroundColor: 'white',
+              padding: '0.5rem',
+              borderRadius: '4px',
+              fontFamily: 'monospace',
+              fontSize: '0.85rem',
+              wordBreak: 'break-all',
+              color: '#2c3e50'
+            }}>
+              {streamUrl}
+            </div>
+          </div>
         )}
+
         {channel.status === 'running' && channel.process_id && (
           <p style={{ fontSize: '0.9rem', color: '#7f8c8d', marginBottom: '0.5rem' }}>
             <strong>Process ID:</strong> {channel.process_id}
           </p>
         )}
         {channel.error_message && (
-          <p style={{ fontSize: '0.9rem', color: '#e74c3c', marginBottom: '0.5rem' }}>
-            <strong>Error:</strong> {channel.error_message}
-          </p>
+          <div style={{
+            backgroundColor: '#fee',
+            padding: '0.75rem',
+            borderRadius: '4px',
+            marginTop: '0.5rem',
+            marginBottom: '0.5rem'
+          }}>
+            <p style={{ fontSize: '0.9rem', color: '#e74c3c', margin: 0 }}>
+              <strong>⚠️ Error:</strong> {channel.error_message}
+            </p>
+          </div>
         )}
         <p style={{ fontSize: '0.9rem', color: '#7f8c8d' }}>
-          <strong>Auto-restart:</strong> {channel.auto_restart ? 'Enabled' : 'Disabled'}
+          <strong>Auto-restart:</strong> {channel.auto_restart ? '✅ Enabled' : '❌ Disabled'}
         </p>
       </div>
 
@@ -117,6 +215,42 @@ function ChannelCard({ channel, onUpdate, onDelete }) {
           Delete
         </button>
       </div>
+
+      {showPreview && channel.status === 'running' && (
+        <div style={{ marginTop: '1rem' }}>
+          <div style={{
+            backgroundColor: '#000',
+            borderRadius: '8px',
+            overflow: 'hidden',
+            position: 'relative'
+          }}>
+            <video
+              controls
+              autoPlay
+              muted
+              style={{ width: '100%', maxHeight: '400px' }}
+              src={streamUrl}
+            >
+              Your browser does not support HLS playback.
+            </video>
+            <div style={{
+              position: 'absolute',
+              top: '0.5rem',
+              right: '0.5rem',
+              backgroundColor: 'rgba(0,0,0,0.7)',
+              color: 'white',
+              padding: '0.25rem 0.5rem',
+              borderRadius: '4px',
+              fontSize: '0.75rem'
+            }}>
+              LIVE
+            </div>
+          </div>
+          <p style={{ fontSize: '0.85rem', color: '#7f8c8d', marginTop: '0.5rem', textAlign: 'center' }}>
+            Note: Some browsers may not support HLS natively. Use VLC or a dedicated player for best results.
+          </p>
+        </div>
+      )}
 
       {showLogs && (
         <div style={{ marginTop: '1rem' }}>
