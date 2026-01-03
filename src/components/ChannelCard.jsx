@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import api from '../services/api';
 import RtmpSettings from './RtmpSettings';
+import WatermarkSettings from './WatermarkSettings';
 
 function ChannelCard({ channel, onUpdate, onDelete }) {
   const [loading, setLoading] = useState(false);
@@ -9,6 +10,7 @@ function ChannelCard({ channel, onUpdate, onDelete }) {
   const [showPreview, setShowPreview] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showRtmpSettings, setShowRtmpSettings] = useState(false);
+  const [showWatermarkSettings, setShowWatermarkSettings] = useState(false);
 
   const streamUrl = `${window.location.protocol}//${window.location.host}/hls/channel_${channel.id}/index.m3u8`;
 
@@ -242,6 +244,13 @@ function ChannelCard({ channel, onUpdate, onDelete }) {
         >
           {showRtmpSettings ? 'Hide' : 'Multi-Platform'}
         </button>
+        <button
+          className="btn btn-primary"
+          onClick={() => setShowWatermarkSettings(!showWatermarkSettings)}
+          style={{ backgroundColor: '#e67e22' }}
+        >
+          {showWatermarkSettings ? 'Hide' : 'Watermark'}
+        </button>
         <button className="btn btn-danger" onClick={handleDelete} disabled={loading || channel.status === 'running'}>
           Delete
         </button>
@@ -308,6 +317,18 @@ function ChannelCard({ channel, onUpdate, onDelete }) {
           border: '1px solid #e0e0e0',
         }}>
           <RtmpSettings channelId={channel.id} channelName={channel.name} />
+        </div>
+      )}
+
+      {showWatermarkSettings && (
+        <div style={{
+          marginTop: '1rem',
+          padding: '1rem',
+          backgroundColor: '#fff5e6',
+          borderRadius: '8px',
+          border: '1px solid #ffe0b2',
+        }}>
+          <WatermarkSettings channel={channel} onUpdate={onUpdate} />
         </div>
       )}
     </div>
