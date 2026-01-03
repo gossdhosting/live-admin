@@ -10,6 +10,11 @@ function RtmpTemplatesManager() {
     platform: 'facebook',
     rtmp_url: '',
     stream_key: '',
+    video_bitrate: '',
+    audio_bitrate: '',
+    profile: '',
+    preset: '',
+    fps: '',
   });
   const [editingId, setEditingId] = useState(null);
 
@@ -40,15 +45,35 @@ function RtmpTemplatesManager() {
     const defaults = {
       facebook: {
         rtmp_url: 'rtmps://live-api-s.facebook.com:443/rtmp/',
+        video_bitrate: '4000k',
+        audio_bitrate: '128k',
+        profile: 'main',
+        preset: 'veryfast',
+        fps: 30,
       },
       youtube: {
         rtmp_url: 'rtmp://a.rtmp.youtube.com/live2/',
+        video_bitrate: '4500k',
+        audio_bitrate: '128k',
+        profile: 'high',
+        preset: 'veryfast',
+        fps: 30,
       },
       twitch: {
         rtmp_url: 'rtmp://live.twitch.tv/app/',
+        video_bitrate: '6000k',
+        audio_bitrate: '160k',
+        profile: 'main',
+        preset: 'veryfast',
+        fps: 30,
       },
       custom: {
         rtmp_url: '',
+        video_bitrate: '4000k',
+        audio_bitrate: '128k',
+        profile: 'main',
+        preset: 'veryfast',
+        fps: 30,
       },
     };
     return defaults[platform] || defaults.custom;
@@ -61,6 +86,11 @@ function RtmpTemplatesManager() {
       ...prev,
       platform,
       rtmp_url: defaults.rtmp_url,
+      video_bitrate: defaults.video_bitrate,
+      audio_bitrate: defaults.audio_bitrate,
+      profile: defaults.profile,
+      preset: defaults.preset,
+      fps: defaults.fps,
     }));
   };
 
@@ -116,6 +146,11 @@ function RtmpTemplatesManager() {
       platform: 'facebook',
       rtmp_url: '',
       stream_key: '',
+      video_bitrate: '',
+      audio_bitrate: '',
+      profile: '',
+      preset: '',
+      fps: '',
     });
     setEditingId(null);
     setShowAddForm(false);
@@ -224,6 +259,87 @@ function RtmpTemplatesManager() {
               placeholder="Your stream key"
               required
             />
+          </div>
+
+          <h4 style={{ marginTop: '2rem', marginBottom: '1rem', color: '#2c3e50' }}>Encoding Settings (Optional)</h4>
+          <p style={{ marginTop: '0', marginBottom: '1rem', color: '#7f8c8d', fontSize: '0.85rem' }}>
+            Leave blank to use platform defaults. These settings override platform defaults when set.
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div className="form-group">
+              <label>Video Bitrate</label>
+              <input
+                type="text"
+                name="video_bitrate"
+                value={formData.video_bitrate}
+                onChange={handleInputChange}
+                className="form-control"
+                placeholder="e.g., 4000k, 6000k"
+              />
+              <small style={{ color: '#7f8c8d' }}>Format: number + 'k' (e.g., 4000k)</small>
+            </div>
+
+            <div className="form-group">
+              <label>Audio Bitrate</label>
+              <input
+                type="text"
+                name="audio_bitrate"
+                value={formData.audio_bitrate}
+                onChange={handleInputChange}
+                className="form-control"
+                placeholder="e.g., 128k, 160k"
+              />
+              <small style={{ color: '#7f8c8d' }}>Format: number + 'k' (e.g., 128k)</small>
+            </div>
+
+            <div className="form-group">
+              <label>Profile</label>
+              <select
+                name="profile"
+                value={formData.profile}
+                onChange={handleInputChange}
+                className="form-control"
+              >
+                <option value="">Platform Default</option>
+                <option value="baseline">Baseline</option>
+                <option value="main">Main</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>Preset</label>
+              <select
+                name="preset"
+                value={formData.preset}
+                onChange={handleInputChange}
+                className="form-control"
+              >
+                <option value="">Platform Default</option>
+                <option value="ultrafast">Ultrafast (lowest CPU)</option>
+                <option value="superfast">Superfast</option>
+                <option value="veryfast">Veryfast (recommended)</option>
+                <option value="faster">Faster</option>
+                <option value="fast">Fast</option>
+                <option value="medium">Medium (best quality)</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>FPS (Frames Per Second)</label>
+              <input
+                type="number"
+                name="fps"
+                value={formData.fps}
+                onChange={handleInputChange}
+                className="form-control"
+                placeholder="e.g., 30, 60"
+                min="1"
+                max="60"
+              />
+              <small style={{ color: '#7f8c8d' }}>Common values: 24, 30, 60</small>
+            </div>
           </div>
 
           <div style={{ marginTop: '1.5rem', display: 'flex', gap: '0.75rem' }}>
