@@ -9,6 +9,7 @@ function Dashboard() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(new Date());
+  const [serverStats, setServerStats] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -33,11 +34,26 @@ function Dashboard() {
       }
     };
 
+    const fetchServerStats = async () => {
+      try {
+        const response = await api.get('/server-stats');
+        if (isMounted) {
+          setServerStats(response.data);
+        }
+      } catch (error) {
+        if (isMounted) {
+          console.error('Failed to fetch server stats:', error);
+        }
+      }
+    };
+
     fetchChannels();
+    fetchServerStats();
 
     // Auto-refresh every 5 seconds
     const interval = setInterval(() => {
       fetchChannels(true);
+      fetchServerStats();
     }, 5000);
 
     return () => {
@@ -96,6 +112,142 @@ function Dashboard() {
 
   return (
     <div className="container">
+      {/* Server Stats Section */}
+      {serverStats && (
+        <div className="card" style={{ marginBottom: '1.5rem' }}>
+          <div className="card-header">
+            <h2>Server Status</h2>
+            <div style={{ fontSize: '0.85rem', color: '#95a5a6' }}>
+              {serverStats.system.hostname} • {serverStats.system.osDistro} • Uptime: {serverStats.system.uptimeFormatted}
+            </div>
+          </div>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '1rem',
+            padding: '1rem'
+          }}>
+            {/* CPU Card */}
+            <div style={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              padding: '1.5rem',
+              borderRadius: '12px',
+              color: 'white',
+              boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+            }}>
+              <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '0.5rem' }}>CPU Usage</div>
+              <div style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
+                {serverStats.cpu.usage}%
+              </div>
+              <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>
+                {serverStats.cpu.cores} Cores
+                {serverStats.cpu.temperature && ` • ${serverStats.cpu.temperature}°C`}
+              </div>
+              <div style={{
+                marginTop: '0.5rem',
+                background: 'rgba(255,255,255,0.2)',
+                borderRadius: '4px',
+                height: '6px',
+                overflow: 'hidden'
+              }}>
+                <div style={{
+                  background: 'white',
+                  height: '100%',
+                  width: `${Math.min(100, serverStats.cpu.usage)}%`,
+                  transition: 'width 0.3s ease'
+                }} />
+              </div>
+            </div>
+
+            {/* RAM Card */}
+            <div style={{
+              background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+              padding: '1.5rem',
+              borderRadius: '12px',
+              color: 'white',
+              boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+            }}>
+              <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '0.5rem' }}>RAM Usage</div>
+              <div style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
+                {serverStats.memory.usedPercent}%
+              </div>
+              <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>
+                {serverStats.memory.usedGB} GB / {serverStats.memory.totalGB} GB
+              </div>
+              <div style={{
+                marginTop: '0.5rem',
+                background: 'rgba(255,255,255,0.2)',
+                borderRadius: '4px',
+                height: '6px',
+                overflow: 'hidden'
+              }}>
+                <div style={{
+                  background: 'white',
+                  height: '100%',
+                  width: `${serverStats.memory.usedPercent}%`,
+                  transition: 'width 0.3s ease'
+                }} />
+              </div>
+            </div>
+
+            {/* Disk Card */}
+            {serverStats.disk && (
+              <div style={{
+                background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                padding: '1.5rem',
+                borderRadius: '12px',
+                color: 'white',
+                boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+              }}>
+                <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '0.5rem' }}>Disk Usage</div>
+                <div style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
+                  {serverStats.disk.usedPercent}%
+                </div>
+                <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>
+                  {serverStats.disk.usedGB} GB / {serverStats.disk.totalGB} GB
+                </div>
+                <div style={{
+                  marginTop: '0.5rem',
+                  background: 'rgba(255,255,255,0.2)',
+                  borderRadius: '4px',
+                  height: '6px',
+                  overflow: 'hidden'
+                }}>
+                  <div style={{
+                    background: 'white',
+                    height: '100%',
+                    width: `${serverStats.disk.usedPercent}%`,
+                    transition: 'width 0.3s ease'
+                  }} />
+                </div>
+              </div>
+            )}
+
+            {/* Network Card */}
+            {serverStats.network && (
+              <div style={{
+                background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                padding: '1.5rem',
+                borderRadius: '12px',
+                color: 'white',
+                boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+              }}>
+                <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '0.5rem' }}>Network</div>
+                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '0.3rem' }}>
+                  ↓ {(serverStats.network.rx_sec / 1024 / 1024).toFixed(2)} MB/s
+                </div>
+                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
+                  ↑ {(serverStats.network.tx_sec / 1024 / 1024).toFixed(2)} MB/s
+                </div>
+                <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>
+                  {serverStats.network.interface}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="card">
         <div className="card-header">
           <h2>Live Channels</h2>

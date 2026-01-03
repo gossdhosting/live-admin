@@ -203,6 +203,66 @@ function ChannelCard({ channel, onUpdate, onDelete }) {
     );
   };
 
+  const getRtmpConnectionsInfo = () => {
+    const runtime = channel.runtime_status || {};
+    const rtmpConnections = runtime.rtmpConnections || [];
+
+    if (channel.status !== 'running' || rtmpConnections.length === 0) return null;
+
+    return (
+      <div style={{
+        backgroundColor: '#f0f8ff',
+        padding: '0.75rem',
+        borderRadius: '4px',
+        marginTop: '0.5rem',
+        fontSize: '0.85rem'
+      }}>
+        <div style={{ marginBottom: '0.5rem', fontWeight: 'bold', color: '#2c3e50' }}>
+          RTMP Destinations:
+        </div>
+        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+          {rtmpConnections.map((conn) => {
+            const statusColor = conn.status === 'connected' ? '#27ae60' :
+                               conn.status === 'connecting' ? '#f39c12' : '#e74c3c';
+            const statusIcon = conn.status === 'connected' ? '✓' :
+                              conn.status === 'connecting' ? '⟳' : '✗';
+            const statusText = conn.status === 'connected' ? 'CONNECTED' :
+                              conn.status === 'connecting' ? 'CONNECTING' : 'DISCONNECTED';
+
+            return (
+              <div key={conn.destinationId} style={{
+                backgroundColor: 'white',
+                border: `2px solid ${statusColor}`,
+                borderRadius: '6px',
+                padding: '0.5rem 0.75rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                minWidth: '150px'
+              }}>
+                <div style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  backgroundColor: statusColor,
+                  animation: conn.status === 'connecting' ? 'pulse 1.5s ease-in-out infinite' : 'none'
+                }} />
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 'bold', textTransform: 'capitalize', fontSize: '0.9rem' }}>
+                    {conn.platform}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: statusColor, fontWeight: '600' }}>
+                    {statusIcon} {statusText}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="card">
       <div className="card-header">
@@ -223,6 +283,9 @@ function ChannelCard({ channel, onUpdate, onDelete }) {
 
         {/* Health Metrics Display */}
         {getHealthInfo()}
+
+        {/* RTMP Connections Status */}
+        {getRtmpConnectionsInfo()}
 
         {/* Error Message Display */}
         {channel.status === 'error' && channel.error_message && (

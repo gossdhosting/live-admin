@@ -7,6 +7,7 @@ function CreateChannelModal({ onClose, onSuccess }) {
     description: '',
     input_url: '',
     auto_restart: true,
+    quality_preset: '720p',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -89,6 +90,25 @@ function CreateChannelModal({ onClose, onSuccess }) {
             />
             <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
               Paste the YouTube Live stream URL
+            </small>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="quality_preset">Default Output Quality *</label>
+            <select
+              id="quality_preset"
+              name="quality_preset"
+              className="form-control"
+              value={formData.quality_preset}
+              onChange={handleChange}
+              required
+            >
+              <option value="480p">480p (854x480) - Low bandwidth</option>
+              <option value="720p">720p (1280x720) - HD (Recommended)</option>
+              <option value="1080p">1080p (1920x1080) - Full HD (Max)</option>
+            </select>
+            <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
+              Maximum resolution for re-broadcasting. Higher quality requires more bandwidth.
             </small>
           </div>
 
