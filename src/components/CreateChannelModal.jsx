@@ -12,6 +12,7 @@ function CreateChannelModal({ onClose, onSuccess }) {
     input_type: 'youtube',
     media_file_id: null,
     loop_video: false,
+    title_enabled: false,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -213,11 +214,29 @@ function CreateChannelModal({ onClose, onSuccess }) {
               className="form-control"
               value={formData.stream_title}
               onChange={handleChange}
-              placeholder="e.g., Live Gaming Session - Fortnite"
+              placeholder="e.g., Kata Srinivas Goud Followers Protest Outside Revanth Reddy House"
               maxLength="100"
             />
             <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
-              This title will be sent to Twitch/YouTube when stream starts (requires API setup)
+              This title can be displayed as an overlay on the video (news headline style)
+            </small>
+          </div>
+
+          <div className="form-group">
+            <div className="checkbox-group">
+              <input
+                type="checkbox"
+                id="title_enabled"
+                name="title_enabled"
+                checked={formData.title_enabled}
+                onChange={handleChange}
+              />
+              <label htmlFor="title_enabled" style={{ marginBottom: 0 }}>
+                Show title overlay on video
+              </label>
+            </div>
+            <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
+              Display the stream title as an overlay on the video. Configure appearance in Settings → Title Settings.
             </small>
           </div>
 

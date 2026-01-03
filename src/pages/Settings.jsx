@@ -9,7 +9,7 @@ function Settings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
-  const [activeTab, setActiveTab] = useState('system'); // system, profile, password, rtmp
+  const [activeTab, setActiveTab] = useState('system'); // system, profile, password, rtmp, title
 
   // Password change state
   const [passwordData, setPasswordData] = useState({
@@ -301,6 +301,22 @@ function Settings() {
           >
             RTMP Templates
           </button>
+          <button
+            className={activeTab === 'title' ? 'tab-active' : 'tab-inactive'}
+            onClick={() => setActiveTab('title')}
+            style={{
+              padding: '0.75rem 1.5rem',
+              border: 'none',
+              background: activeTab === 'title' ? '#3498db' : 'transparent',
+              color: activeTab === 'title' ? '#fff' : '#7f8c8d',
+              cursor: 'pointer',
+              fontWeight: '500',
+              borderRadius: '4px 4px 0 0',
+              transition: 'all 0.2s'
+            }}
+          >
+            Title Settings
+          </button>
         </div>
 
         {/* System Settings Tab */}
@@ -550,6 +566,180 @@ function Settings() {
         {activeTab === 'rtmp' && (
           <div>
             <RtmpTemplatesManager />
+          </div>
+        )}
+
+        {/* Title Settings Tab */}
+        {activeTab === 'title' && (
+          <div>
+            {message && (
+              <div className={`alert ${message.includes('success') ? 'alert-success' : 'alert-error'}`}>
+                {message}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label htmlFor="title_bg_color">Background Color</label>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                  <input
+                    type="color"
+                    id="title_bg_color"
+                    className="form-control"
+                    value={settings.title_bg_color || '#000000'}
+                    onChange={(e) => handleChange('title_bg_color', e.target.value)}
+                    style={{ width: '80px', height: '40px', cursor: 'pointer' }}
+                  />
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={settings.title_bg_color || '#000000'}
+                    onChange={(e) => handleChange('title_bg_color', e.target.value)}
+                    placeholder="#000000"
+                    style={{ width: '120px' }}
+                  />
+                </div>
+                <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
+                  Background color for the title overlay
+                </small>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="title_opacity">Background Opacity (%)</label>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                  <input
+                    type="range"
+                    id="title_opacity"
+                    min="0"
+                    max="100"
+                    value={settings.title_opacity || '80'}
+                    onChange={(e) => handleChange('title_opacity', e.target.value)}
+                    style={{ flex: 1 }}
+                  />
+                  <input
+                    type="number"
+                    className="form-control"
+                    value={settings.title_opacity || '80'}
+                    onChange={(e) => handleChange('title_opacity', e.target.value)}
+                    min="0"
+                    max="100"
+                    style={{ width: '80px' }}
+                  />
+                </div>
+                <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
+                  0 = Transparent, 100 = Opaque. Current: {settings.title_opacity || '80'}%
+                </small>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="title_position">Position</label>
+                <select
+                  id="title_position"
+                  className="form-control"
+                  value={settings.title_position || 'bottom-left'}
+                  onChange={(e) => handleChange('title_position', e.target.value)}
+                >
+                  <option value="top-left">Top Left</option>
+                  <option value="top-center">Top Center</option>
+                  <option value="top-right">Top Right</option>
+                  <option value="bottom-left">Bottom Left</option>
+                  <option value="bottom-center">Bottom Center</option>
+                  <option value="bottom-right">Bottom Right</option>
+                </select>
+                <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
+                  Position of the title overlay on the video
+                </small>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="title_text_color">Text Color</label>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                  <input
+                    type="color"
+                    id="title_text_color"
+                    className="form-control"
+                    value={settings.title_text_color || '#FFFFFF'}
+                    onChange={(e) => handleChange('title_text_color', e.target.value)}
+                    style={{ width: '80px', height: '40px', cursor: 'pointer' }}
+                  />
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={settings.title_text_color || '#FFFFFF'}
+                    onChange={(e) => handleChange('title_text_color', e.target.value)}
+                    placeholder="#FFFFFF"
+                    style={{ width: '120px' }}
+                  />
+                </div>
+                <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
+                  Text color for the title
+                </small>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="title_font_size">Font Size (px)</label>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                  <input
+                    type="range"
+                    id="title_font_size"
+                    min="16"
+                    max="72"
+                    value={settings.title_font_size || '32'}
+                    onChange={(e) => handleChange('title_font_size', e.target.value)}
+                    style={{ flex: 1 }}
+                  />
+                  <input
+                    type="number"
+                    className="form-control"
+                    value={settings.title_font_size || '32'}
+                    onChange={(e) => handleChange('title_font_size', e.target.value)}
+                    min="16"
+                    max="72"
+                    style={{ width: '80px' }}
+                  />
+                </div>
+                <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
+                  Font size for the title text. Current: {settings.title_font_size || '32'}px
+                </small>
+              </div>
+
+              <div className="modal-actions">
+                <button type="submit" className="btn btn-primary" disabled={saving}>
+                  {saving ? 'Saving...' : 'Save Settings'}
+                </button>
+              </div>
+            </form>
+
+            <div style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid #e1e8ed' }}>
+              <h3 style={{ marginBottom: '1rem' }}>Title Overlay Preview</h3>
+              <div style={{
+                position: 'relative',
+                backgroundColor: '#2c3e50',
+                borderRadius: '8px',
+                padding: '2rem',
+                minHeight: '200px',
+                display: 'flex',
+                alignItems: settings.title_position?.startsWith('top') ? 'flex-start' : 'flex-end',
+                justifyContent: settings.title_position?.includes('center') ? 'center' : settings.title_position?.includes('right') ? 'flex-end' : 'flex-start'
+              }}>
+                <div style={{
+                  backgroundColor: settings.title_bg_color || '#000000',
+                  opacity: (settings.title_opacity || 80) / 100,
+                  padding: '1rem 1.5rem',
+                  borderRadius: '4px',
+                  color: settings.title_text_color || '#FFFFFF',
+                  fontSize: `${settings.title_font_size || 32}px`,
+                  fontWeight: 'bold',
+                  maxWidth: '80%',
+                  wordWrap: 'break-word'
+                }}>
+                  Example News Title Here
+                </div>
+              </div>
+              <small style={{ color: '#7f8c8d', fontSize: '0.85rem', display: 'block', marginTop: '0.5rem' }}>
+                This is a preview of how the title overlay will appear on your stream. Enable the title overlay when creating/editing a channel.
+              </small>
+            </div>
           </div>
         )}
       </div>
