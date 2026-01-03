@@ -3,6 +3,8 @@ import api from '../services/api';
 
 function WatermarkSettings({ channel, onUpdate }) {
   const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
   const [settings, setSettings] = useState({
     watermark_enabled: channel.watermark_enabled || false,
     watermark_path: channel.watermark_path || '',
@@ -50,6 +52,7 @@ function WatermarkSettings({ channel, onUpdate }) {
         watermark_path: response.data.path,
       });
 
+      setHasChanges(false);
       alert('Watermark uploaded successfully');
       onUpdate();
     } catch (error) {
@@ -59,21 +62,27 @@ function WatermarkSettings({ channel, onUpdate }) {
     }
   };
 
-  const handleSettingChange = async (key, value) => {
+  const handleSettingChange = (key, value) => {
     if (channel.status === 'running') {
       alert('Please stop the stream before changing watermark settings');
       return;
     }
 
     setSettings((prev) => ({ ...prev, [key]: value }));
+    setHasChanges(true);
+  };
 
+  const handleSaveSettings = async () => {
+    setSaving(true);
     try {
-      await api.put(`/watermark/${channel.id}`, {
-        [key]: value,
-      });
+      await api.put(`/watermark/${channel.id}`, settings);
+      setHasChanges(false);
+      alert('Watermark settings saved successfully');
       onUpdate();
     } catch (error) {
       alert(error.response?.data?.error || 'Failed to update watermark settings');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -94,6 +103,7 @@ function WatermarkSettings({ channel, onUpdate }) {
         watermark_opacity: 1.0,
         watermark_scale: 1.0,
       });
+      setHasChanges(false);
       alert('Watermark deleted successfully');
       onUpdate();
     } catch (error) {
@@ -268,9 +278,24 @@ function WatermarkSettings({ channel, onUpdate }) {
             borderRadius: '4px',
             fontSize: '0.85rem',
             color: '#1976d2',
+            marginBottom: '1rem',
           }}>
             ℹ️ Preview: Watermark will be positioned at <strong>{positions.find(p => p.value === settings.watermark_position)?.label}</strong> with <strong>{Math.round(settings.watermark_opacity * 100)}%</strong> opacity and <strong>{Math.round(settings.watermark_scale * 100)}%</strong> size when the stream starts.
           </div>
+
+          <button
+            className="btn btn-success"
+            onClick={handleSaveSettings}
+            disabled={!hasChanges || saving || channel.status === 'running'}
+            style={{
+              width: '100%',
+              padding: '0.75rem',
+              fontSize: '1rem',
+              fontWeight: '600',
+            }}
+          >
+            {saving ? 'Saving...' : hasChanges ? 'Save Watermark Settings' : 'No Changes to Save'}
+          </button>
         </>
       )}
     </div>
