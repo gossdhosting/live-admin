@@ -46,6 +46,10 @@ function RtmpSettings({ channelId, channelName }) {
         rtmp_url: 'rtmp://a.rtmp.youtube.com/live2/',
         placeholder_key: 'Your YouTube stream key',
       },
+      twitch: {
+        rtmp_url: 'rtmp://live.twitch.tv/app/',
+        placeholder_key: 'Your Twitch stream key',
+      },
       custom: {
         rtmp_url: '',
         placeholder_key: 'Stream key',
@@ -134,6 +138,7 @@ function RtmpSettings({ channelId, channelName }) {
     const icons = {
       facebook: '📘',
       youtube: '📺',
+      twitch: '🎮',
       custom: '🔧',
     };
     return icons[platform] || '🔧';
@@ -183,6 +188,7 @@ function RtmpSettings({ channelId, channelName }) {
             >
               <option value="facebook">Facebook Live</option>
               <option value="youtube">YouTube Live</option>
+              <option value="twitch">Twitch</option>
               <option value="custom">Custom RTMP</option>
             </select>
           </div>
@@ -244,7 +250,7 @@ function RtmpSettings({ channelId, channelName }) {
           color: '#7f8c8d',
         }}>
           <p>No RTMP destinations configured.</p>
-          <p style={{ fontSize: '0.9rem' }}>Add Facebook or YouTube to stream to multiple platforms simultaneously.</p>
+          <p style={{ fontSize: '0.9rem' }}>Add Facebook, YouTube, or Twitch to stream to multiple platforms simultaneously.</p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>

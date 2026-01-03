@@ -8,6 +8,7 @@ function WatermarkSettings({ channel, onUpdate }) {
     watermark_path: channel.watermark_path || '',
     watermark_position: channel.watermark_position || 'top-left',
     watermark_opacity: channel.watermark_opacity || 1.0,
+    watermark_scale: channel.watermark_scale || 1.0,
   });
 
   const positions = [
@@ -91,6 +92,7 @@ function WatermarkSettings({ channel, onUpdate }) {
         watermark_path: '',
         watermark_position: 'top-left',
         watermark_opacity: 1.0,
+        watermark_scale: 1.0,
       });
       alert('Watermark deleted successfully');
       onUpdate();
@@ -234,6 +236,32 @@ function WatermarkSettings({ channel, onUpdate }) {
             </div>
           </div>
 
+          <div style={{ marginBottom: '1rem' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', color: '#2c3e50' }}>
+              Size: {Math.round(settings.watermark_scale * 100)}%
+            </label>
+            <input
+              type="range"
+              min="0.1"
+              max="2.0"
+              step="0.1"
+              value={settings.watermark_scale}
+              onChange={(e) => handleSettingChange('watermark_scale', parseFloat(e.target.value))}
+              disabled={channel.status === 'running'}
+              style={{ width: '100%' }}
+            />
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              fontSize: '0.8rem',
+              color: '#7f8c8d',
+              marginTop: '0.25rem',
+            }}>
+              <span>10% (Smallest)</span>
+              <span>200% (Largest)</span>
+            </div>
+          </div>
+
           <div style={{
             backgroundColor: '#e3f2fd',
             padding: '0.75rem',
@@ -241,7 +269,7 @@ function WatermarkSettings({ channel, onUpdate }) {
             fontSize: '0.85rem',
             color: '#1976d2',
           }}>
-            ℹ️ Preview: Watermark will be positioned at <strong>{positions.find(p => p.value === settings.watermark_position)?.label}</strong> with <strong>{Math.round(settings.watermark_opacity * 100)}%</strong> opacity when the stream starts.
+            ℹ️ Preview: Watermark will be positioned at <strong>{positions.find(p => p.value === settings.watermark_position)?.label}</strong> with <strong>{Math.round(settings.watermark_opacity * 100)}%</strong> opacity and <strong>{Math.round(settings.watermark_scale * 100)}%</strong> size when the stream starts.
           </div>
         </>
       )}
