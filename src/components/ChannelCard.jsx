@@ -207,6 +207,15 @@ function ChannelCard({ channel, onUpdate, onDelete }) {
     const runtime = channel.runtime_status || {};
     const rtmpConnections = runtime.rtmpConnections || [];
 
+    // Debug logging
+    console.log('[ChannelCard] RTMP Connection Info:', {
+      channelId: channel.id,
+      channelStatus: channel.status,
+      hasRuntime: !!runtime,
+      rtmpConnections,
+      rtmpConnectionsLength: rtmpConnections.length
+    });
+
     if (channel.status !== 'running' || rtmpConnections.length === 0) return null;
 
     return (
