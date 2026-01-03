@@ -10,6 +10,7 @@ function RtmpSettings({ channelId, channelName }) {
     rtmp_url: '',
     stream_key: '',
     enabled: true,
+    custom_bitrate: 4000,
   });
   const [editingId, setEditingId] = useState(null);
 

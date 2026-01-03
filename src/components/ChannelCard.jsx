@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import api from '../services/api';
-import RtmpSettings from './RtmpSettings';
+import RtmpSettingsNew from './RtmpSettingsNew';
 import WatermarkSettings from './WatermarkSettings';
 
 function ChannelCard({ channel, onUpdate, onDelete }) {
@@ -316,7 +316,7 @@ function ChannelCard({ channel, onUpdate, onDelete }) {
           borderRadius: '8px',
           border: '1px solid #e0e0e0',
         }}>
-          <RtmpSettings channelId={channel.id} channelName={channel.name} />
+          <RtmpSettingsNew channelId={channel.id} channelName={channel.name} />
         </div>
       )}
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import RtmpTemplatesManager from '../components/RtmpTemplatesManager';
 
 function Settings() {
   const navigate = useNavigate();
@@ -447,6 +448,8 @@ function Settings() {
           </p>
         </div>
       </div>
+
+      <RtmpTemplatesManager />
     </div>
   );
 }
