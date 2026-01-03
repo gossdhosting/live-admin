@@ -8,6 +8,7 @@ function CreateChannelModal({ onClose, onSuccess }) {
     input_url: '',
     auto_restart: true,
     quality_preset: '720p',
+    stream_title: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -90,6 +91,23 @@ function CreateChannelModal({ onClose, onSuccess }) {
             />
             <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
               Paste the YouTube Live stream URL
+            </small>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="stream_title">Stream Title</label>
+            <input
+              type="text"
+              id="stream_title"
+              name="stream_title"
+              className="form-control"
+              value={formData.stream_title}
+              onChange={handleChange}
+              placeholder="e.g., Live Gaming Session - Fortnite"
+              maxLength="100"
+            />
+            <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
+              This title will be sent to Twitch/YouTube when stream starts (requires API setup)
             </small>
           </div>
 
