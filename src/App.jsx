@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
+import MediaManager from './pages/MediaManager';
 import Navbar from './components/Navbar';
 import api from './services/api';
 
@@ -56,6 +57,10 @@ function App() {
         <Route
           path="/settings"
           element={user ? <Settings /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/media"
+          element={user ? <MediaManager /> : <Navigate to="/login" />}
         />
       </Routes>
     </Router>

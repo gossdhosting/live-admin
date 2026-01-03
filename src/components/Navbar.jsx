@@ -17,6 +17,9 @@ function Navbar({ user, onLogout }) {
         </Link>
         <div className="navbar-actions">
           <span className="user-email">{user.email}</span>
+          <Link to="/media">
+            <button className="btn btn-secondary">Media Manager</button>
+          </Link>
           <Link to="/settings">
             <button className="btn btn-secondary">Settings</button>
           </Link>

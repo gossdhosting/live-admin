@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 
 function CreateChannelModal({ onClose, onSuccess }) {
@@ -9,13 +9,42 @@ function CreateChannelModal({ onClose, onSuccess }) {
     auto_restart: true,
     quality_preset: '720p',
     stream_title: '',
+    input_type: 'youtube',
+    media_file_id: null,
+    loop_video: false,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [mediaFiles, setMediaFiles] = useState([]);
+
+  useEffect(() => {
+    fetchMediaFiles();
+  }, []);
+
+  const fetchMediaFiles = async () => {
+    try {
+      const response = await api.get('/media');
+      setMediaFiles(response.data.mediaFiles || []);
+    } catch (err) {
+      console.error('Failed to fetch media files:', err);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    // Validate input based on input_type
+    if (formData.input_type === 'video' && !formData.media_file_id) {
+      setError('Please select a video file');
+      return;
+    }
+
+    if (formData.input_type === 'youtube' && !formData.input_url) {
+      setError('Please enter a YouTube Live URL');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -31,9 +60,16 @@ function CreateChannelModal({ onClose, onSuccess }) {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    let finalValue = type === 'checkbox' ? checked : value;
+
+    // Convert media_file_id to number or null
+    if (name === 'media_file_id') {
+      finalValue = value ? parseInt(value, 10) : null;
+    }
+
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: finalValue,
     }));
   };
 
@@ -78,21 +114,95 @@ function CreateChannelModal({ onClose, onSuccess }) {
           </div>
 
           <div className="form-group">
-            <label htmlFor="input_url">YouTube Live URL *</label>
-            <input
-              type="url"
-              id="input_url"
-              name="input_url"
-              className="form-control"
-              value={formData.input_url}
-              onChange={handleChange}
-              required
-              placeholder="https://www.youtube.com/watch?v=..."
-            />
-            <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
-              Paste the YouTube Live stream URL
-            </small>
+            <label>Input Type *</label>
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: 0 }}>
+                <input
+                  type="radio"
+                  name="input_type"
+                  value="youtube"
+                  checked={formData.input_type === 'youtube'}
+                  onChange={handleChange}
+                />
+                YouTube Live
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: 0 }}>
+                <input
+                  type="radio"
+                  name="input_type"
+                  value="video"
+                  checked={formData.input_type === 'video'}
+                  onChange={handleChange}
+                />
+                Pre-recorded Video
+              </label>
+            </div>
           </div>
+
+          {formData.input_type === 'youtube' && (
+            <div className="form-group">
+              <label htmlFor="input_url">YouTube Live URL *</label>
+              <input
+                type="url"
+                id="input_url"
+                name="input_url"
+                className="form-control"
+                value={formData.input_url}
+                onChange={handleChange}
+                required
+                placeholder="https://www.youtube.com/watch?v=..."
+              />
+              <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
+                Paste the YouTube Live stream URL
+              </small>
+            </div>
+          )}
+
+          {formData.input_type === 'video' && (
+            <div className="form-group">
+              <label htmlFor="media_file_id">Select Video *</label>
+              <select
+                id="media_file_id"
+                name="media_file_id"
+                className="form-control"
+                value={formData.media_file_id || ''}
+                onChange={handleChange}
+                required
+              >
+                <option value="">-- Choose a video --</option>
+                {mediaFiles.map((media) => (
+                  <option key={media.id} value={media.id}>
+                    {media.original_name}
+                  </option>
+                ))}
+              </select>
+              {mediaFiles.length === 0 && (
+                <small style={{ color: '#e74c3c', fontSize: '0.85rem' }}>
+                  No videos uploaded yet. Please upload a video in Media Manager first.
+                </small>
+              )}
+            </div>
+          )}
+
+          {formData.input_type === 'video' && (
+            <div className="form-group">
+              <div className="checkbox-group">
+                <input
+                  type="checkbox"
+                  id="loop_video"
+                  name="loop_video"
+                  checked={formData.loop_video}
+                  onChange={handleChange}
+                />
+                <label htmlFor="loop_video" style={{ marginBottom: 0 }}>
+                  Loop video automatically
+                </label>
+              </div>
+              <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
+                When enabled, the video will restart automatically when it ends
+              </small>
+            </div>
+          )}
 
           <div className="form-group">
             <label htmlFor="stream_title">Stream Title</label>
