@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import api from '../services/api';
+import RtmpSettings from './RtmpSettings';
 
 function ChannelCard({ channel, onUpdate, onDelete }) {
   const [loading, setLoading] = useState(false);
@@ -7,6 +8,7 @@ function ChannelCard({ channel, onUpdate, onDelete }) {
   const [logs, setLogs] = useState([]);
   const [showPreview, setShowPreview] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showRtmpSettings, setShowRtmpSettings] = useState(false);
 
   const streamUrl = `${window.location.protocol}//${window.location.host}/hls/channel_${channel.id}/index.m3u8`;
 
@@ -33,6 +35,23 @@ function ChannelCard({ channel, onUpdate, onDelete }) {
       onUpdate();
     } catch (error) {
       alert(error.response?.data?.error || 'Failed to stop stream');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRestart = async () => {
+    if (!confirm(`Restart streaming for "${channel.name}"?`)) return;
+
+    setLoading(true);
+    try {
+      await api.post(`/channels/${channel.id}/stop`);
+      // Wait a moment before restarting
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      await api.post(`/channels/${channel.id}/start`);
+      onUpdate();
+    } catch (error) {
+      alert(error.response?.data?.error || 'Failed to restart stream');
     } finally {
       setLoading(false);
     }
@@ -204,12 +223,24 @@ function ChannelCard({ channel, onUpdate, onDelete }) {
             {loading ? 'Starting...' : 'Start Stream'}
           </button>
         ) : (
-          <button className="btn btn-danger" onClick={handleStop} disabled={loading}>
-            {loading ? 'Stopping...' : 'Stop Stream'}
-          </button>
+          <>
+            <button className="btn btn-danger" onClick={handleStop} disabled={loading}>
+              {loading ? 'Stopping...' : 'Stop Stream'}
+            </button>
+            <button className="btn btn-primary" onClick={handleRestart} disabled={loading}>
+              {loading ? 'Restarting...' : 'Restart Stream'}
+            </button>
+          </>
         )}
         <button className="btn btn-secondary" onClick={handleViewLogs}>
           {showLogs ? 'Hide Logs' : 'View Logs'}
+        </button>
+        <button
+          className="btn btn-primary"
+          onClick={() => setShowRtmpSettings(!showRtmpSettings)}
+          style={{ backgroundColor: '#9b59b6' }}
+        >
+          {showRtmpSettings ? 'Hide' : 'Multi-Platform'}
         </button>
         <button className="btn btn-danger" onClick={handleDelete} disabled={loading || channel.status === 'running'}>
           Delete
@@ -265,6 +296,18 @@ function ChannelCard({ channel, onUpdate, onDelete }) {
               ))
             )}
           </div>
+        </div>
+      )}
+
+      {showRtmpSettings && (
+        <div style={{
+          marginTop: '1rem',
+          padding: '1rem',
+          backgroundColor: '#f8f9fa',
+          borderRadius: '8px',
+          border: '1px solid #e0e0e0',
+        }}>
+          <RtmpSettings channelId={channel.id} channelName={channel.name} />
         </div>
       )}
     </div>
