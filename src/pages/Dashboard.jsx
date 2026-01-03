@@ -11,13 +11,39 @@ function Dashboard() {
   const [lastUpdate, setLastUpdate] = useState(new Date());
 
   useEffect(() => {
+    let isMounted = true;
+
+    const fetchChannels = async (silent = false) => {
+      try {
+        if (!silent && isMounted) setRefreshing(true);
+        const response = await api.get('/channels');
+        if (isMounted) {
+          setChannels(response.data.channels);
+          setLastUpdate(new Date());
+        }
+      } catch (error) {
+        if (isMounted) {
+          console.error('Failed to fetch channels:', error);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+          setRefreshing(false);
+        }
+      }
+    };
+
     fetchChannels();
 
     // Auto-refresh every 5 seconds
     const interval = setInterval(() => {
       fetchChannels(true);
     }, 5000);
-    return () => clearInterval(interval);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   const fetchChannels = async (silent = false) => {
@@ -47,7 +73,19 @@ function Dashboard() {
     const running = channels.filter(ch => ch.status === 'running').length;
     const stopped = channels.filter(ch => ch.status === 'stopped').length;
     const error = channels.filter(ch => ch.status === 'error').length;
-    return { total, running, stopped, error };
+
+    // Health stats for running streams
+    const healthy = channels.filter(ch =>
+      ch.status === 'running' &&
+      ch.runtime_status?.healthMetrics?.status === 'healthy'
+    ).length;
+
+    const warnings = channels.filter(ch =>
+      ch.status === 'running' &&
+      (ch.runtime_status?.errorCount > 0 || ch.runtime_status?.reconnectAttempts > 0)
+    ).length;
+
+    return { total, running, stopped, error, healthy, warnings };
   };
 
   if (loading) {
@@ -84,7 +122,7 @@ function Dashboard() {
           <>
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
               gap: '1rem',
               marginBottom: '1rem'
             }}>
@@ -95,7 +133,7 @@ function Dashboard() {
                 textAlign: 'center'
               }}>
                 <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1976d2' }}>{stats.total}</div>
-                <div style={{ fontSize: '0.9rem', color: '#7f8c8d' }}>Total Channels</div>
+                <div style={{ fontSize: '0.85rem', color: '#7f8c8d' }}>Total</div>
               </div>
               <div style={{
                 backgroundColor: '#e8f5e9',
@@ -104,7 +142,27 @@ function Dashboard() {
                 textAlign: 'center'
               }}>
                 <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#388e3c' }}>{stats.running}</div>
-                <div style={{ fontSize: '0.9rem', color: '#7f8c8d' }}>Running</div>
+                <div style={{ fontSize: '0.85rem', color: '#7f8c8d' }}>Running</div>
+              </div>
+              <div style={{
+                backgroundColor: '#c8e6c9',
+                padding: '1rem',
+                borderRadius: '8px',
+                textAlign: 'center',
+                border: '2px solid #66bb6a'
+              }}>
+                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#2e7d32' }}>✓ {stats.healthy}</div>
+                <div style={{ fontSize: '0.85rem', color: '#2e7d32' }}>Healthy</div>
+              </div>
+              <div style={{
+                backgroundColor: '#fff9c4',
+                padding: '1rem',
+                borderRadius: '8px',
+                textAlign: 'center',
+                border: '2px solid #fdd835'
+              }}>
+                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#f57f17' }}>⚠️ {stats.warnings}</div>
+                <div style={{ fontSize: '0.85rem', color: '#f57f17' }}>Warnings</div>
               </div>
               <div style={{
                 backgroundColor: '#ffebee',
@@ -113,16 +171,17 @@ function Dashboard() {
                 textAlign: 'center'
               }}>
                 <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#d32f2f' }}>{stats.stopped}</div>
-                <div style={{ fontSize: '0.9rem', color: '#7f8c8d' }}>Stopped</div>
+                <div style={{ fontSize: '0.85rem', color: '#7f8c8d' }}>Stopped</div>
               </div>
               <div style={{
-                backgroundColor: '#fff3e0',
+                backgroundColor: '#ffcdd2',
                 padding: '1rem',
                 borderRadius: '8px',
-                textAlign: 'center'
+                textAlign: 'center',
+                border: '2px solid #ef5350'
               }}>
-                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#f57c00' }}>{stats.error}</div>
-                <div style={{ fontSize: '0.9rem', color: '#7f8c8d' }}>Errors</div>
+                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#c62828' }}>❌ {stats.error}</div>
+                <div style={{ fontSize: '0.85rem', color: '#c62828' }}>Errors</div>
               </div>
             </div>
             <div style={{

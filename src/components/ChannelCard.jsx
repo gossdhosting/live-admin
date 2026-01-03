@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import api from '../services/api';
 import RtmpSettingsNew from './RtmpSettingsNew';
 import WatermarkSettings from './WatermarkSettings';
@@ -11,6 +11,15 @@ function ChannelCard({ channel, onUpdate, onDelete }) {
   const [copied, setCopied] = useState(false);
   const [showRtmpSettings, setShowRtmpSettings] = useState(false);
   const [showWatermarkSettings, setShowWatermarkSettings] = useState(false);
+  const copiedTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (copiedTimeoutRef.current) {
+        clearTimeout(copiedTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const streamUrl = `${window.location.protocol}//${window.location.host}/hls/channel_${channel.id}/index.m3u8`;
 
@@ -47,13 +56,23 @@ function ChannelCard({ channel, onUpdate, onDelete }) {
 
     setLoading(true);
     try {
+      // Stop the stream first
       await api.post(`/channels/${channel.id}/stop`);
+
       // Wait a moment before restarting
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      await api.post(`/channels/${channel.id}/start`);
-      onUpdate();
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Start the stream
+      try {
+        await api.post(`/channels/${channel.id}/start`);
+        onUpdate();
+      } catch (startError) {
+        // If start fails, still update to show the stopped state
+        onUpdate();
+        throw new Error('Failed to start stream after stopping: ' + (startError.response?.data?.error || startError.message));
+      }
     } catch (error) {
-      alert(error.response?.data?.error || 'Failed to restart stream');
+      alert(error.response?.data?.error || error.message || 'Failed to restart stream');
     } finally {
       setLoading(false);
     }
@@ -90,7 +109,10 @@ function ChannelCard({ channel, onUpdate, onDelete }) {
     try {
       await navigator.clipboard.writeText(streamUrl);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      if (copiedTimeoutRef.current) {
+        clearTimeout(copiedTimeoutRef.current);
+      }
+      copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
     } catch (error) {
       alert('Failed to copy URL');
     }
@@ -101,10 +123,35 @@ function ChannelCard({ channel, onUpdate, onDelete }) {
   };
 
   const getStatusBadge = () => {
-    const statusClass = `status-badge status-${channel.status}`;
-    const statusText = channel.status === 'running' && channel.runtime_status?.uptime
-      ? `${channel.status.toUpperCase()} (${formatUptime(channel.runtime_status.uptime)})`
-      : channel.status.toUpperCase();
+    const runtime = channel.runtime_status || {};
+    const health = runtime.healthMetrics || {};
+
+    // Determine health status
+    let statusClass = `status-badge status-${channel.status}`;
+    let statusIcon = '';
+    let statusText = channel.status.toUpperCase();
+
+    if (channel.status === 'running') {
+      if (health.status === 'healthy') {
+        statusIcon = '✓ ';
+        statusClass = 'status-badge status-healthy';
+      } else if (health.status === 'error' || health.errors > 0) {
+        statusIcon = '⚠️ ';
+        statusClass = 'status-badge status-warning';
+      } else if (health.status === 'starting') {
+        statusIcon = '⏳ ';
+      }
+
+      if (runtime.uptime) {
+        statusText = `${statusIcon}${statusText} (${formatUptime(runtime.uptime)})`;
+      } else {
+        statusText = `${statusIcon}${statusText}`;
+      }
+    } else if (channel.status === 'error') {
+      statusIcon = '❌ ';
+      statusText = `${statusIcon}${statusText}`;
+    }
+
     return <span className={statusClass}>{statusText}</span>;
   };
 
@@ -113,6 +160,47 @@ function ChannelCard({ channel, onUpdate, onDelete }) {
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
     return `${hours}h ${minutes}m ${secs}s`;
+  };
+
+  const getHealthInfo = () => {
+    const runtime = channel.runtime_status || {};
+
+    if (channel.status !== 'running' || !runtime.running) return null;
+
+    const errorCount = runtime.errorCount || 0;
+    const reconnectAttempts = runtime.reconnectAttempts || 0;
+    const maxReconnectAttempts = runtime.maxReconnectAttempts || 5;
+
+    return (
+      <div style={{
+        backgroundColor: '#f8f9fa',
+        padding: '0.75rem',
+        borderRadius: '4px',
+        marginTop: '0.5rem',
+        fontSize: '0.85rem'
+      }}>
+        <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+          <div>
+            <strong>Health:</strong> {runtime.status || 'unknown'}
+          </div>
+          {errorCount > 0 && (
+            <div style={{ color: '#e67e22' }}>
+              <strong>Errors:</strong> {errorCount}
+            </div>
+          )}
+          {reconnectAttempts > 0 && (
+            <div style={{ color: '#e74c3c' }}>
+              <strong>Reconnect Attempts:</strong> {reconnectAttempts}/{maxReconnectAttempts}
+            </div>
+          )}
+          {runtime.lastError && (
+            <div style={{ color: '#c0392b', flex: '1 1 100%', marginTop: '0.5rem' }}>
+              <strong>Last Error:</strong> {runtime.lastError}
+            </div>
+          )}
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -132,6 +220,24 @@ function ChannelCard({ channel, onUpdate, onDelete }) {
             {channel.input_url.substring(0, 60)}...
           </a>
         </div>
+
+        {/* Health Metrics Display */}
+        {getHealthInfo()}
+
+        {/* Error Message Display */}
+        {channel.status === 'error' && channel.error_message && (
+          <div style={{
+            backgroundColor: '#fee',
+            border: '1px solid #fcc',
+            padding: '0.75rem',
+            borderRadius: '4px',
+            marginTop: '0.5rem',
+            color: '#c0392b',
+            fontSize: '0.85rem'
+          }}>
+            <strong>❌ Error:</strong> {channel.error_message}
+          </div>
+        )}
 
         {channel.status === 'running' && (
           <div className="stream-url-section" style={{

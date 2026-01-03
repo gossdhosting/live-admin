@@ -76,9 +76,6 @@ function Login({ onLogin }) {
           </button>
         </form>
 
-        <div style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.85rem', color: '#7f8c8d' }}>
-          Default credentials: admin@example.com / admin123
-        </div>
       </div>
     </div>
   );
