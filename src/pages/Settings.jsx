@@ -58,6 +58,11 @@ function Settings() {
       };
       setMessage(successMessages[success] || 'Account connected successfully!');
       setTimeout(() => setMessage(''), 5000);
+
+      // If this is a popup window (OAuth callback), close it
+      if (window.opener) {
+        setTimeout(() => window.close(), 1000);
+      }
     }
 
     if (error) {
@@ -68,6 +73,11 @@ function Settings() {
       };
       setMessage(errorMessages[error] || 'Authentication failed');
       setTimeout(() => setMessage(''), 5000);
+
+      // If this is a popup window (OAuth callback), close it
+      if (window.opener) {
+        setTimeout(() => window.close(), 1000);
+      }
     }
 
     return () => {
