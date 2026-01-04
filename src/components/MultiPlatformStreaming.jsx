@@ -4,6 +4,7 @@ import api from '../services/api';
 function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDescription, channelStatus }) {
   const [platformConnections, setPlatformConnections] = useState([]);
   const [rtmpTemplates, setRtmpTemplates] = useState([]);
+  const [rtmpDestinations, setRtmpDestinations] = useState([]);
   const [platformStreams, setPlatformStreams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(null);
@@ -14,18 +15,21 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
 
   const fetchAll = async () => {
     try {
-      const [connectionsRes, templatesRes, streamsRes] = await Promise.all([
+      const [connectionsRes, templatesRes, destinationsRes, streamsRes] = await Promise.all([
         api.get('/platforms/connections'),
         api.get('/rtmp/templates?enabled=true'), // Only fetch enabled templates
+        api.get(`/rtmp/channels/${channelId}/rtmp`), // Fetch RTMP destinations for this channel
         api.get(`/platforms/streams/${channelId}`),
       ]);
 
       console.log('Platform connections:', connectionsRes.data.connections);
       console.log('RTMP templates:', templatesRes.data.templates);
+      console.log('RTMP destinations:', destinationsRes.data.destinations);
       console.log('Platform streams:', streamsRes.data.streams);
 
       setPlatformConnections(connectionsRes.data.connections || []);
       setRtmpTemplates(templatesRes.data.templates || []);
+      setRtmpDestinations(destinationsRes.data.destinations || []);
       setPlatformStreams(streamsRes.data.streams || []);
     } catch (error) {
       console.error('Failed to fetch multi-platform data:', error);
@@ -98,13 +102,27 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
     }
   };
 
-  const handleToggleTemplate = async (templateId, currentEnabled) => {
+  const handleToggleTemplate = async (templateId, currentlyEnabled) => {
     try {
-      // This would enable/disable the template for this channel
-      // You'll need to implement this endpoint
-      alert('Template toggle - to be implemented');
+      const enabled = !currentlyEnabled;
+      await api.post(`/rtmp/channels/${channelId}/rtmp/template/${templateId}/toggle`, { enabled });
+
+      // Refresh data
+      fetchAll();
     } catch (error) {
-      alert('Failed to toggle template');
+      console.error('Failed to toggle template:', error);
+      alert(error.response?.data?.error || 'Failed to toggle template');
+    }
+  };
+
+  const handleRemoveDestination = async (destinationId) => {
+    if (!window.confirm('Remove this RTMP destination?')) return;
+
+    try {
+      await api.delete(`/rtmp/rtmp/${destinationId}`);
+      fetchAll();
+    } catch (error) {
+      alert('Failed to remove destination');
     }
   };
 
@@ -262,46 +280,99 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
           </p>
         ) : (
           <div style={{ display: 'grid', gap: '0.75rem' }}>
-            {rtmpTemplates.map((template) => (
-              <div
-                key={template.id}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '0.75rem 1rem',
-                  backgroundColor: '#fff',
-                  borderRadius: '6px',
-                  border: '1px solid #dee2e6',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  <span style={{ fontSize: '1.5rem' }}>🔧</span>
-                  <div>
-                    <div style={{ fontWeight: '600' }}>{template.name}</div>
-                    <div style={{ fontSize: '0.85rem', color: '#7f8c8d' }}>
-                      {template.rtmp_url}
+            {rtmpTemplates.map((template) => {
+              // Check if this template has an active destination for this channel
+              const activeDestination = rtmpDestinations.find(
+                (dest) => dest.template_id === template.id && dest.enabled === 1
+              );
+
+              return (
+                <div
+                  key={template.id}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '0.75rem 1rem',
+                    backgroundColor: '#fff',
+                    borderRadius: '6px',
+                    border: `1px solid ${activeDestination ? getPlatformColor(template.platform) + '33' : '#dee2e6'}`,
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <span style={{ fontSize: '1.5rem' }}>🔧</span>
+                    <div>
+                      <div style={{ fontWeight: '600' }}>{template.name}</div>
+                      <div style={{ fontSize: '0.85rem', color: '#7f8c8d' }}>
+                        {template.rtmp_url}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div>
-                  <button
-                    style={{
-                      padding: '0.5rem 1rem',
-                      backgroundColor: '#6c757d',
-                      color: '#fff',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontSize: '0.85rem',
-                    }}
-                  >
-                    Use Template
-                  </button>
+                  <div>
+                    {activeDestination ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        {channelStatus === 'running' ? (
+                          <span
+                            style={{
+                              padding: '0.25rem 0.5rem',
+                              backgroundColor: '#d4edda',
+                              color: '#155724',
+                              borderRadius: '4px',
+                              fontSize: '0.8rem',
+                              fontWeight: '600',
+                            }}
+                          >
+                            🟢 Live - Broadcasting
+                          </span>
+                        ) : (
+                          <span
+                            style={{
+                              padding: '0.25rem 0.5rem',
+                              backgroundColor: '#fff3cd',
+                              color: '#856404',
+                              borderRadius: '4px',
+                              fontSize: '0.8rem',
+                            }}
+                          >
+                            ✓ Enabled
+                          </span>
+                        )}
+                        <button
+                          onClick={() => handleRemoveDestination(activeDestination.id)}
+                          style={{
+                            padding: '0.25rem 0.5rem',
+                            backgroundColor: '#dc3545',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            fontSize: '0.8rem',
+                          }}
+                        >
+                          Disable
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => handleToggleTemplate(template.id, false)}
+                        style={{
+                          padding: '0.5rem 1rem',
+                          backgroundColor: getPlatformColor(template.platform),
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          fontSize: '0.85rem',
+                        }}
+                      >
+                        Enable
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
