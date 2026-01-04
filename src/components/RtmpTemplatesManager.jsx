@@ -102,6 +102,15 @@ function RtmpTemplatesManager() {
     setShowAddForm(true);
   };
 
+  const handleToggleEnabled = async (id, currentEnabled) => {
+    try {
+      await api.put(`/rtmp/templates/${id}`, { enabled: currentEnabled ? 0 : 1 });
+      fetchTemplates();
+    } catch (error) {
+      alert('Failed to toggle template status');
+    }
+  };
+
   const handleDelete = async (id) => {
     if (!confirm('Delete this RTMP template? This will affect all channels using it.')) return;
 
@@ -356,9 +365,21 @@ function RtmpTemplatesManager() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
                   <span style={{ fontSize: '2rem' }}>{getPlatformIcon(template.platform)}</span>
                   <div>
-                    <h4 style={{ margin: 0, color: '#2c3e50', fontSize: '1.1rem' }}>
-                      {template.name}
-                    </h4>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <h4 style={{ margin: 0, color: '#2c3e50', fontSize: '1.1rem' }}>
+                        {template.name}
+                      </h4>
+                      <span style={{
+                        fontSize: '0.75rem',
+                        padding: '0.25rem 0.5rem',
+                        borderRadius: '4px',
+                        backgroundColor: template.enabled ? '#d4edda' : '#f8d7da',
+                        color: template.enabled ? '#155724' : '#721c24',
+                        fontWeight: '600'
+                      }}>
+                        {template.enabled ? '✓ Enabled' : '✗ Disabled'}
+                      </span>
+                    </div>
                     <span style={{
                       fontSize: '0.85rem',
                       color: '#7f8c8d',
@@ -373,7 +394,22 @@ function RtmpTemplatesManager() {
                   {template.rtmp_url}
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <button
+                  className="btn"
+                  onClick={() => handleToggleEnabled(template.id, template.enabled)}
+                  style={{
+                    fontSize: '0.9rem',
+                    padding: '0.5rem 1rem',
+                    backgroundColor: template.enabled ? '#ffc107' : '#28a745',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {template.enabled ? 'Disable' : 'Enable'}
+                </button>
                 <button
                   className="btn btn-primary"
                   onClick={() => handleEdit(template)}

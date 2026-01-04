@@ -592,22 +592,24 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit }) {
             </button>
           </>
         )}
-        <button
-          className="btn btn-secondary"
-          onClick={() => onEdit(channel)}
-          style={{
-            padding: '0.6rem 1.25rem',
-            fontSize: '0.9rem',
-            fontWeight: '600',
-            borderRadius: '6px',
-            border: 'none',
-            cursor: 'pointer',
-            backgroundColor: '#6c757d',
-            marginLeft: 'auto'
-          }}
-        >
-          ✏️ Edit
-        </button>
+        {channel.status !== 'running' && (
+          <button
+            className="btn btn-secondary"
+            onClick={() => onEdit(channel)}
+            style={{
+              padding: '0.6rem 1.25rem',
+              fontSize: '0.9rem',
+              fontWeight: '600',
+              borderRadius: '6px',
+              border: 'none',
+              cursor: 'pointer',
+              backgroundColor: '#6c757d',
+              marginLeft: 'auto'
+            }}
+          >
+            ✏️ Edit
+          </button>
+        )}
         <button
           className="btn btn-danger"
           onClick={handleDelete}
@@ -619,7 +621,8 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit }) {
             borderRadius: '6px',
             border: 'none',
             cursor: (loading || channel.status === 'running') ? 'not-allowed' : 'pointer',
-            opacity: (loading || channel.status === 'running') ? 0.5 : 1
+            opacity: (loading || channel.status === 'running') ? 0.5 : 1,
+            marginLeft: channel.status === 'running' ? 'auto' : '0'
           }}
         >
           🗑️ Delete

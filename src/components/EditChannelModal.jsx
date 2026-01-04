@@ -51,12 +51,6 @@ function EditChannelModal({ channel, onClose, onSuccess }) {
     e.preventDefault();
     setError('');
 
-    // Check if stream is running
-    if (channel.status === 'running' && needsRestart) {
-      setError('Please stop the stream first by clicking "Stop Stream & Save" button below');
-      return;
-    }
-
     // Validate input based on input_type
     if (formData.input_type === 'video' && !formData.media_file_id) {
       setError('Please select a video file');
@@ -83,30 +77,6 @@ function EditChannelModal({ channel, onClose, onSuccess }) {
     }
   };
 
-  const handleStopAndSave = async () => {
-    setError('');
-    setLoading(true);
-
-    try {
-      console.log('Stopping stream and updating with data:', formData);
-      // Stop stream first
-      await api.post(`/channels/${channel.id}/stop`);
-
-      // Wait a moment for stream to stop
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Then update
-      await api.put(`/channels/${channel.id}`, formData);
-      onSuccess();
-      onClose();
-    } catch (err) {
-      setError(err.response?.data?.error || 'Failed to stop stream and update channel');
-      console.error('Stop and save error:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     let finalValue = type === 'checkbox' ? checked : value;
@@ -120,11 +90,6 @@ function EditChannelModal({ channel, onClose, onSuccess }) {
       ...prev,
       [name]: finalValue,
     }));
-
-    // Mark that restart is needed if stream is running
-    if (channel.status === 'running') {
-      setNeedsRestart(true);
-    }
   };
 
   return (
@@ -138,12 +103,6 @@ function EditChannelModal({ channel, onClose, onSuccess }) {
         </div>
 
         {error && <div className="alert alert-error">{error}</div>}
-
-        {channel.status === 'running' && needsRestart && (
-          <div className="alert alert-warning" style={{ backgroundColor: '#fff3cd', color: '#856404', border: '1px solid #ffeaa7' }}>
-            ⚠️ Stream is currently running. Changes require stopping and restarting the stream.
-          </div>
-        )}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -337,21 +296,9 @@ function EditChannelModal({ channel, onClose, onSuccess }) {
             <button type="button" className="btn btn-secondary" onClick={onClose}>
               Cancel
             </button>
-            {channel.status === 'running' && needsRestart ? (
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={handleStopAndSave}
-                disabled={loading}
-                style={{ backgroundColor: '#e67e22' }}
-              >
-                {loading ? 'Stopping & Saving...' : 'Stop Stream & Save'}
-              </button>
-            ) : (
-              <button type="submit" className="btn btn-primary" disabled={loading}>
-                {loading ? 'Saving...' : 'Save Changes'}
-              </button>
-            )}
+            <button type="submit" className="btn btn-primary" disabled={loading}>
+              {loading ? 'Saving...' : 'Save Changes'}
+            </button>
           </div>
         </form>
       </div>
