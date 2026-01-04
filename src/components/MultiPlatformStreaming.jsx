@@ -18,7 +18,7 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
       const [connectionsRes, templatesRes, destinationsRes, streamsRes] = await Promise.all([
         api.get('/platforms/connections'),
         api.get('/rtmp/templates?enabled=true'), // Only fetch enabled templates
-        api.get(`/rtmp/channels/${channelId}/rtmp`), // Fetch RTMP destinations for this channel
+        api.get(`/channels/${channelId}/rtmp`), // Fetch RTMP destinations for this channel
         api.get(`/platforms/streams/${channelId}`),
       ]);
 
@@ -105,7 +105,7 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
   const handleToggleTemplate = async (templateId, currentlyEnabled) => {
     try {
       const enabled = !currentlyEnabled;
-      await api.post(`/rtmp/channels/${channelId}/rtmp/template/${templateId}/toggle`, { enabled });
+      await api.post(`/channels/${channelId}/rtmp/template/${templateId}/toggle`, { enabled });
 
       // Refresh data
       fetchAll();
@@ -119,7 +119,7 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
     if (!window.confirm('Remove this RTMP destination?')) return;
 
     try {
-      await api.delete(`/rtmp/rtmp/${destinationId}`);
+      await api.delete(`/rtmp/${destinationId}`);
       fetchAll();
     } catch (error) {
       alert('Failed to remove destination');
