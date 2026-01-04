@@ -504,6 +504,7 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit }) {
             channelName={channel.name}
             streamTitle={channel.stream_title}
             streamDescription={channel.description}
+            channelStatus={channel.status}
           />
         </div>
       )}

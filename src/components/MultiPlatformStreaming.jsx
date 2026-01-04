@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 
-function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDescription }) {
+function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDescription, channelStatus }) {
   const [platformConnections, setPlatformConnections] = useState([]);
   const [rtmpTemplates, setRtmpTemplates] = useState([]);
   const [platformStreams, setPlatformStreams] = useState([]);
@@ -179,17 +179,32 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
                   <div>
                     {existingStream ? (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span
-                          style={{
-                            padding: '0.25rem 0.5rem',
-                            backgroundColor: '#d4edda',
-                            color: '#155724',
-                            borderRadius: '4px',
-                            fontSize: '0.8rem',
-                          }}
-                        >
-                          ✓ Stream Created
-                        </span>
+                        {channelStatus === 'running' ? (
+                          <span
+                            style={{
+                              padding: '0.25rem 0.5rem',
+                              backgroundColor: '#d4edda',
+                              color: '#155724',
+                              borderRadius: '4px',
+                              fontSize: '0.8rem',
+                              fontWeight: '600',
+                            }}
+                          >
+                            🟢 Live - Broadcasting
+                          </span>
+                        ) : (
+                          <span
+                            style={{
+                              padding: '0.25rem 0.5rem',
+                              backgroundColor: '#fff3cd',
+                              color: '#856404',
+                              borderRadius: '4px',
+                              fontSize: '0.8rem',
+                            }}
+                          >
+                            ✓ Stream Created
+                          </span>
+                        )}
                         <button
                           onClick={() => handleDeletePlatformStream(existingStream.id)}
                           style={{

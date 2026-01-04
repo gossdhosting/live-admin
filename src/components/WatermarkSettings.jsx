@@ -77,7 +77,6 @@ function WatermarkSettings({ channel, onUpdate }) {
     try {
       await api.put(`/watermark/${channel.id}`, settings);
       setHasChanges(false);
-      alert('Watermark settings saved successfully');
       onUpdate();
     } catch (error) {
       alert(error.response?.data?.error || 'Failed to update watermark settings');
