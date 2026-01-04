@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import api from '../services/api';
-import RtmpSettingsNew from './RtmpSettingsNew';
+import MultiPlatformStreaming from './MultiPlatformStreaming';
 import WatermarkSettings from './WatermarkSettings';
 
 function ChannelCard({ channel, onUpdate, onDelete, onEdit }) {
@@ -496,12 +496,15 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit }) {
       {showRtmpSettings && (
         <div style={{
           marginTop: '1rem',
-          padding: '1rem',
-          backgroundColor: '#f8f9fa',
-          borderRadius: '8px',
           border: '1px solid #e0e0e0',
+          borderRadius: '8px',
         }}>
-          <RtmpSettingsNew channelId={channel.id} channelName={channel.name} />
+          <MultiPlatformStreaming
+            channelId={channel.id}
+            channelName={channel.name}
+            streamTitle={channel.stream_title}
+            streamDescription={channel.description}
+          />
         </div>
       )}
 
