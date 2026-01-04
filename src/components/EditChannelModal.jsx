@@ -71,11 +71,13 @@ function EditChannelModal({ channel, onClose, onSuccess }) {
     setLoading(true);
 
     try {
+      console.log('Updating channel with data:', formData);
       await api.put(`/channels/${channel.id}`, formData);
       onSuccess();
       onClose();
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to update channel');
+      console.error('Update error:', err);
     } finally {
       setLoading(false);
     }
@@ -86,6 +88,7 @@ function EditChannelModal({ channel, onClose, onSuccess }) {
     setLoading(true);
 
     try {
+      console.log('Stopping stream and updating with data:', formData);
       // Stop stream first
       await api.post(`/channels/${channel.id}/stop`);
 
@@ -98,6 +101,7 @@ function EditChannelModal({ channel, onClose, onSuccess }) {
       onClose();
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to stop stream and update channel');
+      console.error('Stop and save error:', err);
     } finally {
       setLoading(false);
     }
