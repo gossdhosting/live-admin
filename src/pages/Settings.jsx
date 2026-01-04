@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/api';
 import RtmpTemplatesManager from '../components/RtmpTemplatesManager';
+import PlatformConnections from '../components/PlatformConnections';
 
 function Settings() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [settings, setSettings] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
-  const [activeTab, setActiveTab] = useState('system'); // system, profile, password, rtmp, title
+  const [activeTab, setActiveTab] = useState('system'); // system, profile, password, rtmp, title, platforms
 
   // Password change state
   const [passwordData, setPasswordData] = useState({
@@ -38,6 +40,36 @@ function Settings() {
     fetchSettings();
     fetchUserProfile();
 
+    // Check for URL parameters (tab selection, success/error messages from OAuth)
+    const params = new URLSearchParams(location.search);
+    const tab = params.get('tab');
+    const success = params.get('success');
+    const error = params.get('error');
+
+    if (tab) {
+      setActiveTab(tab);
+    }
+
+    if (success) {
+      const successMessages = {
+        facebook_connected: 'Facebook account connected successfully!',
+        youtube_connected: 'YouTube account connected successfully!',
+        twitch_connected: 'Twitch account connected successfully!',
+      };
+      setMessage(successMessages[success] || 'Account connected successfully!');
+      setTimeout(() => setMessage(''), 5000);
+    }
+
+    if (error) {
+      const errorMessages = {
+        facebook_auth_failed: 'Failed to connect Facebook account',
+        youtube_auth_failed: 'Failed to connect YouTube account',
+        twitch_auth_failed: 'Failed to connect Twitch account',
+      };
+      setMessage(errorMessages[error] || 'Authentication failed');
+      setTimeout(() => setMessage(''), 5000);
+    }
+
     return () => {
       if (messageTimeoutRef.current) {
         clearTimeout(messageTimeoutRef.current);
@@ -46,7 +78,7 @@ function Settings() {
         clearTimeout(logoutTimeoutRef.current);
       }
     };
-  }, []);
+  }, [location]);
 
   const fetchSettings = async () => {
     try {
@@ -316,6 +348,22 @@ function Settings() {
             }}
           >
             Title Settings
+          </button>
+          <button
+            className={activeTab === 'platforms' ? 'tab-active' : 'tab-inactive'}
+            onClick={() => setActiveTab('platforms')}
+            style={{
+              padding: '0.75rem 1.5rem',
+              border: 'none',
+              background: activeTab === 'platforms' ? '#3498db' : 'transparent',
+              color: activeTab === 'platforms' ? '#fff' : '#7f8c8d',
+              cursor: 'pointer',
+              fontWeight: '500',
+              borderRadius: '4px 4px 0 0',
+              transition: 'all 0.2s'
+            }}
+          >
+            Platforms
           </button>
         </div>
 
@@ -767,6 +815,13 @@ function Settings() {
                 This is a preview of how the title overlay will appear on your stream. Enable the title overlay when creating/editing a channel.
               </small>
             </div>
+          </div>
+        )}
+
+        {/* Platforms Tab */}
+        {activeTab === 'platforms' && (
+          <div>
+            <PlatformConnections />
           </div>
         )}
       </div>
