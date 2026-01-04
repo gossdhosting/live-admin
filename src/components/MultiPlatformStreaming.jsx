@@ -20,6 +20,10 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
         api.get(`/platforms/streams/${channelId}`),
       ]);
 
+      console.log('Platform connections:', connectionsRes.data.connections);
+      console.log('RTMP templates:', templatesRes.data.templates);
+      console.log('Platform streams:', streamsRes.data.streams);
+
       setPlatformConnections(connectionsRes.data.connections || []);
       setRtmpTemplates(templatesRes.data.templates || []);
       setPlatformStreams(streamsRes.data.streams || []);
