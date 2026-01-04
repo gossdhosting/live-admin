@@ -7,7 +7,7 @@ function RtmpTemplatesManager() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
-    platform: 'facebook',
+    platform: 'custom',
     rtmp_url: '',
     stream_key: '',
     video_bitrate: '',
@@ -42,31 +42,8 @@ function RtmpTemplatesManager() {
   };
 
   const getPlatformDefaults = (platform) => {
+    // Only custom RTMP is supported - social platforms use OAuth integration
     const defaults = {
-      facebook: {
-        rtmp_url: 'rtmps://live-api-s.facebook.com:443/rtmp/',
-        video_bitrate: '4000k',
-        audio_bitrate: '128k',
-        profile: 'main',
-        preset: 'veryfast',
-        fps: 30,
-      },
-      youtube: {
-        rtmp_url: 'rtmp://a.rtmp.youtube.com/live2/',
-        video_bitrate: '4500k',
-        audio_bitrate: '128k',
-        profile: 'high',
-        preset: 'veryfast',
-        fps: 30,
-      },
-      twitch: {
-        rtmp_url: 'rtmp://live.twitch.tv/app/',
-        video_bitrate: '6000k',
-        audio_bitrate: '160k',
-        profile: 'main',
-        preset: 'veryfast',
-        fps: 30,
-      },
       custom: {
         rtmp_url: '',
         video_bitrate: '4000k',
@@ -76,7 +53,7 @@ function RtmpTemplatesManager() {
         fps: 30,
       },
     };
-    return defaults[platform] || defaults.custom;
+    return defaults.custom;
   };
 
   const handlePlatformChange = (e) => {
@@ -143,7 +120,7 @@ function RtmpTemplatesManager() {
   const resetForm = () => {
     setFormData({
       name: '',
-      platform: 'facebook',
+      platform: 'custom',
       rtmp_url: '',
       stream_key: '',
       video_bitrate: '',
@@ -157,13 +134,8 @@ function RtmpTemplatesManager() {
   };
 
   const getPlatformIcon = (platform) => {
-    const icons = {
-      facebook: '📘',
-      youtube: '📺',
-      twitch: '🎮',
-      custom: '🔧',
-    };
-    return icons[platform] || '🔧';
+    // All templates are custom RTMP now
+    return '🔧';
   };
 
   const getPlatformLabel = (platform) => {
@@ -183,9 +155,12 @@ function RtmpTemplatesManager() {
         marginBottom: '2rem',
       }}>
         <div>
-          <h2 style={{ margin: 0, color: '#2c3e50' }}>Global RTMP Templates</h2>
+          <h2 style={{ margin: 0, color: '#2c3e50' }}>Custom RTMP Destinations</h2>
           <p style={{ margin: '0.5rem 0 0 0', color: '#7f8c8d', fontSize: '0.9rem' }}>
-            Configure RTMP servers once, then enable/disable them per channel
+            Add custom RTMP servers (Restream.io, custom CDN, backup servers, etc.)
+          </p>
+          <p style={{ margin: '0.25rem 0 0 0', color: '#95a5a6', fontSize: '0.85rem' }}>
+            💡 For Facebook, YouTube, and Twitch, use the Platforms tab to connect via OAuth
           </p>
         </div>
         <button
@@ -214,25 +189,23 @@ function RtmpTemplatesManager() {
               value={formData.name}
               onChange={handleInputChange}
               className="form-control"
-              placeholder="e.g., My Facebook Page, Main YouTube Channel"
+              placeholder="e.g., Backup Server, Restream.io, Custom CDN"
               required
             />
           </div>
 
           <div className="form-group">
-            <label>Platform</label>
-            <select
-              name="platform"
-              value={formData.platform}
-              onChange={handlePlatformChange}
+            <label>Platform Type</label>
+            <input
+              type="text"
+              value="Custom RTMP"
               className="form-control"
-              required
-            >
-              <option value="facebook">Facebook Live</option>
-              <option value="youtube">YouTube Live</option>
-              <option value="twitch">Twitch</option>
-              <option value="custom">Custom RTMP</option>
-            </select>
+              disabled
+              style={{ backgroundColor: '#f8f9fa', cursor: 'not-allowed' }}
+            />
+            <small style={{ color: '#7f8c8d', fontSize: '0.85rem', display: 'block', marginTop: '0.25rem' }}>
+              Use Settings → Platforms tab to connect Facebook, YouTube, or Twitch via OAuth
+            </small>
           </div>
 
           <div className="form-group">
