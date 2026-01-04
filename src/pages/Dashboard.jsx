@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import ChannelCard from '../components/ChannelCard';
 import CreateChannelModal from '../components/CreateChannelModal';
+import EditChannelModal from '../components/EditChannelModal';
 
 function Dashboard() {
   const [channels, setChannels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingChannel, setEditingChannel] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(new Date());
   const [serverStats, setServerStats] = useState(null);
@@ -78,6 +81,11 @@ function Dashboard() {
 
   const handleChannelDeleted = (id) => {
     setChannels((prev) => prev.filter((ch) => ch.id !== id));
+  };
+
+  const handleEditChannel = (channel) => {
+    setEditingChannel(channel);
+    setShowEditModal(true);
   };
 
   const handleRefresh = () => {
@@ -354,12 +362,24 @@ function Dashboard() {
           channel={channel}
           onUpdate={fetchChannels}
           onDelete={handleChannelDeleted}
+          onEdit={handleEditChannel}
         />
       ))}
 
       {showCreateModal && (
         <CreateChannelModal
           onClose={() => setShowCreateModal(false)}
+          onSuccess={fetchChannels}
+        />
+      )}
+
+      {showEditModal && editingChannel && (
+        <EditChannelModal
+          channel={editingChannel}
+          onClose={() => {
+            setShowEditModal(false);
+            setEditingChannel(null);
+          }}
           onSuccess={fetchChannels}
         />
       )}

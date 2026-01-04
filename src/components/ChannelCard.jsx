@@ -3,7 +3,7 @@ import api from '../services/api';
 import RtmpSettingsNew from './RtmpSettingsNew';
 import WatermarkSettings from './WatermarkSettings';
 
-function ChannelCard({ channel, onUpdate, onDelete }) {
+function ChannelCard({ channel, onUpdate, onDelete, onEdit }) {
   const [loading, setLoading] = useState(false);
   const [showLogs, setShowLogs] = useState(false);
   const [logs, setLogs] = useState([]);
@@ -414,6 +414,13 @@ function ChannelCard({ channel, onUpdate, onDelete }) {
         )}
         <button className="btn btn-secondary" onClick={handleViewLogs}>
           {showLogs ? 'Hide Logs' : 'View Logs'}
+        </button>
+        <button
+          className="btn btn-primary"
+          onClick={() => onEdit(channel)}
+          style={{ backgroundColor: '#3498db' }}
+        >
+          Edit
         </button>
         <button
           className="btn btn-primary"
