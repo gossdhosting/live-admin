@@ -452,6 +452,27 @@ function Settings() {
                 </small>
               </div>
 
+              <div className="form-group">
+                <label htmlFor="ffmpeg_threading">FFmpeg Threading Mode</label>
+                <select
+                  id="ffmpeg_threading"
+                  className="form-control"
+                  value={settings.ffmpeg_threading || 'auto'}
+                  onChange={(e) => handleChange('ffmpeg_threading', e.target.value)}
+                >
+                  <option value="auto">Auto (Recommended - Uses all CPU cores)</option>
+                  <option value="1">Single Thread (Lower CPU usage, slower encoding)</option>
+                  <option value="2">2 Threads</option>
+                  <option value="4">4 Threads</option>
+                  <option value="8">8 Threads</option>
+                </select>
+                <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
+                  Auto mode uses all available CPU cores for faster encoding. Use single thread for low-resource VPS.
+                  <br />
+                  <strong>Note:</strong> Changes apply to newly started streams only. Restart existing streams to apply.
+                </small>
+              </div>
+
               <div className="modal-actions">
                 <button type="submit" className="btn btn-primary" disabled={saving}>
                   {saving ? 'Saving...' : 'Save Settings'}
