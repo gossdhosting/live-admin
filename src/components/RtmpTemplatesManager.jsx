@@ -104,10 +104,13 @@ function RtmpTemplatesManager() {
 
   const handleToggleEnabled = async (id, currentEnabled) => {
     try {
-      await api.put(`/rtmp/templates/${id}`, { enabled: currentEnabled ? 0 : 1 });
-      fetchTemplates();
+      console.log('Toggling template:', id, 'from', currentEnabled, 'to', currentEnabled ? 0 : 1);
+      const response = await api.put(`/rtmp/templates/${id}`, { enabled: currentEnabled ? 0 : 1 });
+      console.log('Toggle response:', response.data);
+      await fetchTemplates();
     } catch (error) {
-      alert('Failed to toggle template status');
+      console.error('Failed to toggle template status:', error);
+      alert(error.response?.data?.error || 'Failed to toggle template status');
     }
   };
 

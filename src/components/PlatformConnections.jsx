@@ -45,10 +45,15 @@ function PlatformConnections() {
 
         // Poll for popup close
         const pollTimer = setInterval(() => {
-          if (popup.closed) {
-            clearInterval(pollTimer);
-            setConnecting(null);
-            fetchConnections();
+          try {
+            if (popup.closed) {
+              clearInterval(pollTimer);
+              setConnecting(null);
+              fetchConnections();
+            }
+          } catch (e) {
+            // Ignore CORS errors when checking popup.closed
+            // This happens when popup navigates to OAuth provider
           }
         }, 500);
       }
