@@ -261,7 +261,7 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
                       </button>
                     ) : (
                       <span style={{ fontSize: '0.85rem', color: '#7f8c8d' }}>
-                        Start stream to enable
+                        Stop stream to enable
                       </span>
                     )}
                   </div>
@@ -374,7 +374,7 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
                       </button>
                     ) : (
                       <span style={{ fontSize: '0.85rem', color: '#7f8c8d' }}>
-                        Start stream to enable
+                        Stop stream to enable
                       </span>
                     )}
                   </div>
