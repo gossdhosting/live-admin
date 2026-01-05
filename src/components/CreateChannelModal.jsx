@@ -15,7 +15,7 @@ function CreateChannelModal({ onClose, onSuccess }) {
     description: '',
     input_url: '',
     auto_restart: true,
-    quality_preset: '720p',
+    quality_preset: '480p',
     stream_title: '',
     input_type: 'youtube',
     media_file_id: null,
