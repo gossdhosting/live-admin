@@ -209,7 +209,7 @@ function Dashboard({ user }) {
             }}>
               <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '0.5rem' }}>Storage</div>
               <div style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
-                {userStats.usage.storage_mb} MB
+                {userStats?.usage?.storage_mb || 0} MB
               </div>
               <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>
                 {userStats.limits.storage_limit_mb} MB limit
@@ -224,7 +224,7 @@ function Dashboard({ user }) {
                 <div style={{
                   background: 'white',
                   height: '100%',
-                  width: `${Math.min(100, (userStats.usage.storage_mb / userStats.limits.storage_limit_mb) * 100)}%`,
+                  width: `${Math.min(100, ((userStats?.usage?.storage_mb || 0) / userStats.limits.storage_limit_mb) * 100)}%`,
                   transition: 'width 0.3s ease'
                 }} />
               </div>
