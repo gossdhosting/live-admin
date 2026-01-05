@@ -23,7 +23,8 @@ function Navbar({ user, onLogout }) {
     { path: '/', label: 'Dashboard', icon: '📊' },
     { path: '/media', label: 'Media', icon: '🎬' },
     { path: '/plans', label: 'Plans', icon: '💎' },
-    { path: '/settings', label: 'Settings', icon: '⚙️' }
+    { path: '/settings', label: 'Settings', icon: '⚙️' },
+    ...(user && user.role === 'admin' ? [{ path: '/admin', label: 'Admin', icon: '👑' }] : [])
   ];
 
   return (

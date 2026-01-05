@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import UpgradePrompt from '../components/UpgradePrompt';
 
-function MediaManager() {
+function MediaManager({ user }) {
   const [mediaFiles, setMediaFiles] = useState([]);
   const [totalStorage, setTotalStorage] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -10,6 +10,7 @@ function MediaManager() {
   const [error, setError] = useState('');
   const [uploadProgress, setUploadProgress] = useState(0);
   const [userStats, setUserStats] = useState(null);
+  const isAdmin = user && user.role === 'admin';
 
   useEffect(() => {
     fetchMediaFiles();
@@ -295,6 +296,17 @@ function MediaManager() {
                 color: '#7f8c8d',
                 marginBottom: '0.5rem'
               }}>
+                {isAdmin && (
+                  <div style={{
+                    backgroundColor: '#e3f2fd',
+                    padding: '0.5rem',
+                    borderRadius: '4px',
+                    marginBottom: '0.5rem',
+                    color: '#1976d2'
+                  }}>
+                    <strong>👤 Uploaded by:</strong> {media.user_email || `User #${media.user_id}`}
+                  </div>
+                )}
                 <div><strong>Size:</strong> {formatFileSize(media.file_size)}</div>
                 <div><strong>Duration:</strong> {formatDuration(media.duration)}</div>
                 <div><strong>Uploaded:</strong> {new Date(media.created_at).toLocaleDateString()}</div>

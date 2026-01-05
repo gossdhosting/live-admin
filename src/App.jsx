@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
+import AdminSettings from './pages/AdminSettings';
 import MediaManager from './pages/MediaManager';
 import Plans from './pages/Plans';
 import Navbar from './components/Navbar';
@@ -63,6 +64,10 @@ function App() {
         <Route
           path="/settings"
           element={user ? <Settings user={user} /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/admin"
+          element={user && user.role === 'admin' ? <AdminSettings user={user} /> : <Navigate to="/" />}
         />
         <Route
           path="/media"

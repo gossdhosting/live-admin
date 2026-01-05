@@ -560,6 +560,7 @@ function Dashboard({ user }) {
           onUpdate={fetchChannels}
           onDelete={handleChannelDeleted}
           onEdit={handleEditChannel}
+          user={user}
         />
       ))}
 

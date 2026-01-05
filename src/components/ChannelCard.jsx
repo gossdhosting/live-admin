@@ -3,7 +3,7 @@ import api from '../services/api';
 import MultiPlatformStreaming from './MultiPlatformStreaming';
 import WatermarkSettings from './WatermarkSettings';
 
-function ChannelCard({ channel, onUpdate, onDelete, onEdit }) {
+function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
   const [loading, setLoading] = useState(false);
   const [logs, setLogs] = useState([]);
   const [showPreview, setShowPreview] = useState(false);
@@ -12,6 +12,7 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit }) {
   const [userStats, setUserStats] = useState(null);
   const [runtime, setRuntime] = useState(0);
   const copiedTimeoutRef = useRef(null);
+  const isAdmin = user && user.role === 'admin';
 
   useEffect(() => {
     return () => {
@@ -540,7 +541,13 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit }) {
                   {channel.auto_restart ? '✅ Enabled' : '⭕ Disabled'}
                 </div>
               </div>
-              {channel.process_id && (
+              {isAdmin && (
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: '#6c757d', marginBottom: '0.25rem' }}>User ID</div>
+                  <div style={{ fontWeight: '600', color: '#2c3e50', fontFamily: 'monospace' }}>#{channel.user_id}</div>
+                </div>
+              )}
+              {isAdmin && channel.process_id && (
                 <div>
                   <div style={{ fontSize: '0.75rem', color: '#6c757d', marginBottom: '0.25rem' }}>Process ID</div>
                   <div style={{ fontWeight: '600', color: '#2c3e50', fontFamily: 'monospace' }}>{channel.process_id}</div>
