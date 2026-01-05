@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
+import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
 import MediaManager from './pages/MediaManager';
@@ -51,16 +52,20 @@ function App() {
           element={user ? <Navigate to="/" /> : <Login onLogin={handleLogin} />}
         />
         <Route
+          path="/register"
+          element={user ? <Navigate to="/" /> : <Register />}
+        />
+        <Route
           path="/"
-          element={user ? <Dashboard /> : <Navigate to="/login" />}
+          element={user ? <Dashboard user={user} /> : <Navigate to="/login" />}
         />
         <Route
           path="/settings"
-          element={user ? <Settings /> : <Navigate to="/login" />}
+          element={user ? <Settings user={user} /> : <Navigate to="/login" />}
         />
         <Route
           path="/media"
-          element={user ? <MediaManager /> : <Navigate to="/login" />}
+          element={user ? <MediaManager user={user} /> : <Navigate to="/login" />}
         />
       </Routes>
     </Router>

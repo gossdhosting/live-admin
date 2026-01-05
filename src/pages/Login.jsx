@@ -76,6 +76,15 @@ function Login({ onLogin }) {
           </button>
         </form>
 
+        <div style={{ textAlign: 'center', marginTop: '20px' }}>
+          <p style={{ color: '#666' }}>
+            Don't have an account?{' '}
+            <a href="/register" style={{ color: '#007bff' }}>
+              Sign up
+            </a>
+          </p>
+        </div>
+
       </div>
     </div>
   );
