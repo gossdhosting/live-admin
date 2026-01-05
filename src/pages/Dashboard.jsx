@@ -247,7 +247,7 @@ function Dashboard({ user }) {
               </div>
             </div>
           </div>
-          {!userStats.canCreate.stream && (
+          {userStats?.canCreate && !userStats.canCreate.stream && (
             <div style={{
               margin: '1rem',
               padding: '1rem',
