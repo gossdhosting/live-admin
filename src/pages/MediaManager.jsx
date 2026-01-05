@@ -188,10 +188,10 @@ function MediaManager({ user }) {
           id="file-upload"
         />
 
-        <label htmlFor="file-upload">
+        <label htmlFor="file-upload" className="cursor-pointer">
           <Button
             disabled={uploading}
-            className="cursor-pointer"
+            type="button"
             asChild
           >
             <span>
