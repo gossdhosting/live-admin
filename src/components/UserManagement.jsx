@@ -7,6 +7,9 @@ function UserManagement() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [userDetails, setUserDetails] = useState(null);
+  const [loadingDetails, setLoadingDetails] = useState(false);
   const [modalMode, setModalMode] = useState('create'); // 'create' or 'edit'
   const [selectedUser, setSelectedUser] = useState(null);
   const [formData, setFormData] = useState({
@@ -129,6 +132,44 @@ function UserManagement() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const openDetailsModal = async (user) => {
+    setSelectedUser(user);
+    setShowDetailsModal(true);
+    setLoadingDetails(true);
+
+    try {
+      const response = await api.get(`/users/${user.id}/details`);
+      setUserDetails(response.data);
+    } catch (error) {
+      console.error('Failed to fetch user details:', error);
+      showMessage('Failed to load user details', 'error');
+    } finally {
+      setLoadingDetails(false);
+    }
+  };
+
+  const handleLoginAsUser = async (userId) => {
+    if (!window.confirm('Are you sure you want to login as this user? You will be switched to their account.')) {
+      return;
+    }
+
+    try {
+      const response = await api.post(`/auth/admin-login-as/${userId}`);
+
+      // Store the admin token to return later
+      const currentToken = localStorage.getItem('token');
+      localStorage.setItem('adminToken', currentToken);
+
+      // Set the new user token
+      localStorage.setItem('token', response.data.token);
+
+      // Reload to switch to user account
+      window.location.href = '/';
+    } catch (error) {
+      showMessage(error.response?.data?.error || 'Failed to login as user', 'error');
+    }
+  };
+
   if (loading) {
     return <div>Loading users...</div>;
   }
@@ -194,6 +235,13 @@ function UserManagement() {
                 </td>
                 <td style={{ padding: '0.75rem' }}>{new Date(user.created_at).toLocaleDateString()}</td>
                 <td style={{ padding: '0.75rem', textAlign: 'right' }}>
+                  <button
+                    className="btn btn-sm"
+                    onClick={() => openDetailsModal(user)}
+                    style={{ marginRight: '0.5rem', padding: '0.25rem 0.5rem', fontSize: '0.85rem', backgroundColor: '#3498db', color: '#fff' }}
+                  >
+                    View
+                  </button>
                   <button
                     className="btn btn-sm btn-secondary"
                     onClick={() => openEditModal(user)}
@@ -342,6 +390,213 @@ function UserManagement() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* User Details Modal */}
+      {showDetailsModal && (
+        <div className="modal-overlay" onClick={() => setShowDetailsModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto' }}>
+            <h3>User Details: {selectedUser?.email}</h3>
+
+            {loadingDetails ? (
+              <div style={{ textAlign: 'center', padding: '2rem' }}>Loading...</div>
+            ) : userDetails ? (
+              <div>
+                {/* User Information */}
+                <div style={{
+                  backgroundColor: '#f8f9fa',
+                  padding: '1rem',
+                  borderRadius: '8px',
+                  marginBottom: '1.5rem'
+                }}>
+                  <h4 style={{ marginTop: 0, marginBottom: '1rem' }}>Account Information</h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.9rem' }}>
+                    <div>
+                      <strong>User ID:</strong> #{userDetails.user.id}
+                    </div>
+                    <div>
+                      <strong>Email:</strong> {userDetails.user.email}
+                    </div>
+                    <div>
+                      <strong>Name:</strong> {userDetails.user.name || 'N/A'}
+                    </div>
+                    <div>
+                      <strong>Role:</strong> <span style={{
+                        padding: '0.25rem 0.5rem',
+                        borderRadius: '4px',
+                        fontSize: '0.8rem',
+                        fontWeight: '600',
+                        backgroundColor: userDetails.user.role === 'admin' ? '#e74c3c' : '#3498db',
+                        color: '#fff'
+                      }}>{userDetails.user.role}</span>
+                    </div>
+                    <div>
+                      <strong>Status:</strong> <span style={{
+                        padding: '0.25rem 0.5rem',
+                        borderRadius: '4px',
+                        fontSize: '0.8rem',
+                        backgroundColor: userDetails.user.status === 'active' ? '#27ae60' : '#95a5a6',
+                        color: '#fff'
+                      }}>{userDetails.user.status}</span>
+                    </div>
+                    <div>
+                      <strong>Joined:</strong> {new Date(userDetails.user.created_at).toLocaleDateString()}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Plan Details */}
+                <div style={{
+                  backgroundColor: '#e3f2fd',
+                  padding: '1rem',
+                  borderRadius: '8px',
+                  marginBottom: '1.5rem'
+                }}>
+                  <h4 style={{ marginTop: 0, marginBottom: '1rem' }}>Plan & Subscription</h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.9rem' }}>
+                    <div>
+                      <strong>Current Plan:</strong> {userDetails.plan.name}
+                    </div>
+                    <div>
+                      <strong>Billing Cycle:</strong> {userDetails.user.subscription_type}
+                    </div>
+                    <div>
+                      <strong>Max Streams:</strong> {userDetails.plan.max_concurrent_streams}
+                    </div>
+                    <div>
+                      <strong>Max Duration:</strong> {userDetails.plan.max_stream_duration ? `${userDetails.plan.max_stream_duration} min` : 'Unlimited'}
+                    </div>
+                    <div>
+                      <strong>Max Bitrate:</strong> {userDetails.plan.max_bitrate} kbps
+                    </div>
+                    <div>
+                      <strong>Storage Limit:</strong> {(userDetails.plan.storage_limit_mb / 1024).toFixed(2)} GB
+                    </div>
+                  </div>
+                </div>
+
+                {/* Usage Statistics */}
+                <div style={{
+                  backgroundColor: '#fff3cd',
+                  padding: '1rem',
+                  borderRadius: '8px',
+                  marginBottom: '1.5rem'
+                }}>
+                  <h4 style={{ marginTop: 0, marginBottom: '1rem' }}>Activity & Usage</h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.9rem' }}>
+                    <div>
+                      <strong>Total Channels:</strong> {userDetails.stats.total_channels}
+                    </div>
+                    <div>
+                      <strong>Running Channels:</strong> {userDetails.stats.running_channels}
+                    </div>
+                    <div>
+                      <strong>Media Files:</strong> {userDetails.stats.total_media}
+                    </div>
+                    <div>
+                      <strong>Storage Used:</strong> {(userDetails.stats.storage_used_mb / 1024).toFixed(2)} GB
+                    </div>
+                  </div>
+                </div>
+
+                {/* Platform Connections */}
+                <div style={{
+                  backgroundColor: '#d4edda',
+                  padding: '1rem',
+                  borderRadius: '8px',
+                  marginBottom: '1.5rem'
+                }}>
+                  <h4 style={{ marginTop: 0, marginBottom: '1rem' }}>Connected Platforms</h4>
+                  {userDetails.platforms && userDetails.platforms.length > 0 ? (
+                    <div style={{ fontSize: '0.9rem' }}>
+                      {userDetails.platforms.map((platform, idx) => (
+                        <div key={idx} style={{
+                          padding: '0.5rem',
+                          backgroundColor: '#fff',
+                          borderRadius: '4px',
+                          marginBottom: '0.5rem',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center'
+                        }}>
+                          <div>
+                            <strong style={{ textTransform: 'capitalize' }}>{platform.platform}:</strong>{' '}
+                            {platform.platform_user_name || platform.platform_user_email || platform.platform_channel_name || 'Connected'}
+                          </div>
+                          <span style={{
+                            fontSize: '0.75rem',
+                            color: '#666'
+                          }}>
+                            {new Date(platform.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ color: '#666', fontSize: '0.9rem' }}>No platforms connected</div>
+                  )}
+                </div>
+
+                {/* Custom RTMP Destinations */}
+                <div style={{
+                  backgroundColor: '#f3e5f5',
+                  padding: '1rem',
+                  borderRadius: '8px',
+                  marginBottom: '1.5rem'
+                }}>
+                  <h4 style={{ marginTop: 0, marginBottom: '1rem' }}>Custom RTMP Destinations</h4>
+                  {userDetails.rtmp_destinations && userDetails.rtmp_destinations.length > 0 ? (
+                    <div style={{ fontSize: '0.9rem' }}>
+                      {userDetails.rtmp_destinations.map((dest, idx) => (
+                        <div key={idx} style={{
+                          padding: '0.5rem',
+                          backgroundColor: '#fff',
+                          borderRadius: '4px',
+                          marginBottom: '0.5rem'
+                        }}>
+                          <strong>{dest.name}</strong> ({dest.platform})<br />
+                          <span style={{ fontSize: '0.8rem', color: '#666' }}>
+                            Channel: {dest.channel_name || 'N/A'}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ color: '#666', fontSize: '0.9rem' }}>No custom RTMP destinations</div>
+                  )}
+                </div>
+
+                {/* Action Buttons */}
+                <div style={{
+                  display: 'flex',
+                  gap: '1rem',
+                  marginTop: '1.5rem',
+                  paddingTop: '1.5rem',
+                  borderTop: '1px solid #dee2e6'
+                }}>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => handleLoginAsUser(selectedUser.id)}
+                    style={{ flex: 1 }}
+                  >
+                    🔐 Login to Profile
+                  </button>
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => setShowDetailsModal(false)}
+                    style={{ flex: 1 }}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '2rem', color: '#e74c3c' }}>
+                Failed to load user details
+              </div>
+            )}
           </div>
         </div>
       )}
