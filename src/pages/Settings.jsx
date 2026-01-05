@@ -347,24 +347,22 @@ function Settings({ user }) {
           >
             RTMP Templates
           </button>
-          {user && user.role === 'admin' && (
-            <button
-              className={activeTab === 'title' ? 'tab-active' : 'tab-inactive'}
-              onClick={() => setActiveTab('title')}
-              style={{
-                padding: '0.75rem 1.5rem',
-                border: 'none',
-                background: activeTab === 'title' ? '#3498db' : 'transparent',
-                color: activeTab === 'title' ? '#fff' : '#7f8c8d',
-                cursor: 'pointer',
-                fontWeight: '500',
-                borderRadius: '4px 4px 0 0',
-                transition: 'all 0.2s'
-              }}
-            >
-              Title Settings
-            </button>
-          )}
+          <button
+            className={activeTab === 'title' ? 'tab-active' : 'tab-inactive'}
+            onClick={() => setActiveTab('title')}
+            style={{
+              padding: '0.75rem 1.5rem',
+              border: 'none',
+              background: activeTab === 'title' ? '#3498db' : 'transparent',
+              color: activeTab === 'title' ? '#fff' : '#7f8c8d',
+              cursor: 'pointer',
+              fontWeight: '500',
+              borderRadius: '4px 4px 0 0',
+              transition: 'all 0.2s'
+            }}
+          >
+            Title Settings
+          </button>
           <button
             className={activeTab === 'platforms' ? 'tab-active' : 'tab-inactive'}
             onClick={() => setActiveTab('platforms')}
@@ -699,8 +697,8 @@ function Settings({ user }) {
           </div>
         )}
 
-        {/* Title Settings Tab (Admin Only) */}
-        {activeTab === 'title' && user && user.role === 'admin' && (
+        {/* Title Settings Tab */}
+        {activeTab === 'title' && (
           <div>
             {message && (
               <div className={`alert ${message.includes('success') ? 'alert-success' : 'alert-error'}`}>
