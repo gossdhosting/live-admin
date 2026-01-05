@@ -32,7 +32,7 @@ function Settings({ user }) {
   });
   const [profileMessage, setProfileMessage] = useState('');
   const [updatingProfile, setUpdatingProfile] = useState(false);
-  const [user, setUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
 
   // Refs for cleanup
   const messageTimeoutRef = useRef(null);
@@ -110,7 +110,7 @@ function Settings({ user }) {
   const fetchUserProfile = async () => {
     try {
       const response = await api.get('/auth/me');
-      setUser(response.data.user);
+      setCurrentUser(response.data.user);
       setProfileData({
         email: response.data.user.email,
         name: response.data.user.name || '',
@@ -182,7 +182,7 @@ function Settings({ user }) {
       setProfileData((prev) => ({ ...prev, currentPassword: '' }));
 
       // Logout after 2 seconds if email changed
-      if (profileData.email !== user.email) {
+      if (profileData.email !== currentUser.email) {
         if (logoutTimeoutRef.current) {
           clearTimeout(logoutTimeoutRef.current);
         }
