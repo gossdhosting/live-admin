@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import UpgradePrompt from '../components/UpgradePrompt';
+import { Button } from '../components/ui/button';
 
 function MediaManager({ user }) {
   const [mediaFiles, setMediaFiles] = useState([]);
@@ -109,18 +110,18 @@ function MediaManager({ user }) {
   };
 
   if (loading) {
-    return <div className="page-container"><div>Loading...</div></div>;
+    return <div className="page-container"><div className="text-center p-8">Loading...</div></div>;
   }
 
   return (
     <div className="page-container">
       <div className="page-header">
         <h1>Media Manager</h1>
-        <p style={{ color: '#7f8c8d' }}>Upload and manage pre-recorded videos for streaming</p>
+        <p className="text-gray-500">Upload and manage pre-recorded videos for streaming</p>
       </div>
 
       {error && (
-        <div className="alert alert-error" style={{ marginBottom: '1rem' }}>
+        <div className="alert alert-error mb-4">
           {error}
         </div>
       )}
@@ -130,37 +131,21 @@ function MediaManager({ user }) {
         <>
           {/* Storage warning at 80% */}
           {totalStorage >= userStats.limits.storage_limit * 0.8 && totalStorage < userStats.limits.storage_limit * 0.9 && (
-            <div style={{
-              padding: '1rem',
-              backgroundColor: '#fff3cd',
-              border: '1px solid #ffc107',
-              borderRadius: '8px',
-              marginBottom: '1rem',
-              fontSize: '0.95rem',
-              color: '#856404'
-            }}>
+            <div className="p-4 bg-yellow-50 border border-yellow-400 rounded-lg mb-4 text-sm text-yellow-800">
               <strong>Storage Warning:</strong> You've used {Math.round((totalStorage / userStats.limits.storage_limit) * 100)}% of your storage limit ({formatFileSize(userStats.limits.storage_limit)}). Consider upgrading your plan for more storage.
             </div>
           )}
 
           {/* Storage critical warning at 90% */}
           {totalStorage >= userStats.limits.storage_limit * 0.9 && totalStorage < userStats.limits.storage_limit && (
-            <div style={{
-              padding: '1rem',
-              backgroundColor: '#f8d7da',
-              border: '1px solid #f5c6cb',
-              borderRadius: '8px',
-              marginBottom: '1rem',
-              fontSize: '0.95rem',
-              color: '#721c24'
-            }}>
+            <div className="p-4 bg-red-50 border border-red-300 rounded-lg mb-4 text-sm text-red-800">
               <strong>Critical:</strong> You've used {Math.round((totalStorage / userStats.limits.storage_limit) * 100)}% of your storage limit. You may not be able to upload new videos soon.
             </div>
           )}
 
           {/* Storage limit reached */}
           {totalStorage >= userStats.limits.storage_limit && (
-            <div style={{ marginBottom: '1rem' }}>
+            <div className="mb-4">
               <UpgradePrompt
                 currentPlan={userStats.plan.name}
                 requiredPlan={userStats.plan.name === 'Free' ? 'Basic' : userStats.plan.name === 'Basic' ? 'Pro' : 'Enterprise'}
@@ -173,19 +158,11 @@ function MediaManager({ user }) {
       )}
 
       {/* Storage Info */}
-      <div style={{
-        backgroundColor: '#ecf0f1',
-        padding: '1rem',
-        borderRadius: '8px',
-        marginBottom: '1.5rem',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
+      <div className="bg-gray-100 p-4 rounded-lg mb-6 flex justify-between items-center flex-wrap gap-4">
         <div>
           <strong>Total Storage Used:</strong> {formatFileSize(totalStorage)}
           {userStats && userStats.limits.storage_limit && (
-            <span style={{ color: '#7f8c8d', marginLeft: '0.5rem' }}>
+            <span className="text-gray-500 ml-2">
               / {formatFileSize(userStats.limits.storage_limit)} ({Math.round((totalStorage / userStats.limits.storage_limit) * 100)}%)
             </span>
           )}
@@ -196,16 +173,9 @@ function MediaManager({ user }) {
       </div>
 
       {/* Upload Section */}
-      <div style={{
-        border: '2px dashed #3498db',
-        borderRadius: '8px',
-        padding: '2rem',
-        textAlign: 'center',
-        marginBottom: '2rem',
-        backgroundColor: '#f8f9fa'
-      }}>
-        <h3 style={{ marginBottom: '1rem' }}>Upload Video</h3>
-        <p style={{ color: '#7f8c8d', marginBottom: '1rem' }}>
+      <div className="border-2 border-dashed border-blue-500 rounded-lg p-8 text-center mb-8 bg-gray-50">
+        <h3 className="mb-4 text-lg font-semibold">Upload Video</h3>
+        <p className="text-gray-500 mb-4">
           Supported formats: MP4, WebM, MOV, MKV (Max 5GB)
         </p>
 
@@ -214,41 +184,28 @@ function MediaManager({ user }) {
           accept="video/*"
           onChange={handleFileUpload}
           disabled={uploading}
-          style={{ display: 'none' }}
+          className="hidden"
           id="file-upload"
         />
 
-        <label
-          htmlFor="file-upload"
-          className="btn btn-primary"
-          style={{
-            display: 'inline-block',
-            cursor: uploading ? 'not-allowed' : 'pointer',
-            opacity: uploading ? 0.6 : 1
-          }}
-        >
-          {uploading ? `Uploading... ${uploadProgress}%` : 'Choose File'}
+        <label htmlFor="file-upload">
+          <Button
+            disabled={uploading}
+            className="cursor-pointer"
+            asChild
+          >
+            <span>
+              {uploading ? `Uploading... ${uploadProgress}%` : '📁 Choose File'}
+            </span>
+          </Button>
         </label>
 
         {uploading && (
-          <div style={{
-            marginTop: '1rem',
-            backgroundColor: '#ecf0f1',
-            borderRadius: '4px',
-            height: '24px',
-            overflow: 'hidden'
-          }}>
-            <div style={{
-              backgroundColor: '#3498db',
-              height: '100%',
-              width: `${uploadProgress}%`,
-              transition: 'width 0.3s',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white',
-              fontSize: '0.85rem'
-            }}>
+          <div className="mt-4 bg-gray-200 rounded h-6 overflow-hidden">
+            <div
+              className="bg-blue-500 h-full flex items-center justify-center text-white text-sm transition-all duration-300"
+              style={{ width: `${uploadProgress}%` }}
+            >
               {uploadProgress}%
             </div>
           </div>
@@ -256,55 +213,26 @@ function MediaManager({ user }) {
       </div>
 
       {/* Media Files List */}
-      <h2 style={{ marginBottom: '1rem' }}>Your Videos ({mediaFiles.length})</h2>
+      <h2 className="mb-4 text-xl font-semibold">Your Videos ({mediaFiles.length})</h2>
 
       {mediaFiles.length === 0 ? (
-        <div style={{
-          textAlign: 'center',
-          padding: '3rem',
-          backgroundColor: '#f8f9fa',
-          borderRadius: '8px',
-          color: '#7f8c8d'
-        }}>
+        <div className="text-center p-12 bg-gray-50 rounded-lg text-gray-500">
           <p>No videos uploaded yet. Upload your first video above!</p>
         </div>
       ) : (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-          gap: '1rem'
-        }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {mediaFiles.map((media) => (
             <div
               key={media.id}
-              style={{
-                border: '1px solid #ddd',
-                borderRadius: '8px',
-                padding: '1rem',
-                backgroundColor: 'white'
-              }}
+              className="border border-gray-300 rounded-lg p-4 bg-white hover:shadow-lg transition-shadow"
             >
-              <h3 style={{
-                fontSize: '1rem',
-                marginBottom: '0.5rem',
-                wordBreak: 'break-word'
-              }}>
+              <h3 className="text-base font-semibold mb-2 break-words">
                 {media.original_name}
               </h3>
 
-              <div style={{
-                fontSize: '0.85rem',
-                color: '#7f8c8d',
-                marginBottom: '0.5rem'
-              }}>
+              <div className="text-sm text-gray-600 mb-2 space-y-1">
                 {isAdmin && (
-                  <div style={{
-                    backgroundColor: '#e3f2fd',
-                    padding: '0.5rem',
-                    borderRadius: '4px',
-                    marginBottom: '0.5rem',
-                    color: '#1976d2'
-                  }}>
+                  <div className="bg-blue-50 p-2 rounded mb-2 text-blue-700">
                     <strong>👤 Uploaded by:</strong> {media.user_email || `User #${media.user_id}`}
                   </div>
                 )}
@@ -313,27 +241,22 @@ function MediaManager({ user }) {
                 <div><strong>Uploaded:</strong> {new Date(media.created_at).toLocaleDateString()}</div>
               </div>
 
-              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-                <button
+              <div className="flex gap-2 mt-3">
+                <Button
                   onClick={() => setPreviewMedia(media)}
-                  className="btn btn-primary"
-                  style={{
-                    flex: 1,
-                    padding: '0.5rem'
-                  }}
+                  className="flex-1"
+                  size="sm"
                 >
-                  Preview
-                </button>
-                <button
+                  👁️ Preview
+                </Button>
+                <Button
                   onClick={() => handleDelete(media.id)}
-                  className="btn btn-danger"
-                  style={{
-                    flex: 1,
-                    padding: '0.5rem'
-                  }}
+                  variant="destructive"
+                  className="flex-1"
+                  size="sm"
                 >
-                  Delete
-                </button>
+                  🗑️ Delete
+                </Button>
               </div>
             </div>
           ))}
@@ -343,77 +266,36 @@ function MediaManager({ user }) {
       {/* Preview Modal */}
       {previewMedia && (
         <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            padding: '2rem'
-          }}
+          className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-8"
           onClick={() => setPreviewMedia(null)}
         >
           <div
-            style={{
-              backgroundColor: 'white',
-              borderRadius: '8px',
-              maxWidth: '900px',
-              width: '100%',
-              maxHeight: '90vh',
-              overflow: 'auto'
-            }}
+            className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div style={{
-              padding: '1.5rem',
-              borderBottom: '1px solid #ddd',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}>
-              <h2 style={{ margin: 0 }}>Preview: {previewMedia.original_name}</h2>
+            <div className="px-6 py-4 border-b border-gray-300 flex justify-between items-center">
+              <h2 className="m-0 text-lg font-semibold">Preview: {previewMedia.original_name}</h2>
               <button
                 onClick={() => setPreviewMedia(null)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '1.5rem',
-                  cursor: 'pointer',
-                  color: '#7f8c8d'
-                }}
+                className="bg-transparent border-none text-2xl cursor-pointer text-gray-500 hover:text-gray-800"
               >
                 ×
               </button>
             </div>
 
-            <div style={{ padding: '1.5rem' }}>
+            <div className="p-6">
               <video
                 controls
                 autoPlay
-                style={{
-                  width: '100%',
-                  maxHeight: '500px',
-                  backgroundColor: '#000',
-                  borderRadius: '4px'
-                }}
+                className="w-full max-h-[500px] bg-black rounded"
               >
                 <source src={`https://live.telanganatribune.com/uploads/${previewMedia.filename}`} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
 
-              <div style={{
-                marginTop: '1.5rem',
-                padding: '1rem',
-                backgroundColor: '#f8f9fa',
-                borderRadius: '4px'
-              }}>
-                <h3 style={{ marginBottom: '0.75rem' }}>Video Details</h3>
-                <div style={{ fontSize: '0.9rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+              <div className="mt-6 p-4 bg-gray-50 rounded">
+                <h3 className="mb-3 font-semibold">Video Details</h3>
+                <div className="text-sm grid grid-cols-1 md:grid-cols-2 gap-2">
                   <div><strong>File Name:</strong> {previewMedia.original_name}</div>
                   <div><strong>Size:</strong> {formatFileSize(previewMedia.file_size)}</div>
                   <div><strong>Duration:</strong> {formatDuration(previewMedia.duration)}</div>
@@ -425,18 +307,13 @@ function MediaManager({ user }) {
               </div>
             </div>
 
-            <div style={{
-              padding: '1rem 1.5rem',
-              borderTop: '1px solid #ddd',
-              display: 'flex',
-              justifyContent: 'flex-end'
-            }}>
-              <button
+            <div className="px-6 py-4 border-t border-gray-300 flex justify-end">
+              <Button
                 onClick={() => setPreviewMedia(null)}
-                className="btn btn-secondary"
+                variant="secondary"
               >
                 Close
-              </button>
+              </Button>
             </div>
           </div>
         </div>
