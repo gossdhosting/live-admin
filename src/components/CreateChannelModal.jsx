@@ -43,7 +43,7 @@ function CreateChannelModal({ onClose, onSuccess }) {
 
   const fetchUserStats = async () => {
     try {
-      const response = await api.get('/stats/user');
+      const response = await api.get('/users/stats');
       setUserStats(response.data);
     } catch (err) {
       console.error('Failed to fetch user stats:', err);
