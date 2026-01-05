@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import api from '../services/api';
 import MultiPlatformStreaming from './MultiPlatformStreaming';
 import WatermarkSettings from './WatermarkSettings';
+import { Button } from './ui/button';
 
 function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
   const [loading, setLoading] = useState(false);
@@ -410,72 +411,34 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
             )}
 
             {channel.status === 'running' && (
-              <div style={{
-                backgroundColor: '#e8f5e9',
-                padding: '1rem',
-                borderRadius: '6px',
-                marginTop: '1rem',
-                border: '1px solid #c8e6c9'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                  <strong style={{ color: '#2c3e50', fontSize: '0.9rem' }}>🎥 Stream URL</strong>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button
-                      className="btn btn-sm"
+              <div className="bg-green-50 p-4 rounded-lg mt-4 border border-green-200">
+                <div className="flex items-center justify-between mb-3">
+                  <strong className="text-gray-800 text-sm">🎥 Stream URL</strong>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
                       onClick={handleCopyUrl}
-                      style={{
-                        padding: '0.35rem 0.75rem',
-                        fontSize: '0.8rem',
-                        backgroundColor: copied ? '#27ae60' : '#3498db',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer'
-                      }}
+                      className={copied ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'}
                     >
                       {copied ? '✓ Copied' : '📋 Copy'}
-                    </button>
-                    <button
-                      className="btn btn-sm"
+                    </Button>
+                    <Button
+                      size="sm"
                       onClick={handleOpenStream}
-                      style={{
-                        padding: '0.35rem 0.75rem',
-                        fontSize: '0.8rem',
-                        backgroundColor: '#9b59b6',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer'
-                      }}
+                      className="bg-purple-600 hover:bg-purple-700"
                     >
                       🔗 Open
-                    </button>
-                    <button
-                      className="btn btn-sm"
+                    </Button>
+                    <Button
+                      size="sm"
                       onClick={() => setShowPreview(!showPreview)}
-                      style={{
-                        padding: '0.35rem 0.75rem',
-                        fontSize: '0.8rem',
-                        backgroundColor: '#e67e22',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer'
-                      }}
+                      className="bg-orange-600 hover:bg-orange-700"
                     >
                       {showPreview ? '👁️ Hide' : '👁️ Preview'}
-                    </button>
+                    </Button>
                   </div>
                 </div>
-                <div style={{
-                  backgroundColor: 'white',
-                  padding: '0.75rem',
-                  borderRadius: '4px',
-                  fontFamily: 'monospace',
-                  fontSize: '0.8rem',
-                  wordBreak: 'break-all',
-                  color: '#2c3e50'
-                }}>
+                <div className="bg-white p-3 rounded font-mono text-xs break-all text-gray-800">
                   {streamUrl}
                 </div>
               </div>
@@ -518,39 +481,31 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
               </div>
             )}
 
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-              gap: '1rem',
-              marginTop: '1rem',
-              padding: '1rem',
-              backgroundColor: '#f8f9fa',
-              borderRadius: '6px'
-            }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4 p-4 bg-gray-50 rounded-lg">
               <div>
-                <div style={{ fontSize: '0.75rem', color: '#6c757d', marginBottom: '0.25rem' }}>Quality</div>
-                <div style={{ fontWeight: '600', color: '#2c3e50' }}>{channel.quality_preset}</div>
+                <div className="text-xs text-gray-500 mb-1">Quality</div>
+                <div className="font-semibold text-gray-800">{channel.quality_preset}</div>
               </div>
               <div>
-                <div style={{ fontSize: '0.75rem', color: '#6c757d', marginBottom: '0.25rem' }}>Input Type</div>
-                <div style={{ fontWeight: '600', color: '#2c3e50', textTransform: 'capitalize' }}>{channel.input_type}</div>
+                <div className="text-xs text-gray-500 mb-1">Input Type</div>
+                <div className="font-semibold text-gray-800 capitalize">{channel.input_type}</div>
               </div>
               <div>
-                <div style={{ fontSize: '0.75rem', color: '#6c757d', marginBottom: '0.25rem' }}>Auto-restart</div>
-                <div style={{ fontWeight: '600', color: channel.auto_restart ? '#27ae60' : '#95a5a6' }}>
+                <div className="text-xs text-gray-500 mb-1">Auto-restart</div>
+                <div className={`font-semibold ${channel.auto_restart ? 'text-green-600' : 'text-gray-400'}`}>
                   {channel.auto_restart ? '✅ Enabled' : '⭕ Disabled'}
                 </div>
               </div>
               {isAdmin && (
                 <div>
-                  <div style={{ fontSize: '0.75rem', color: '#6c757d', marginBottom: '0.25rem' }}>User ID</div>
-                  <div style={{ fontWeight: '600', color: '#2c3e50', fontFamily: 'monospace' }}>#{channel.user_id}</div>
+                  <div className="text-xs text-gray-500 mb-1">User ID</div>
+                  <div className="font-semibold text-gray-800 font-mono">#{channel.user_id}</div>
                 </div>
               )}
               {isAdmin && channel.process_id && (
                 <div>
-                  <div style={{ fontSize: '0.75rem', color: '#6c757d', marginBottom: '0.25rem' }}>Process ID</div>
-                  <div style={{ fontWeight: '600', color: '#2c3e50', fontFamily: 'monospace' }}>{channel.process_id}</div>
+                  <div className="text-xs text-gray-500 mb-1">Process ID</div>
+                  <div className="font-semibold text-gray-800 font-mono">{channel.process_id}</div>
                 </div>
               )}
             </div>
@@ -624,28 +579,15 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
   };
 
   return (
-    <div style={{
-      backgroundColor: 'white',
-      borderRadius: '8px',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-      overflow: 'hidden',
-      marginBottom: '1.5rem'
-    }}>
+    <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
       {/* Header */}
-      <div style={{
-        padding: '1.25rem 1.5rem',
-        borderBottom: '1px solid #e9ecef',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        backgroundColor: '#f8f9fa'
-      }}>
-        <div style={{ flex: 1 }}>
-          <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#2c3e50', fontWeight: '600' }}>
+      <div className="px-6 py-5 border-b border-gray-200 flex items-center justify-between bg-gray-50">
+        <div className="flex-1">
+          <h2 className="m-0 text-xl text-gray-800 font-semibold">
             {channel.name}
           </h2>
           {channel.description && (
-            <p style={{ color: '#6c757d', marginTop: '0.35rem', marginBottom: 0, fontSize: '0.9rem' }}>
+            <p className="text-gray-600 mt-1 mb-0 text-sm">
               {channel.description}
             </p>
           )}
@@ -654,111 +596,54 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
       </div>
 
       {/* Control Buttons */}
-      <div style={{
-        padding: '1rem 1.5rem',
-        borderBottom: '1px solid #e9ecef',
-        display: 'flex',
-        gap: '0.75rem',
-        flexWrap: 'wrap',
-        backgroundColor: 'white'
-      }}>
+      <div className="px-6 py-4 border-b border-gray-200 flex gap-3 flex-wrap bg-white">
         {channel.status !== 'running' ? (
-          <button
-            className="btn btn-success"
+          <Button
             onClick={handleStart}
             disabled={loading}
-            style={{
-              padding: '0.6rem 1.25rem',
-              fontSize: '0.9rem',
-              fontWeight: '600',
-              borderRadius: '6px',
-              border: 'none',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              opacity: loading ? 0.6 : 1
-            }}
+            className="bg-green-600 hover:bg-green-700 text-white"
           >
             {loading ? '⏳ Starting...' : '▶️ Start Stream'}
-          </button>
+          </Button>
         ) : (
           <>
-            <button
-              className="btn btn-danger"
+            <Button
+              variant="destructive"
               onClick={handleStop}
               disabled={loading}
-              style={{
-                padding: '0.6rem 1.25rem',
-                fontSize: '0.9rem',
-                fontWeight: '600',
-                borderRadius: '6px',
-                border: 'none',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                opacity: loading ? 0.6 : 1
-              }}
             >
               {loading ? '⏳ Stopping...' : '⏹️ Stop Stream'}
-            </button>
-            <button
-              className="btn btn-primary"
+            </Button>
+            <Button
               onClick={handleRestart}
               disabled={loading}
-              style={{
-                padding: '0.6rem 1.25rem',
-                fontSize: '0.9rem',
-                fontWeight: '600',
-                borderRadius: '6px',
-                border: 'none',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                opacity: loading ? 0.6 : 1,
-                backgroundColor: '#f39c12'
-              }}
+              className="bg-orange-500 hover:bg-orange-600 text-white"
             >
               {loading ? '⏳ Restarting...' : '🔄 Restart Stream'}
-            </button>
+            </Button>
           </>
         )}
         {channel.status !== 'running' && (
-          <button
-            className="btn btn-secondary"
+          <Button
+            variant="secondary"
             onClick={() => onEdit(channel)}
-            style={{
-              padding: '0.6rem 1.25rem',
-              fontSize: '0.9rem',
-              fontWeight: '600',
-              borderRadius: '6px',
-              border: 'none',
-              cursor: 'pointer',
-              backgroundColor: '#6c757d',
-              marginLeft: 'auto'
-            }}
+            className="ml-auto"
           >
             ✏️ Edit
-          </button>
+          </Button>
         )}
-        <button
-          className="btn btn-danger"
+        <Button
+          variant="destructive"
           onClick={handleDelete}
           disabled={loading || channel.status === 'running'}
-          style={{
-            padding: '0.6rem 1.25rem',
-            fontSize: '0.9rem',
-            fontWeight: '600',
-            borderRadius: '6px',
-            border: 'none',
-            cursor: (loading || channel.status === 'running') ? 'not-allowed' : 'pointer',
-            opacity: (loading || channel.status === 'running') ? 0.5 : 1,
-            marginLeft: channel.status === 'running' ? 'auto' : '0'
-          }}
+          className={channel.status === 'running' ? 'ml-auto' : ''}
         >
           🗑️ Delete
-        </button>
+        </Button>
       </div>
 
       {/* Tabs */}
-      <div style={{
-        display: 'flex',
-        borderBottom: '2px solid #e9ecef',
-        backgroundColor: '#f8f9fa'
-      }}>
+      <div className="flex border-b-2 border-gray-200 bg-gray-50">
         {[
           { id: 'overview', label: '📊 Overview', icon: '📊' },
           { id: 'platforms', label: '🌐 Multi-Platform', icon: '🌐' },
@@ -768,18 +653,13 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
+            className={`flex-1 p-4 text-sm font-semibold border-none bg-transparent transition-all outline-none cursor-pointer ${
+              activeTab === tab.id
+                ? 'border-b-3 border-blue-500 text-blue-500'
+                : 'border-b-3 border-transparent text-gray-500 hover:text-gray-700'
+            }`}
             style={{
-              flex: 1,
-              padding: '1rem',
-              fontSize: '0.9rem',
-              fontWeight: '600',
-              border: 'none',
-              backgroundColor: 'transparent',
-              borderBottom: activeTab === tab.id ? '3px solid #3498db' : '3px solid transparent',
-              color: activeTab === tab.id ? '#3498db' : '#6c757d',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              outline: 'none'
+              borderBottom: activeTab === tab.id ? '3px solid #3498db' : '3px solid transparent'
             }}
           >
             {tab.label}
@@ -788,7 +668,7 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
       </div>
 
       {/* Tab Content */}
-      <div style={{ minHeight: '200px' }}>
+      <div className="min-h-[200px]">
         {renderTabContent()}
       </div>
     </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import UpgradePrompt from './UpgradePrompt';
+import { Button } from './ui/button';
 
 // Quality preset to bitrate mapping (must match backend)
 const QUALITY_BITRATES = {
@@ -135,8 +136,8 @@ function CreateChannelModal({ onClose, onSuccess }) {
 
           <div className="form-group">
             <label>Input Type *</label>
-            <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: 0 }}>
+            <div className="flex gap-4 mt-2">
+              <label className="flex items-center gap-2 mb-0">
                 <input
                   type="radio"
                   name="input_type"
@@ -146,7 +147,7 @@ function CreateChannelModal({ onClose, onSuccess }) {
                 />
                 YouTube Live
               </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: 0 }}>
+              <label className="flex items-center gap-2 mb-0">
                 <input
                   type="radio"
                   name="input_type"
@@ -329,12 +330,12 @@ function CreateChannelModal({ onClose, onSuccess }) {
           </div>
 
           <div className="modal-actions">
-            <button type="button" className="btn btn-secondary" onClick={onClose}>
+            <Button type="button" variant="secondary" onClick={onClose}>
               Cancel
-            </button>
-            <button type="submit" className="btn btn-primary" disabled={loading}>
+            </Button>
+            <Button type="submit" disabled={loading}>
               {loading ? 'Creating...' : 'Create Channel'}
-            </button>
+            </Button>
           </div>
         </form>
       </div>
