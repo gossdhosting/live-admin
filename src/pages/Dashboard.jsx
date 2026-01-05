@@ -429,23 +429,21 @@ function Dashboard({ user }) {
         />
       ))}
 
-      {showCreateModal && (
-        <CreateChannelModal
-          onClose={() => setShowCreateModal(false)}
-          onSuccess={fetchChannels}
-        />
-      )}
+      <CreateChannelModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSuccess={fetchChannels}
+      />
 
-      {showEditModal && editingChannel && (
-        <EditChannelModal
-          channel={editingChannel}
-          onClose={() => {
-            setShowEditModal(false);
-            setEditingChannel(null);
-          }}
-          onSuccess={fetchChannels}
-        />
-      )}
+      <EditChannelModal
+        isOpen={showEditModal}
+        channel={editingChannel}
+        onClose={() => {
+          setShowEditModal(false);
+          setEditingChannel(null);
+        }}
+        onSuccess={fetchChannels}
+      />
     </div>
   );
 }
