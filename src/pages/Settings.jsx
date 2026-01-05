@@ -3,15 +3,17 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/api';
 import RtmpTemplatesManager from '../components/RtmpTemplatesManager';
 import PlatformConnections from '../components/PlatformConnections';
+import UserManagement from '../components/UserManagement';
+import PlanManagement from '../components/PlanManagement';
 
-function Settings() {
+function Settings({ user }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [settings, setSettings] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
-  const [activeTab, setActiveTab] = useState('system'); // system, profile, password, rtmp, title, platforms
+  const [activeTab, setActiveTab] = useState('system'); // system, profile, password, rtmp, title, platforms, users, plans
 
   // Password change state
   const [passwordData, setPasswordData] = useState({
@@ -375,6 +377,42 @@ function Settings() {
           >
             Platforms
           </button>
+          {user && user.role === 'admin' && (
+            <>
+              <button
+                className={activeTab === 'users' ? 'tab-active' : 'tab-inactive'}
+                onClick={() => setActiveTab('users')}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  border: 'none',
+                  background: activeTab === 'users' ? '#3498db' : 'transparent',
+                  color: activeTab === 'users' ? '#fff' : '#7f8c8d',
+                  cursor: 'pointer',
+                  fontWeight: '500',
+                  borderRadius: '4px 4px 0 0',
+                  transition: 'all 0.2s'
+                }}
+              >
+                Users
+              </button>
+              <button
+                className={activeTab === 'plans' ? 'tab-active' : 'tab-inactive'}
+                onClick={() => setActiveTab('plans')}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  border: 'none',
+                  background: activeTab === 'plans' ? '#3498db' : 'transparent',
+                  color: activeTab === 'plans' ? '#fff' : '#7f8c8d',
+                  cursor: 'pointer',
+                  fontWeight: '500',
+                  borderRadius: '4px 4px 0 0',
+                  transition: 'all 0.2s'
+                }}
+              >
+                Plans
+              </button>
+            </>
+          )}
         </div>
 
         {/* System Settings Tab */}
@@ -853,6 +891,20 @@ function Settings() {
         {activeTab === 'platforms' && (
           <div>
             <PlatformConnections />
+          </div>
+        )}
+
+        {/* Users Tab (Admin Only) */}
+        {activeTab === 'users' && user && user.role === 'admin' && (
+          <div>
+            <UserManagement />
+          </div>
+        )}
+
+        {/* Plans Tab (Admin Only) */}
+        {activeTab === 'plans' && user && user.role === 'admin' && (
+          <div>
+            <PlanManagement />
           </div>
         )}
       </div>
