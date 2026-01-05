@@ -4,6 +4,7 @@ import ChannelCard from '../components/ChannelCard';
 import CreateChannelModal from '../components/CreateChannelModal';
 import EditChannelModal from '../components/EditChannelModal';
 import UpgradePrompt from '../components/UpgradePrompt';
+import { Button } from '../components/ui/button';
 
 function Dashboard({ user }) {
   const [channels, setChannels] = useState([]);
@@ -456,97 +457,54 @@ function Dashboard({ user }) {
       <div className="card">
         <div className="card-header">
           <h2>Live Channels</h2>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button
-              className="btn btn-secondary"
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
               onClick={handleRefresh}
               disabled={refreshing}
-              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+              className="gap-2"
             >
               {refreshing ? '🔄 Refreshing...' : '🔄 Refresh'}
-            </button>
-            <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
+            </Button>
+            <Button onClick={() => setShowCreateModal(true)}>
               + Create Channel
-            </button>
+            </Button>
           </div>
         </div>
 
         {channels.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '2rem', color: '#7f8c8d' }}>
+          <div className="text-center p-8 text-gray-500">
             <p>No channels yet. Create your first channel to get started.</p>
           </div>
         ) : (
           <>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-              gap: '1rem',
-              marginBottom: '1rem'
-            }}>
-              <div style={{
-                backgroundColor: '#e3f2fd',
-                padding: '1rem',
-                borderRadius: '8px',
-                textAlign: 'center'
-              }}>
-                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#1976d2' }}>{stats.total}</div>
-                <div style={{ fontSize: '0.85rem', color: '#7f8c8d' }}>Total</div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-4">
+              <div className="bg-blue-50 p-4 rounded-lg text-center">
+                <div className="text-3xl font-bold text-blue-600">{stats.total}</div>
+                <div className="text-sm text-gray-500">Total</div>
               </div>
-              <div style={{
-                backgroundColor: '#e8f5e9',
-                padding: '1rem',
-                borderRadius: '8px',
-                textAlign: 'center'
-              }}>
-                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#388e3c' }}>{stats.running}</div>
-                <div style={{ fontSize: '0.85rem', color: '#7f8c8d' }}>Running</div>
+              <div className="bg-green-50 p-4 rounded-lg text-center">
+                <div className="text-3xl font-bold text-green-700">{stats.running}</div>
+                <div className="text-sm text-gray-500">Running</div>
               </div>
-              <div style={{
-                backgroundColor: '#c8e6c9',
-                padding: '1rem',
-                borderRadius: '8px',
-                textAlign: 'center',
-                border: '2px solid #66bb6a'
-              }}>
-                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#2e7d32' }}>✓ {stats.healthy}</div>
-                <div style={{ fontSize: '0.85rem', color: '#2e7d32' }}>Healthy</div>
+              <div className="bg-green-100 p-4 rounded-lg text-center border-2 border-green-400">
+                <div className="text-3xl font-bold text-green-800">✓ {stats.healthy}</div>
+                <div className="text-sm text-green-800">Healthy</div>
               </div>
-              <div style={{
-                backgroundColor: '#fff9c4',
-                padding: '1rem',
-                borderRadius: '8px',
-                textAlign: 'center',
-                border: '2px solid #fdd835'
-              }}>
-                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#f57f17' }}>⚠️ {stats.warnings}</div>
-                <div style={{ fontSize: '0.85rem', color: '#f57f17' }}>Warnings</div>
+              <div className="bg-yellow-50 p-4 rounded-lg text-center border-2 border-yellow-400">
+                <div className="text-3xl font-bold text-yellow-700">⚠️ {stats.warnings}</div>
+                <div className="text-sm text-yellow-700">Warnings</div>
               </div>
-              <div style={{
-                backgroundColor: '#ffebee',
-                padding: '1rem',
-                borderRadius: '8px',
-                textAlign: 'center'
-              }}>
-                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#d32f2f' }}>{stats.stopped}</div>
-                <div style={{ fontSize: '0.85rem', color: '#7f8c8d' }}>Stopped</div>
+              <div className="bg-red-50 p-4 rounded-lg text-center">
+                <div className="text-3xl font-bold text-red-600">{stats.stopped}</div>
+                <div className="text-sm text-gray-500">Stopped</div>
               </div>
-              <div style={{
-                backgroundColor: '#ffcdd2',
-                padding: '1rem',
-                borderRadius: '8px',
-                textAlign: 'center',
-                border: '2px solid #ef5350'
-              }}>
-                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#c62828' }}>❌ {stats.error}</div>
-                <div style={{ fontSize: '0.85rem', color: '#c62828' }}>Errors</div>
+              <div className="bg-red-100 p-4 rounded-lg text-center border-2 border-red-400">
+                <div className="text-3xl font-bold text-red-800">❌ {stats.error}</div>
+                <div className="text-sm text-red-800">Errors</div>
               </div>
             </div>
-            <div style={{
-              fontSize: '0.85rem',
-              color: '#95a5a6',
-              textAlign: 'right',
-              marginTop: '0.5rem'
-            }}>
+            <div className="text-sm text-gray-400 text-right mt-2">
               Last updated: {lastUpdate.toLocaleTimeString()} • Auto-refresh: Every 5s
             </div>
           </>
