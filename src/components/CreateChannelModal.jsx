@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import UpgradePrompt from './UpgradePrompt';
 import { Button } from './ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from './ui/dialog';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { Alert } from './ui/alert';
 
 // Quality preset to bitrate mapping (must match backend)
 const QUALITY_BITRATES = {
@@ -10,7 +14,7 @@ const QUALITY_BITRATES = {
   '1080p': 6000
 };
 
-function CreateChannelModal({ onClose, onSuccess }) {
+function CreateChannelModal({ onClose, onSuccess, isOpen }) {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -95,25 +99,25 @@ function CreateChannelModal({ onClose, onSuccess }) {
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal">
-        <div className="modal-header">
-          <h2>Create New Channel</h2>
-          <button className="modal-close" onClick={onClose}>
-            &times;
-          </button>
-        </div>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Create New Channel</DialogTitle>
+        </DialogHeader>
 
-        {error && <div className="alert alert-error">{error}</div>}
+        {error && (
+          <Alert className="bg-red-50 border-red-200 text-red-800">
+            {error}
+          </Alert>
+        )}
 
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="name">Channel Name *</label>
-            <input
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Channel Name *</Label>
+            <Input
               type="text"
               id="name"
               name="name"
-              className="form-control"
               value={formData.name}
               onChange={handleChange}
               required
@@ -121,21 +125,20 @@ function CreateChannelModal({ onClose, onSuccess }) {
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="description">Description</label>
-            <input
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Input
               type="text"
               id="description"
               name="description"
-              className="form-control"
               value={formData.description}
               onChange={handleChange}
               placeholder="Optional description"
             />
           </div>
 
-          <div className="form-group">
-            <label>Input Type *</label>
+          <div className="space-y-2">
+            <Label>Input Type *</Label>
             <div className="flex gap-4 mt-2">
               <label className="flex items-center gap-2 mb-0">
                 <input
@@ -161,31 +164,30 @@ function CreateChannelModal({ onClose, onSuccess }) {
           </div>
 
           {formData.input_type === 'youtube' && (
-            <div className="form-group">
-              <label htmlFor="input_url">YouTube Live URL *</label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="input_url">YouTube Live URL *</Label>
+              <Input
                 type="url"
                 id="input_url"
                 name="input_url"
-                className="form-control"
                 value={formData.input_url}
                 onChange={handleChange}
                 required
                 placeholder="https://www.youtube.com/watch?v=..."
               />
-              <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
+              <p className="text-xs text-slate-500">
                 Paste the YouTube Live stream URL
-              </small>
+              </p>
             </div>
           )}
 
           {formData.input_type === 'video' && (
-            <div className="form-group">
-              <label htmlFor="media_file_id">Select Video *</label>
+            <div className="space-y-2">
+              <Label htmlFor="media_file_id">Select Video *</Label>
               <select
                 id="media_file_id"
                 name="media_file_id"
-                className="form-control"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={formData.media_file_id || ''}
                 onChange={handleChange}
                 required
@@ -198,16 +200,16 @@ function CreateChannelModal({ onClose, onSuccess }) {
                 ))}
               </select>
               {mediaFiles.length === 0 && (
-                <small style={{ color: '#e74c3c', fontSize: '0.85rem' }}>
+                <p className="text-xs text-red-600">
                   No videos uploaded yet. Please upload a video in Media Manager first.
-                </small>
+                </p>
               )}
             </div>
           )}
 
           {formData.input_type === 'video' && (
-            <div className="form-group">
-              <div className="checkbox-group">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
                   id="loop_video"
@@ -215,35 +217,34 @@ function CreateChannelModal({ onClose, onSuccess }) {
                   checked={formData.loop_video}
                   onChange={handleChange}
                 />
-                <label htmlFor="loop_video" style={{ marginBottom: 0 }}>
+                <Label htmlFor="loop_video" className="mb-0 cursor-pointer">
                   Loop video automatically
-                </label>
+                </Label>
               </div>
-              <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
+              <p className="text-xs text-slate-500">
                 When enabled, the video will restart automatically when it ends
-              </small>
+              </p>
             </div>
           )}
 
-          <div className="form-group">
-            <label htmlFor="stream_title">Stream Title</label>
-            <input
+          <div className="space-y-2">
+            <Label htmlFor="stream_title">Stream Title</Label>
+            <Input
               type="text"
               id="stream_title"
               name="stream_title"
-              className="form-control"
               value={formData.stream_title}
               onChange={handleChange}
               placeholder="e.g., Kata Srinivas Goud Followers Protest Outside Revanth Reddy House"
               maxLength="100"
             />
-            <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
+            <p className="text-xs text-slate-500">
               This title can be displayed as an overlay on the video (news headline style)
-            </small>
+            </p>
           </div>
 
-          <div className="form-group">
-            <div className="checkbox-group">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
               <input
                 type="checkbox"
                 id="title_enabled"
@@ -251,46 +252,37 @@ function CreateChannelModal({ onClose, onSuccess }) {
                 checked={formData.title_enabled}
                 onChange={handleChange}
               />
-              <label htmlFor="title_enabled" style={{ marginBottom: 0 }}>
+              <Label htmlFor="title_enabled" className="mb-0 cursor-pointer">
                 Show title overlay on video
-              </label>
+              </Label>
             </div>
-            <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
+            <p className="text-xs text-slate-500">
               Display the stream title as an overlay on the video. Configure appearance in Settings → Title Settings.
-            </small>
+            </p>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="quality_preset">Default Output Quality *</label>
+          <div className="space-y-2">
+            <Label htmlFor="quality_preset">Default Output Quality *</Label>
 
             {/* Show quality limit upgrade prompt if user is limited */}
             {userStats && userStats.limits.max_bitrate < 6000 && (
-              <div style={{ marginBottom: '1rem' }}>
-                <div style={{
-                  padding: '0.75rem',
-                  backgroundColor: '#fff3cd',
-                  border: '1px solid #ffc107',
-                  borderRadius: '4px',
-                  fontSize: '0.9rem',
-                  color: '#856404'
-                }}>
-                  {userStats.limits.max_bitrate < 4000 ? (
-                    <>
-                      Your plan supports up to 480p quality. Upgrade to <strong>Basic plan</strong> for 720p HD streaming.
-                    </>
-                  ) : (
-                    <>
-                      Your plan supports up to 720p quality. Upgrade to <strong>Pro plan</strong> for 1080p Full HD streaming.
-                    </>
-                  )}
-                </div>
+              <div className="p-3 mb-2 bg-amber-50 border border-amber-200 rounded-md text-sm text-amber-900">
+                {userStats.limits.max_bitrate < 4000 ? (
+                  <>
+                    Your plan supports up to 480p quality. Upgrade to <strong>Basic plan</strong> for 720p HD streaming.
+                  </>
+                ) : (
+                  <>
+                    Your plan supports up to 720p quality. Upgrade to <strong>Pro plan</strong> for 1080p Full HD streaming.
+                  </>
+                )}
               </div>
             )}
 
             <select
               id="quality_preset"
               name="quality_preset"
-              className="form-control"
+              className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={formData.quality_preset}
               onChange={handleChange}
               required
@@ -309,13 +301,13 @@ function CreateChannelModal({ onClose, onSuccess }) {
                 1080p (1920x1080) - Full HD {userStats && userStats.limits.max_bitrate < QUALITY_BITRATES['1080p'] ? '(Upgrade Required)' : '(Max)'}
               </option>
             </select>
-            <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
+            <p className="text-xs text-slate-500">
               Maximum resolution for re-broadcasting. Higher quality requires more bandwidth.
-            </small>
+            </p>
           </div>
 
-          <div className="form-group">
-            <div className="checkbox-group">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
               <input
                 type="checkbox"
                 id="auto_restart"
@@ -323,23 +315,23 @@ function CreateChannelModal({ onClose, onSuccess }) {
                 checked={formData.auto_restart}
                 onChange={handleChange}
               />
-              <label htmlFor="auto_restart" style={{ marginBottom: 0 }}>
+              <Label htmlFor="auto_restart" className="mb-0 cursor-pointer">
                 Auto-restart on failure
-              </label>
+              </Label>
             </div>
           </div>
 
-          <div className="modal-actions">
+          <DialogFooter className="flex gap-2 justify-end pt-4">
             <Button type="button" variant="secondary" onClick={onClose}>
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
               {loading ? 'Creating...' : 'Create Channel'}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 

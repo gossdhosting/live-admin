@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Badge } from '../components/ui/badge';
+import { Alert, AlertDescription } from '../components/ui/alert';
 
 function Plans() {
   const [plans, setPlans] = useState([]);
@@ -53,290 +57,179 @@ function Plans() {
   };
 
   const planColors = {
-    'Free': '#95a5a6',
-    'Basic': '#3498db',
-    'Pro': '#9b59b6',
-    'Enterprise': '#e74c3c'
+    'Free': 'bg-gray-500',
+    'Basic': 'bg-blue-500',
+    'Pro': 'bg-purple-500',
+    'Enterprise': 'bg-red-500'
+  };
+
+  const planBorderColors = {
+    'Free': 'border-gray-500',
+    'Basic': 'border-blue-500',
+    'Pro': 'border-purple-500',
+    'Enterprise': 'border-red-500'
   };
 
   if (loading) {
     return (
-      <div className="page-container">
-        <div>Loading plans...</div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center p-8">Loading plans...</div>
       </div>
     );
   }
 
   return (
-    <div className="page-container">
-      <div className="page-header">
-        <h1>Subscription Plans</h1>
-        <p style={{ color: '#7f8c8d' }}>Choose the plan that fits your streaming needs</p>
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Subscription Plans</h1>
+        <p className="text-gray-600">Choose the plan that fits your streaming needs</p>
       </div>
 
-      {/* Current Plan Badge */}
+      {/* Current Plan Card */}
       {userStats && (
-        <div style={{
-          padding: '1.5rem',
-          backgroundColor: '#ecf0f1',
-          borderRadius: '8px',
-          marginBottom: '2rem',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <div>
-            <div style={{ fontSize: '0.9rem', color: '#7f8c8d', marginBottom: '0.25rem' }}>
-              Current Plan
+        <Card className="mb-8 bg-gray-50">
+          <CardContent className="pt-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Current Plan</p>
+                <div className="flex items-center gap-2">
+                  <Badge className={`${planColors[userStats.plan.name]} text-white text-lg px-3 py-1`}>
+                    {userStats.plan.name}
+                  </Badge>
+                  {userStats.plan.price_monthly > 0 && (
+                    <span className="text-gray-600">
+                      ${userStats.plan.price_monthly}/month
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-gray-600">
+                  {userStats.running_channels || 0} / {userStats.limits?.max_concurrent_streams || 0} Active Streams
+                </p>
+                <p className="text-sm text-gray-600">
+                  {formatStorage(userStats.storage_used_mb || 0)} / {formatStorage(userStats.limits?.storage_limit_mb || 0)} Storage
+                </p>
+              </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{
-                fontSize: '1.5rem',
-                fontWeight: 'bold',
-                color: planColors[userStats.plan.name] || '#3498db'
-              }}>
-                {userStats.plan.name}
-              </span>
-              {userStats.plan.price_monthly > 0 && (
-                <span style={{ fontSize: '1rem', color: '#7f8c8d' }}>
-                  ${userStats.plan.price_monthly}/month
-                </span>
-              )}
-            </div>
-          </div>
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '0.85rem', color: '#7f8c8d' }}>
-              {userStats.running_channels || 0} / {userStats.limits?.max_concurrent_streams || 0} Active Streams
-            </div>
-            <div style={{ fontSize: '0.85rem', color: '#7f8c8d' }}>
-              {formatStorage(userStats.storage_used_mb || 0)} / {formatStorage(userStats.limits?.storage_limit_mb || 0)} Storage
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Plans Grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-        gap: '1.5rem',
-        marginBottom: '2rem'
-      }}>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {plans.map((plan) => {
           const isCurrentPlan = userStats && userStats.plan.id === plan.id;
-          const borderColor = planColors[plan.name] || '#3498db';
+          const colorClass = planColors[plan.name] || 'bg-blue-500';
+          const borderClass = planBorderColors[plan.name] || 'border-blue-500';
 
           return (
-            <div
+            <Card
               key={plan.id}
-              style={{
-                border: `3px solid ${isCurrentPlan ? borderColor : '#ddd'}`,
-                borderRadius: '12px',
-                padding: '1.5rem',
-                backgroundColor: isCurrentPlan ? `${borderColor}10` : 'white',
-                position: 'relative',
-                transition: 'transform 0.2s, box-shadow 0.2s',
-                cursor: 'pointer'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
+              className={`relative transition-all duration-200 hover:-translate-y-1 hover:shadow-lg ${
+                isCurrentPlan ? `border-4 ${borderClass} bg-gradient-to-br from-white to-gray-50` : 'border-2 border-gray-200'
+              }`}
             >
               {/* Current Plan Badge */}
               {isCurrentPlan && (
-                <div style={{
-                  position: 'absolute',
-                  top: '-12px',
-                  right: '20px',
-                  backgroundColor: borderColor,
-                  color: 'white',
-                  padding: '0.25rem 0.75rem',
-                  borderRadius: '12px',
-                  fontSize: '0.75rem',
-                  fontWeight: 'bold'
-                }}>
-                  CURRENT PLAN
+                <div className="absolute -top-3 right-4">
+                  <Badge className={`${colorClass} text-white`}>
+                    CURRENT PLAN
+                  </Badge>
                 </div>
               )}
 
-              {/* Plan Header */}
-              <div style={{ marginBottom: '1rem' }}>
-                <h3 style={{
-                  margin: 0,
-                  marginBottom: '0.5rem',
-                  fontSize: '1.5rem',
-                  color: borderColor
-                }}>
+              <CardHeader>
+                <CardTitle className={`text-2xl ${isCurrentPlan ? `text-${plan.name.toLowerCase()}-600` : ''}`}>
                   {plan.name}
-                </h3>
-                <p style={{
-                  margin: 0,
-                  color: '#7f8c8d',
-                  fontSize: '0.9rem',
-                  minHeight: '2.5rem'
-                }}>
+                </CardTitle>
+                <CardDescription className="min-h-[2.5rem]">
                   {plan.description}
-                </p>
-              </div>
+                </CardDescription>
+              </CardHeader>
 
-              {/* Pricing */}
-              <div style={{ marginBottom: '1.5rem' }}>
-                <div style={{
-                  fontSize: '2.5rem',
-                  fontWeight: 'bold',
-                  color: '#2c3e50'
-                }}>
-                  ${plan.price_monthly}
-                  <span style={{ fontSize: '1rem', color: '#7f8c8d', fontWeight: 'normal' }}>
-                    /month
-                  </span>
-                </div>
-                {plan.price_yearly > 0 && (
-                  <div style={{ fontSize: '0.85rem', color: '#27ae60', marginTop: '0.25rem' }}>
-                    or ${plan.price_yearly}/year (Save ${((plan.price_monthly * 12) - plan.price_yearly).toFixed(0)})
+              <CardContent className="space-y-4">
+                {/* Pricing */}
+                <div>
+                  <div className="text-4xl font-bold text-gray-900">
+                    ${plan.price_monthly}
+                    <span className="text-base text-gray-600 font-normal">/month</span>
                   </div>
+                  {plan.price_yearly > 0 && (
+                    <p className="text-sm text-green-600 mt-1">
+                      or ${plan.price_yearly}/year (Save ${((plan.price_monthly * 12) - plan.price_yearly).toFixed(0)})
+                    </p>
+                  )}
+                </div>
+
+                {/* Features List */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-green-600 text-lg">✓</span>
+                    <span><strong>{plan.max_concurrent_streams}</strong> Concurrent Stream{plan.max_concurrent_streams > 1 ? 's' : ''}</span>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-green-600 text-lg">✓</span>
+                    <span><strong>{formatBitrate(plan.max_bitrate)}</strong> Quality</span>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-green-600 text-lg">✓</span>
+                    <span><strong>{formatStorage(plan.storage_limit_mb)}</strong> Storage</span>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-green-600 text-lg">✓</span>
+                    <span><strong>{formatDuration(plan.max_stream_duration)}</strong> per Stream</span>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className={`text-lg ${plan.custom_watermark ? 'text-green-600' : 'text-red-600'}`}>
+                      {plan.custom_watermark ? '✓' : '✗'}
+                    </span>
+                    <span className={plan.custom_watermark ? '' : 'text-gray-500'}>
+                      Custom Watermarks
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-green-600 text-lg">✓</span>
+                    <span>Multi-platform Streaming</span>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-green-600 text-lg">✓</span>
+                    <span>24/7 Support</span>
+                  </div>
+                </div>
+              </CardContent>
+
+              <CardFooter>
+                {isCurrentPlan ? (
+                  <Button variant="outline" disabled className="w-full">
+                    Current Plan
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={() => alert('Payment integration coming soon!')}
+                    className={`w-full ${colorClass} hover:opacity-90`}
+                  >
+                    {userStats && userStats.plan.price_monthly < plan.price_monthly ? 'Upgrade' : 'Select'} Plan
+                  </Button>
                 )}
-              </div>
-
-              {/* Features List */}
-              <div style={{ marginBottom: '1.5rem' }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  marginBottom: '0.75rem',
-                  fontSize: '0.9rem'
-                }}>
-                  <span style={{ color: '#27ae60', fontSize: '1.2rem' }}>✓</span>
-                  <span><strong>{plan.max_concurrent_streams}</strong> Concurrent Stream{plan.max_concurrent_streams > 1 ? 's' : ''}</span>
-                </div>
-
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  marginBottom: '0.75rem',
-                  fontSize: '0.9rem'
-                }}>
-                  <span style={{ color: '#27ae60', fontSize: '1.2rem' }}>✓</span>
-                  <span><strong>{formatBitrate(plan.max_bitrate)}</strong> Quality</span>
-                </div>
-
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  marginBottom: '0.75rem',
-                  fontSize: '0.9rem'
-                }}>
-                  <span style={{ color: '#27ae60', fontSize: '1.2rem' }}>✓</span>
-                  <span><strong>{formatStorage(plan.storage_limit_mb)}</strong> Storage</span>
-                </div>
-
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  marginBottom: '0.75rem',
-                  fontSize: '0.9rem'
-                }}>
-                  <span style={{ color: '#27ae60', fontSize: '1.2rem' }}>✓</span>
-                  <span><strong>{formatDuration(plan.max_stream_duration)}</strong> per Stream</span>
-                </div>
-
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  marginBottom: '0.75rem',
-                  fontSize: '0.9rem'
-                }}>
-                  <span style={{ color: plan.custom_watermark ? '#27ae60' : '#e74c3c', fontSize: '1.2rem' }}>
-                    {plan.custom_watermark ? '✓' : '✗'}
-                  </span>
-                  <span style={{ color: plan.custom_watermark ? 'inherit' : '#7f8c8d' }}>
-                    Custom Watermarks
-                  </span>
-                </div>
-
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  marginBottom: '0.75rem',
-                  fontSize: '0.9rem'
-                }}>
-                  <span style={{ color: '#27ae60', fontSize: '1.2rem' }}>✓</span>
-                  <span>Multi-platform Streaming</span>
-                </div>
-
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  marginBottom: '0.75rem',
-                  fontSize: '0.9rem'
-                }}>
-                  <span style={{ color: '#27ae60', fontSize: '1.2rem' }}>✓</span>
-                  <span>24/7 Support</span>
-                </div>
-              </div>
-
-              {/* Action Button */}
-              {isCurrentPlan ? (
-                <button
-                  className="btn"
-                  disabled
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    fontSize: '1rem',
-                    fontWeight: 'bold',
-                    backgroundColor: '#ecf0f1',
-                    color: '#7f8c8d',
-                    cursor: 'not-allowed'
-                  }}
-                >
-                  Current Plan
-                </button>
-              ) : (
-                <button
-                  className="btn btn-primary"
-                  onClick={() => alert('Payment integration coming soon!')}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    fontSize: '1rem',
-                    fontWeight: 'bold',
-                    backgroundColor: borderColor,
-                    borderColor: borderColor
-                  }}
-                >
-                  {userStats && userStats.plan.price_monthly < plan.price_monthly ? 'Upgrade' : 'Select'} Plan
-                </button>
-              )}
-            </div>
+              </CardFooter>
+            </Card>
           );
         })}
       </div>
 
       {/* Payment Note */}
-      <div style={{
-        padding: '1rem',
-        backgroundColor: '#e3f2fd',
-        border: '1px solid #2196f3',
-        borderRadius: '8px',
-        fontSize: '0.9rem',
-        color: '#1976d2',
-        textAlign: 'center'
-      }}>
-        Payment integration coming soon. Contact administrator for plan upgrades.
-      </div>
+      <Alert className="border-blue-200 bg-blue-50">
+        <AlertDescription className="text-blue-900 text-center">
+          Payment integration coming soon. Contact administrator for plan upgrades.
+        </AlertDescription>
+      </Alert>
     </div>
   );
 }

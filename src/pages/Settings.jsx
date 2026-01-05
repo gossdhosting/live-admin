@@ -3,6 +3,12 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/api';
 import RtmpTemplatesManager from '../components/RtmpTemplatesManager';
 import PlatformConnections from '../components/PlatformConnections';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { Button } from '../components/ui/button';
+import { Alert, AlertDescription } from '../components/ui/alert';
+import { Label } from '../components/ui/label';
+import { Input } from '../components/ui/input';
 
 function Settings({ user }) {
   const navigate = useNavigate();
@@ -253,471 +259,373 @@ function Settings({ user }) {
   };
 
   if (loading) {
-    return <div className="loading">Loading settings...</div>;
+    return <div className="flex items-center justify-center p-8">Loading settings...</div>;
   }
 
   return (
-    <div className="container">
-      <div className="card">
-        <div className="card-header">
-          <h2>Settings</h2>
-          <button className="btn btn-secondary" onClick={() => navigate('/')}>
+    <div className="container mx-auto px-4 py-8">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Settings</CardTitle>
+          <Button variant="outline" onClick={() => navigate('/')}>
             Back to Dashboard
-          </button>
-        </div>
+          </Button>
+        </CardHeader>
 
-        {/* Tabs Navigation */}
-        <div style={{
-          display: 'flex',
-          borderBottom: '2px solid #e1e8ed',
-          marginBottom: '1.5rem',
-          gap: '0.5rem',
-          flexWrap: 'wrap'
-        }}>
-          <button
-            className={activeTab === 'profile' ? 'tab-active' : 'tab-inactive'}
-            onClick={() => setActiveTab('profile')}
-            style={{
-              padding: '0.75rem 1.5rem',
-              border: 'none',
-              background: activeTab === 'profile' ? '#3498db' : 'transparent',
-              color: activeTab === 'profile' ? '#fff' : '#7f8c8d',
-              cursor: 'pointer',
-              fontWeight: '500',
-              borderRadius: '4px 4px 0 0',
-              transition: 'all 0.2s'
-            }}
-          >
-            Profile
-          </button>
-          <button
-            className={activeTab === 'password' ? 'tab-active' : 'tab-inactive'}
-            onClick={() => setActiveTab('password')}
-            style={{
-              padding: '0.75rem 1.5rem',
-              border: 'none',
-              background: activeTab === 'password' ? '#3498db' : 'transparent',
-              color: activeTab === 'password' ? '#fff' : '#7f8c8d',
-              cursor: 'pointer',
-              fontWeight: '500',
-              borderRadius: '4px 4px 0 0',
-              transition: 'all 0.2s'
-            }}
-          >
-            Password
-          </button>
-          <button
-            className={activeTab === 'rtmp' ? 'tab-active' : 'tab-inactive'}
-            onClick={() => setActiveTab('rtmp')}
-            style={{
-              padding: '0.75rem 1.5rem',
-              border: 'none',
-              background: activeTab === 'rtmp' ? '#3498db' : 'transparent',
-              color: activeTab === 'rtmp' ? '#fff' : '#7f8c8d',
-              cursor: 'pointer',
-              fontWeight: '500',
-              borderRadius: '4px 4px 0 0',
-              transition: 'all 0.2s'
-            }}
-          >
-            RTMP Templates
-          </button>
-          <button
-            className={activeTab === 'title' ? 'tab-active' : 'tab-inactive'}
-            onClick={() => setActiveTab('title')}
-            style={{
-              padding: '0.75rem 1.5rem',
-              border: 'none',
-              background: activeTab === 'title' ? '#3498db' : 'transparent',
-              color: activeTab === 'title' ? '#fff' : '#7f8c8d',
-              cursor: 'pointer',
-              fontWeight: '500',
-              borderRadius: '4px 4px 0 0',
-              transition: 'all 0.2s'
-            }}
-          >
-            Title Settings
-          </button>
-          <button
-            className={activeTab === 'platforms' ? 'tab-active' : 'tab-inactive'}
-            onClick={() => setActiveTab('platforms')}
-            style={{
-              padding: '0.75rem 1.5rem',
-              border: 'none',
-              background: activeTab === 'platforms' ? '#3498db' : 'transparent',
-              color: activeTab === 'platforms' ? '#fff' : '#7f8c8d',
-              cursor: 'pointer',
-              fontWeight: '500',
-              borderRadius: '4px 4px 0 0',
-              transition: 'all 0.2s'
-            }}
-          >
-            Platforms
-          </button>
-        </div>
+        <CardContent>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-5">
+              <TabsTrigger value="profile">Profile</TabsTrigger>
+              <TabsTrigger value="password">Password</TabsTrigger>
+              <TabsTrigger value="rtmp">RTMP Templates</TabsTrigger>
+              <TabsTrigger value="title">Title Settings</TabsTrigger>
+              <TabsTrigger value="platforms">Platforms</TabsTrigger>
+            </TabsList>
 
-        {/* Profile Tab */}
-        {activeTab === 'profile' && (
-          <div>
-            {profileMessage && (
-              <div className={`alert ${profileMessage.includes('success') ? 'alert-success' : 'alert-error'}`}>
-                {profileMessage}
-              </div>
-            )}
+            <TabsContent value="profile" className="mt-6">
+              {profileMessage && (
+                <Alert className={profileMessage.includes('success') ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
+                  <AlertDescription className={profileMessage.includes('success') ? 'text-green-800' : 'text-red-800'}>
+                    {profileMessage}
+                  </AlertDescription>
+                </Alert>
+              )}
 
-            <form onSubmit={handleProfileSubmit}>
-              <div className="form-group">
-                <label htmlFor="email">Email Address *</label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  className="form-control"
-                  value={profileData.email}
-                  onChange={handleProfileChange}
-                  required
-                  autoComplete="email"
-                />
-                <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
-                  This will be your new login email
-                </small>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="name">Name</label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  className="form-control"
-                  value={profileData.name}
-                  onChange={handleProfileChange}
-                  autoComplete="name"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="profileCurrentPassword">Current Password * (required to confirm changes)</label>
-                <input
-                  type="password"
-                  id="profileCurrentPassword"
-                  name="currentPassword"
-                  className="form-control"
-                  value={profileData.currentPassword}
-                  onChange={handleProfileChange}
-                  required
-                  autoComplete="current-password"
-                />
-                <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
-                  Enter your current password to confirm profile changes
-                </small>
-              </div>
-
-              <div className="modal-actions">
-                <button type="submit" className="btn btn-primary" disabled={updatingProfile}>
-                  {updatingProfile ? 'Updating...' : 'Update Profile'}
-                </button>
-              </div>
-
-              <div style={{ marginTop: '1rem', padding: '0.75rem', backgroundColor: '#d1ecf1', borderRadius: '4px' }}>
-                <small style={{ color: '#0c5460' }}>
-                  ℹ️ If you change your email, you'll be logged out and need to login with the new email.
-                </small>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {/* Password Tab */}
-        {activeTab === 'password' && (
-          <div>
-            {passwordMessage && (
-              <div className={`alert ${passwordMessage.includes('success') ? 'alert-success' : 'alert-error'}`}>
-                {passwordMessage}
-              </div>
-            )}
-
-            <form onSubmit={handlePasswordSubmit}>
-              <div className="form-group">
-                <label htmlFor="currentPassword">Current Password *</label>
-                <input
-                  type="password"
-                  id="currentPassword"
-                  name="currentPassword"
-                  className="form-control"
-                  value={passwordData.currentPassword}
-                  onChange={handlePasswordChange}
-                  required
-                  autoComplete="current-password"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="newPassword">New Password *</label>
-                <input
-                  type="password"
-                  id="newPassword"
-                  name="newPassword"
-                  className="form-control"
-                  value={passwordData.newPassword}
-                  onChange={handlePasswordChange}
-                  required
-                  minLength="6"
-                  autoComplete="new-password"
-                />
-                <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
-                  Minimum 6 characters
-                </small>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="confirmPassword">Confirm New Password *</label>
-                <input
-                  type="password"
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  className="form-control"
-                  value={passwordData.confirmPassword}
-                  onChange={handlePasswordChange}
-                  required
-                  minLength="6"
-                  autoComplete="new-password"
-                />
-              </div>
-
-              <div className="modal-actions">
-                <button type="submit" className="btn btn-primary" disabled={changingPassword}>
-                  {changingPassword ? 'Changing...' : 'Change Password'}
-                </button>
-              </div>
-
-              <div style={{ marginTop: '1rem', padding: '0.75rem', backgroundColor: '#fff3cd', borderRadius: '4px' }}>
-                <small style={{ color: '#856404' }}>
-                  ⚠️ After changing your password, you will be logged out and need to login again.
-                </small>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {/* RTMP Templates Tab */}
-        {activeTab === 'rtmp' && (
-          <div>
-            <RtmpTemplatesManager />
-          </div>
-        )}
-
-        {/* Title Settings Tab */}
-        {activeTab === 'title' && (
-          <div>
-            <div style={{ marginBottom: '1rem', padding: '1rem', background: '#e8f5e9', borderRadius: '8px' }}>
-              <strong>ℹ️ Your Title Settings:</strong> Customize how titles appear on your streams.
-            </div>
-            {userSettingsMessage && (
-              <div className={`alert ${userSettingsMessage.includes('success') ? 'alert-success' : 'alert-error'}`}>
-                {userSettingsMessage}
-              </div>
-            )}
-
-            <form onSubmit={handleUserSettingsSubmit}>
-              <div className="form-group">
-                <label htmlFor="title_bg_color">Background Color</label>
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                  <input
-                    type="color"
-                    id="title_bg_color"
-                    className="form-control"
-                    value={userSettings.title_bg_color || '#000000'}
-                    onChange={(e) => handleUserSettingsChange('title_bg_color', e.target.value)}
-                    style={{ width: '80px', height: '40px', cursor: 'pointer' }}
+              <form onSubmit={handleProfileSubmit} className="space-y-6 mt-6">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email Address *</Label>
+                  <Input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={profileData.email}
+                    onChange={handleProfileChange}
+                    required
+                    autoComplete="email"
                   />
-                  <input
+                  <p className="text-sm text-gray-500">
+                    This will be your new login email
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="name">Name</Label>
+                  <Input
                     type="text"
-                    className="form-control"
-                    value={userSettings.title_bg_color || '#000000'}
-                    onChange={(e) => handleUserSettingsChange('title_bg_color', e.target.value)}
-                    placeholder="#000000"
-                    style={{ width: '120px' }}
+                    id="name"
+                    name="name"
+                    value={profileData.name}
+                    onChange={handleProfileChange}
+                    autoComplete="name"
                   />
                 </div>
-                <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
-                  Background color for the title overlay
-                </small>
-              </div>
 
-              <div className="form-group">
-                <label htmlFor="title_opacity">Background Opacity (%)</label>
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                  <input
-                    type="range"
-                    id="title_opacity"
-                    min="0"
-                    max="100"
-                    value={userSettings.title_opacity || '80'}
-                    onChange={(e) => handleUserSettingsChange('title_opacity', e.target.value)}
-                    style={{ flex: 1 }}
+                <div className="space-y-2">
+                  <Label htmlFor="profileCurrentPassword">Current Password * (required to confirm changes)</Label>
+                  <Input
+                    type="password"
+                    id="profileCurrentPassword"
+                    name="currentPassword"
+                    value={profileData.currentPassword}
+                    onChange={handleProfileChange}
+                    required
+                    autoComplete="current-password"
                   />
-                  <input
-                    type="number"
-                    className="form-control"
-                    value={userSettings.title_opacity || '80'}
-                    onChange={(e) => handleUserSettingsChange('title_opacity', e.target.value)}
-                    min="0"
-                    max="100"
-                    style={{ width: '80px' }}
+                  <p className="text-sm text-gray-500">
+                    Enter your current password to confirm profile changes
+                  </p>
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <Button type="submit" disabled={updatingProfile}>
+                    {updatingProfile ? 'Updating...' : 'Update Profile'}
+                  </Button>
+                </div>
+
+                <Alert className="border-blue-200 bg-blue-50">
+                  <AlertDescription className="text-blue-800">
+                    ℹ️ If you change your email, you'll be logged out and need to login with the new email.
+                  </AlertDescription>
+                </Alert>
+              </form>
+            </TabsContent>
+
+            <TabsContent value="password" className="mt-6">
+              {passwordMessage && (
+                <Alert className={passwordMessage.includes('success') ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
+                  <AlertDescription className={passwordMessage.includes('success') ? 'text-green-800' : 'text-red-800'}>
+                    {passwordMessage}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              <form onSubmit={handlePasswordSubmit} className="space-y-6 mt-6">
+                <div className="space-y-2">
+                  <Label htmlFor="currentPassword">Current Password *</Label>
+                  <Input
+                    type="password"
+                    id="currentPassword"
+                    name="currentPassword"
+                    value={passwordData.currentPassword}
+                    onChange={handlePasswordChange}
+                    required
+                    autoComplete="current-password"
                   />
                 </div>
-                <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
-                  0 = Transparent, 100 = Opaque. Current: {userSettings.title_opacity || '80'}%
-                </small>
-              </div>
 
-              <div className="form-group">
-                <label htmlFor="title_position">Position</label>
-                <select
-                  id="title_position"
-                  className="form-control"
-                  value={userSettings.title_position || 'bottom-left'}
-                  onChange={(e) => handleUserSettingsChange('title_position', e.target.value)}
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword">New Password *</Label>
+                  <Input
+                    type="password"
+                    id="newPassword"
+                    name="newPassword"
+                    value={passwordData.newPassword}
+                    onChange={handlePasswordChange}
+                    required
+                    minLength="6"
+                    autoComplete="new-password"
+                  />
+                  <p className="text-sm text-gray-500">
+                    Minimum 6 characters
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm New Password *</Label>
+                  <Input
+                    type="password"
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    value={passwordData.confirmPassword}
+                    onChange={handlePasswordChange}
+                    required
+                    minLength="6"
+                    autoComplete="new-password"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <Button type="submit" disabled={changingPassword}>
+                    {changingPassword ? 'Changing...' : 'Change Password'}
+                  </Button>
+                </div>
+
+                <Alert className="border-yellow-200 bg-yellow-50">
+                  <AlertDescription className="text-yellow-800">
+                    ⚠️ After changing your password, you will be logged out and need to login again.
+                  </AlertDescription>
+                </Alert>
+              </form>
+            </TabsContent>
+
+            <TabsContent value="rtmp" className="mt-6">
+              <RtmpTemplatesManager />
+            </TabsContent>
+
+            <TabsContent value="title" className="mt-6">
+              <Alert className="border-green-200 bg-green-50 mb-6">
+                <AlertDescription className="text-green-800">
+                  <strong>ℹ️ Your Title Settings:</strong> Customize how titles appear on your streams.
+                </AlertDescription>
+              </Alert>
+
+              {userSettingsMessage && (
+                <Alert className={userSettingsMessage.includes('success') ? 'border-green-200 bg-green-50 mb-6' : 'border-red-200 bg-red-50 mb-6'}>
+                  <AlertDescription className={userSettingsMessage.includes('success') ? 'text-green-800' : 'text-red-800'}>
+                    {userSettingsMessage}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              <form onSubmit={handleUserSettingsSubmit} className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="title_bg_color">Background Color</Label>
+                  <div className="flex gap-4 items-center">
+                    <input
+                      type="color"
+                      id="title_bg_color"
+                      value={userSettings.title_bg_color || '#000000'}
+                      onChange={(e) => handleUserSettingsChange('title_bg_color', e.target.value)}
+                      className="w-20 h-10 cursor-pointer"
+                    />
+                    <Input
+                      type="text"
+                      value={userSettings.title_bg_color || '#000000'}
+                      onChange={(e) => handleUserSettingsChange('title_bg_color', e.target.value)}
+                      placeholder="#000000"
+                      className="w-32"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    Background color for the title overlay
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="title_opacity">Background Opacity (%)</Label>
+                  <div className="flex gap-4 items-center">
+                    <input
+                      type="range"
+                      id="title_opacity"
+                      min="0"
+                      max="100"
+                      value={userSettings.title_opacity || '80'}
+                      onChange={(e) => handleUserSettingsChange('title_opacity', e.target.value)}
+                      className="flex-1"
+                    />
+                    <Input
+                      type="number"
+                      value={userSettings.title_opacity || '80'}
+                      onChange={(e) => handleUserSettingsChange('title_opacity', e.target.value)}
+                      min="0"
+                      max="100"
+                      className="w-20"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    0 = Transparent, 100 = Opaque. Current: {userSettings.title_opacity || '80'}%
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="title_position">Position</Label>
+                  <select
+                    id="title_position"
+                    value={userSettings.title_position || 'bottom-left'}
+                    onChange={(e) => handleUserSettingsChange('title_position', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="top-left">Top Left</option>
+                    <option value="top-center">Top Center</option>
+                    <option value="top-right">Top Right</option>
+                    <option value="bottom-left">Bottom Left</option>
+                    <option value="bottom-center">Bottom Center</option>
+                    <option value="bottom-right">Bottom Right</option>
+                  </select>
+                  <p className="text-sm text-gray-500">
+                    Position of the title overlay on the video
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="title_text_color">Text Color</Label>
+                  <div className="flex gap-4 items-center">
+                    <input
+                      type="color"
+                      id="title_text_color"
+                      value={userSettings.title_text_color || '#FFFFFF'}
+                      onChange={(e) => handleUserSettingsChange('title_text_color', e.target.value)}
+                      className="w-20 h-10 cursor-pointer"
+                    />
+                    <Input
+                      type="text"
+                      value={userSettings.title_text_color || '#FFFFFF'}
+                      onChange={(e) => handleUserSettingsChange('title_text_color', e.target.value)}
+                      placeholder="#FFFFFF"
+                      className="w-32"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    Text color for the title
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="title_font_size">Font Size (px)</Label>
+                  <div className="flex gap-4 items-center">
+                    <input
+                      type="range"
+                      id="title_font_size"
+                      min="16"
+                      max="72"
+                      value={userSettings.title_font_size || '16'}
+                      onChange={(e) => handleUserSettingsChange('title_font_size', e.target.value)}
+                      className="flex-1"
+                    />
+                    <Input
+                      type="number"
+                      value={userSettings.title_font_size || '16'}
+                      onChange={(e) => handleUserSettingsChange('title_font_size', e.target.value)}
+                      min="16"
+                      max="72"
+                      className="w-20"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    Font size for the title text. Current: {userSettings.title_font_size || '16'}px
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="title_box_padding">Box Padding (px)</Label>
+                  <div className="flex gap-4 items-center">
+                    <input
+                      type="range"
+                      id="title_box_padding"
+                      min="0"
+                      max="20"
+                      value={userSettings.title_box_padding || '5'}
+                      onChange={(e) => handleUserSettingsChange('title_box_padding', e.target.value)}
+                      className="flex-1"
+                    />
+                    <Input
+                      type="number"
+                      value={userSettings.title_box_padding || '5'}
+                      onChange={(e) => handleUserSettingsChange('title_box_padding', e.target.value)}
+                      min="0"
+                      max="20"
+                      className="w-20"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    Padding around text inside the box. Lower = less CPU usage. Current: {userSettings.title_box_padding || '5'}px
+                  </p>
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <Button type="submit" disabled={savingUserSettings}>
+                    {savingUserSettings ? 'Saving...' : 'Save My Settings'}
+                  </Button>
+                </div>
+              </form>
+
+              <div className="mt-8 pt-8 border-t border-gray-200">
+                <h3 className="text-lg font-semibold mb-4">Title Overlay Preview</h3>
+                <div
+                  className="relative bg-slate-700 rounded-lg p-8 min-h-52 flex"
+                  style={{
+                    alignItems: userSettings.title_position?.startsWith('top') ? 'flex-start' : 'flex-end',
+                    justifyContent: userSettings.title_position?.includes('center') ? 'center' : userSettings.title_position?.includes('right') ? 'flex-end' : 'flex-start'
+                  }}
                 >
-                  <option value="top-left">Top Left</option>
-                  <option value="top-center">Top Center</option>
-                  <option value="top-right">Top Right</option>
-                  <option value="bottom-left">Bottom Left</option>
-                  <option value="bottom-center">Bottom Center</option>
-                  <option value="bottom-right">Bottom Right</option>
-                </select>
-                <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
-                  Position of the title overlay on the video
-                </small>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="title_text_color">Text Color</label>
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                  <input
-                    type="color"
-                    id="title_text_color"
-                    className="form-control"
-                    value={userSettings.title_text_color || '#FFFFFF'}
-                    onChange={(e) => handleUserSettingsChange('title_text_color', e.target.value)}
-                    style={{ width: '80px', height: '40px', cursor: 'pointer' }}
-                  />
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={userSettings.title_text_color || '#FFFFFF'}
-                    onChange={(e) => handleUserSettingsChange('title_text_color', e.target.value)}
-                    placeholder="#FFFFFF"
-                    style={{ width: '120px' }}
-                  />
+                  <div
+                    style={{
+                      backgroundColor: userSettings.title_bg_color || '#000000',
+                      opacity: (userSettings.title_opacity || 80) / 100,
+                      padding: '1rem 1.5rem',
+                      borderRadius: '4px',
+                      color: userSettings.title_text_color || '#FFFFFF',
+                      fontSize: `${userSettings.title_font_size || 16}px`,
+                      fontWeight: 'bold',
+                      maxWidth: '80%',
+                      wordWrap: 'break-word'
+                    }}
+                  >
+                    Example News Title Here
+                  </div>
                 </div>
-                <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
-                  Text color for the title
-                </small>
+                <p className="text-sm text-gray-500 mt-2">
+                  This is a preview of how the title overlay will appear on your stream. Enable the title overlay when creating/editing a channel.
+                </p>
               </div>
+            </TabsContent>
 
-              <div className="form-group">
-                <label htmlFor="title_font_size">Font Size (px)</label>
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                  <input
-                    type="range"
-                    id="title_font_size"
-                    min="16"
-                    max="72"
-                    value={userSettings.title_font_size || '16'}
-                    onChange={(e) => handleUserSettingsChange('title_font_size', e.target.value)}
-                    style={{ flex: 1 }}
-                  />
-                  <input
-                    type="number"
-                    className="form-control"
-                    value={userSettings.title_font_size || '16'}
-                    onChange={(e) => handleUserSettingsChange('title_font_size', e.target.value)}
-                    min="16"
-                    max="72"
-                    style={{ width: '80px' }}
-                  />
-                </div>
-                <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
-                  Font size for the title text. Current: {userSettings.title_font_size || '16'}px
-                </small>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="title_box_padding">Box Padding (px)</label>
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                  <input
-                    type="range"
-                    id="title_box_padding"
-                    min="0"
-                    max="20"
-                    value={userSettings.title_box_padding || '5'}
-                    onChange={(e) => handleUserSettingsChange('title_box_padding', e.target.value)}
-                    style={{ flex: 1 }}
-                  />
-                  <input
-                    type="number"
-                    className="form-control"
-                    value={userSettings.title_box_padding || '5'}
-                    onChange={(e) => handleUserSettingsChange('title_box_padding', e.target.value)}
-                    min="0"
-                    max="20"
-                    style={{ width: '80px' }}
-                  />
-                </div>
-                <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
-                  Padding around text inside the box. Lower = less CPU usage. Current: {userSettings.title_box_padding || '5'}px
-                </small>
-              </div>
-
-              <div className="modal-actions">
-                <button type="submit" className="btn btn-primary" disabled={savingUserSettings}>
-                  {savingUserSettings ? 'Saving...' : 'Save My Settings'}
-                </button>
-              </div>
-            </form>
-
-            <div style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid #e1e8ed' }}>
-              <h3 style={{ marginBottom: '1rem' }}>Title Overlay Preview</h3>
-              <div style={{
-                position: 'relative',
-                backgroundColor: '#2c3e50',
-                borderRadius: '8px',
-                padding: '2rem',
-                minHeight: '200px',
-                display: 'flex',
-                alignItems: userSettings.title_position?.startsWith('top') ? 'flex-start' : 'flex-end',
-                justifyContent: userSettings.title_position?.includes('center') ? 'center' : userSettings.title_position?.includes('right') ? 'flex-end' : 'flex-start'
-              }}>
-                <div style={{
-                  backgroundColor: userSettings.title_bg_color || '#000000',
-                  opacity: (userSettings.title_opacity || 80) / 100,
-                  padding: '1rem 1.5rem',
-                  borderRadius: '4px',
-                  color: userSettings.title_text_color || '#FFFFFF',
-                  fontSize: `${userSettings.title_font_size || 16}px`,
-                  fontWeight: 'bold',
-                  maxWidth: '80%',
-                  wordWrap: 'break-word'
-                }}>
-                  Example News Title Here
-                </div>
-              </div>
-              <small style={{ color: '#7f8c8d', fontSize: '0.85rem', display: 'block', marginTop: '0.5rem' }}>
-                This is a preview of how the title overlay will appear on your stream. Enable the title overlay when creating/editing a channel.
-              </small>
-            </div>
-          </div>
-        )}
-
-        {/* Platforms Tab */}
-        {activeTab === 'platforms' && (
-          <div>
-            <PlatformConnections />
-          </div>
-        )}
-      </div>
+            <TabsContent value="platforms" className="mt-6">
+              <PlatformConnections />
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
     </div>
   );
 }

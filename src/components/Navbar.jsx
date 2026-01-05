@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Button } from './ui/button';
 
 function Navbar({ user, onLogout }) {
   const navigate = useNavigate();
@@ -38,115 +39,147 @@ function Navbar({ user, onLogout }) {
   ];
 
   return (
-    <nav className="navbar">
-      <div className="navbar-content">
-        {/* Logo/Brand */}
-        <Link to="/" className="navbar-brand">
-          <span className="navbar-logo">🎥</span>
-          <span className="navbar-title">TT Broadcast</span>
-        </Link>
+    <nav className="bg-gradient-to-r from-purple-600 via-purple-700 to-indigo-800 text-white shadow-lg sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          {/* Logo/Brand */}
+          <Link to="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
+            <span className="text-3xl">🎥</span>
+            <span className="text-xl font-bold tracking-tight hidden sm:block">TT Broadcast</span>
+          </Link>
 
-        {/* Desktop Navigation Links */}
-        <div className="navbar-links">
+          {/* Desktop Navigation Links */}
+          <div className="hidden md:flex items-center gap-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.path}
+                to={link.path}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all font-medium text-sm ${
+                  isActive(link.path)
+                    ? 'bg-white/20 text-white font-semibold'
+                    : 'text-white/90 hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                <span className="text-lg">{link.icon}</span>
+                <span>{link.label}</span>
+              </Link>
+            ))}
+          </div>
+
+          {/* Desktop User Menu */}
+          <div className="hidden md:flex items-center gap-4">
+            {isAdminSession && (
+              <Button
+                onClick={handleReturnToAdmin}
+                className="bg-orange-500 hover:bg-orange-600 text-white font-semibold"
+              >
+                👑 Return to Admin
+              </Button>
+            )}
+            <div className="flex items-center gap-3 px-4 py-2 bg-white/10 rounded-lg">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-500 to-red-500 flex items-center justify-center font-bold text-white">
+                {user.email.charAt(0).toUpperCase()}
+              </div>
+              <span className="text-sm font-medium">{user.email}</span>
+            </div>
+            <Button
+              onClick={handleLogout}
+              variant="destructive"
+              className="bg-red-600 hover:bg-red-700 font-semibold"
+            >
+              <span className="text-lg mr-1">🚪</span>
+              Logout
+            </Button>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            className="md:hidden p-2 rounded-lg hover:bg-white/10 transition-colors"
+            onClick={toggleMobileMenu}
+          >
+            <div className="w-6 h-5 flex flex-col justify-between">
+              <span
+                className={`block h-0.5 w-full bg-white transition-all duration-300 ${
+                  mobileMenuOpen ? 'rotate-45 translate-y-2' : ''
+                }`}
+              ></span>
+              <span
+                className={`block h-0.5 w-full bg-white transition-all duration-300 ${
+                  mobileMenuOpen ? 'opacity-0' : ''
+                }`}
+              ></span>
+              <span
+                className={`block h-0.5 w-full bg-white transition-all duration-300 ${
+                  mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''
+                }`}
+              ></span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Menu */}
+      <div
+        className={`md:hidden fixed top-16 right-0 w-72 h-[calc(100vh-4rem)] bg-gradient-to-b from-purple-700 to-indigo-900 p-6 transition-transform duration-300 ease-in-out overflow-y-auto ${
+          mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        <div className="flex items-center gap-4 p-4 bg-white/15 rounded-xl mb-6">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-red-500 flex items-center justify-center font-bold text-white text-lg">
+            {user.email.charAt(0).toUpperCase()}
+          </div>
+          <span className="text-sm font-medium break-all">{user.email}</span>
+        </div>
+
+        {isAdminSession && (
+          <Button
+            onClick={() => {
+              handleReturnToAdmin();
+              setMobileMenuOpen(false);
+            }}
+            className="w-full mb-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold"
+          >
+            👑 Return to Admin
+          </Button>
+        )}
+
+        <div className="space-y-2">
           {navLinks.map((link) => (
             <Link
               key={link.path}
               to={link.path}
-              className={`nav-link ${isActive(link.path) ? 'nav-link-active' : ''}`}
+              className={`flex items-center gap-4 px-4 py-3 rounded-lg transition-all font-medium ${
+                isActive(link.path)
+                  ? 'bg-white/25 text-white font-semibold'
+                  : 'text-white/90 hover:bg-white/15 hover:text-white'
+              }`}
+              onClick={() => setMobileMenuOpen(false)}
             >
-              <span className="nav-link-icon">{link.icon}</span>
-              <span className="nav-link-text">{link.label}</span>
+              <span className="text-xl">{link.icon}</span>
+              <span>{link.label}</span>
             </Link>
           ))}
         </div>
 
-        {/* Desktop User Menu */}
-        <div className="navbar-user">
-          {isAdminSession && (
-            <button
-              className="btn"
-              onClick={handleReturnToAdmin}
-              style={{
-                marginRight: '1rem',
-                backgroundColor: '#f39c12',
-                color: '#fff',
-                border: 'none',
-                padding: '0.5rem 1rem',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '0.9rem',
-                fontWeight: '600'
-              }}
-            >
-              👑 Return to Admin
-            </button>
-          )}
-          <div className="user-info">
-            <span className="user-avatar">{user.email.charAt(0).toUpperCase()}</span>
-            <span className="user-email">{user.email}</span>
-          </div>
-          <button className="btn btn-logout" onClick={handleLogout}>
-            <span className="btn-icon">🚪</span>
-            <span className="btn-text">Logout</span>
-          </button>
-        </div>
-
-        {/* Mobile Menu Button */}
-        <button className="navbar-mobile-toggle" onClick={toggleMobileMenu}>
-          <span className={`hamburger ${mobileMenuOpen ? 'hamburger-open' : ''}`}>
-            <span></span>
-            <span></span>
-            <span></span>
-          </span>
-        </button>
-      </div>
-
-      {/* Mobile Menu */}
-      <div className={`navbar-mobile-menu ${mobileMenuOpen ? 'navbar-mobile-menu-open' : ''}`}>
-        <div className="navbar-mobile-user">
-          <span className="user-avatar-mobile">{user.email.charAt(0).toUpperCase()}</span>
-          <span className="user-email-mobile">{user.email}</span>
-        </div>
-        {isAdminSession && (
-          <button
-            className="btn"
-            onClick={() => { handleReturnToAdmin(); setMobileMenuOpen(false); }}
-            style={{
-              width: '100%',
-              marginBottom: '0.5rem',
-              backgroundColor: '#f39c12',
-              color: '#fff',
-              border: 'none',
-              padding: '0.75rem',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '0.9rem',
-              fontWeight: '600'
-            }}
-          >
-            👑 Return to Admin
-          </button>
-        )}
-        {navLinks.map((link) => (
-          <Link
-            key={link.path}
-            to={link.path}
-            className={`nav-link-mobile ${isActive(link.path) ? 'nav-link-mobile-active' : ''}`}
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            <span className="nav-link-icon">{link.icon}</span>
-            <span className="nav-link-text">{link.label}</span>
-          </Link>
-        ))}
-        <button className="btn btn-logout-mobile" onClick={() => { handleLogout(); setMobileMenuOpen(false); }}>
-          <span className="btn-icon">🚪</span>
-          <span className="btn-text">Logout</span>
-        </button>
+        <Button
+          onClick={() => {
+            handleLogout();
+            setMobileMenuOpen(false);
+          }}
+          variant="destructive"
+          className="w-full mt-6 bg-red-600 hover:bg-red-700 font-semibold"
+        >
+          <span className="text-lg mr-2">🚪</span>
+          Logout
+        </Button>
       </div>
 
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
-        <div className="navbar-mobile-overlay" onClick={() => setMobileMenuOpen(false)}></div>
+        <div
+          className="md:hidden fixed inset-0 bg-black/50 z-40 top-16"
+          onClick={() => setMobileMenuOpen(false)}
+        ></div>
       )}
     </nav>
   );

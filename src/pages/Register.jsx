@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../services/api';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card';
+import { Alert, AlertDescription } from '../components/ui/alert';
+import { Badge } from '../components/ui/badge';
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -85,171 +92,206 @@ function Register() {
 
   if (success) {
     return (
-      <div className="login-container">
-        <div className="login-card">
-          <h1>Registration Successful!</h1>
-          <div className="alert alert-success">
-            Your account has been created. Redirecting to login...
-          </div>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold text-center">Registration Successful!</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Alert variant="success">
+              <AlertDescription>
+                Your account has been created. Redirecting to login...
+              </AlertDescription>
+            </Alert>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="login-container">
-      <div className="login-card" style={{ maxWidth: '600px' }}>
-        <h1>Create Account</h1>
-        <p style={{ color: '#666', marginBottom: '20px' }}>
-          Sign up to start streaming to multiple platforms
-        </p>
-
-        {error && <div className="alert alert-error">{error}</div>}
-
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="name">Full Name</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              className="form-control"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              autoFocus
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              className="form-control"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              className="form-control"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              minLength="6"
-            />
-            <small style={{ color: '#666' }}>Minimum 6 characters</small>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="confirmPassword">Confirm Password</label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              className="form-control"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="plan_id">Select Plan</label>
-            <select
-              id="plan_id"
-              name="plan_id"
-              className="form-control"
-              value={formData.plan_id}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Choose a plan...</option>
-              {plans.map(plan => (
-                <option key={plan.id} value={plan.id}>
-                  {plan.name} - ${plan.price_monthly}/month
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {selectedPlan && (
-            <div style={{
-              background: '#f5f5f5',
-              padding: '15px',
-              borderRadius: '4px',
-              marginBottom: '20px'
-            }}>
-              <h3 style={{ marginTop: 0, fontSize: '16px' }}>
-                {selectedPlan.name} Plan
-              </h3>
-              <p style={{ margin: '5px 0', color: '#666', fontSize: '14px' }}>
-                {selectedPlan.description}
-              </p>
-              <ul style={{ margin: '10px 0', paddingLeft: '20px', fontSize: '14px' }}>
-                <li>{selectedPlan.max_concurrent_streams} concurrent stream{selectedPlan.max_concurrent_streams > 1 ? 's' : ''}</li>
-                <li>Up to {selectedPlan.max_bitrate}k bitrate ({selectedPlan.max_bitrate >= 6000 ? '1080p' : selectedPlan.max_bitrate >= 4000 ? '720p' : '480p'})</li>
-                <li>{selectedPlan.max_stream_duration ? `${selectedPlan.max_stream_duration} min per stream` : 'Unlimited stream duration'}</li>
-                <li>{selectedPlan.storage_limit_mb}MB storage</li>
-                <li>{selectedPlan.custom_watermark ? 'Custom watermark' : 'No custom watermark'}</li>
-              </ul>
-              {selectedPlan.price_monthly > 0 && (
-                <div className="form-group" style={{ marginTop: '15px' }}>
-                  <label>Billing Cycle</label>
-                  <div style={{ display: 'flex', gap: '10px' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                      <input
-                        type="radio"
-                        name="subscription_type"
-                        value="monthly"
-                        checked={formData.subscription_type === 'monthly'}
-                        onChange={handleChange}
-                      />
-                      <span>Monthly (${selectedPlan.price_monthly}/mo)</span>
-                    </label>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                      <input
-                        type="radio"
-                        name="subscription_type"
-                        value="yearly"
-                        checked={formData.subscription_type === 'yearly'}
-                        onChange={handleChange}
-                      />
-                      <span>Yearly (${selectedPlan.price_yearly}/yr - Save ${(selectedPlan.price_monthly * 12 - selectedPlan.price_yearly)})</span>
-                    </label>
-                  </div>
-                </div>
-              )}
-            </div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 p-4">
+      <Card className="w-full max-w-2xl">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold text-center">Create Account</CardTitle>
+          <CardDescription className="text-center">
+            Sign up to start streaming to multiple platforms
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
           )}
 
-          <button
-            type="submit"
-            className="btn btn-primary"
-            style={{ width: '100%' }}
-            disabled={loading}
-          >
-            {loading ? 'Creating Account...' : 'Create Account'}
-          </button>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Full Name</Label>
+              <Input
+                type="text"
+                id="name"
+                name="name"
+                placeholder="John Doe"
+                value={formData.name}
+                onChange={handleChange}
+                required
+                autoFocus
+              />
+            </div>
 
-          <div style={{ textAlign: 'center', marginTop: '20px' }}>
-            <p style={{ color: '#666' }}>
-              Already have an account?{' '}
-              <a href="/" style={{ color: '#007bff' }}>
-                Sign in
-              </a>
-            </p>
-          </div>
-        </form>
-      </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="you@example.com"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  type="password"
+                  id="password"
+                  name="password"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  minLength="6"
+                />
+                <p className="text-xs text-muted-foreground">Minimum 6 characters</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Input
+                  type="password"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  placeholder="••••••••"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="plan_id">Select Plan</Label>
+              <select
+                id="plan_id"
+                name="plan_id"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                value={formData.plan_id}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Choose a plan...</option>
+                {plans.map(plan => (
+                  <option key={plan.id} value={plan.id}>
+                    {plan.name} - ${plan.price_monthly}/month
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {selectedPlan && (
+              <Card className="bg-muted/50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center justify-between">
+                    {selectedPlan.name} Plan
+                    <Badge variant={selectedPlan.price_monthly === 0 ? 'secondary' : 'default'}>
+                      ${selectedPlan.price_monthly}/mo
+                    </Badge>
+                  </CardTitle>
+                  <CardDescription>{selectedPlan.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <ul className="space-y-1 text-sm">
+                    <li className="flex items-center">
+                      <span className="text-green-600 mr-2">✓</span>
+                      {selectedPlan.max_concurrent_streams} concurrent stream{selectedPlan.max_concurrent_streams > 1 ? 's' : ''}
+                    </li>
+                    <li className="flex items-center">
+                      <span className="text-green-600 mr-2">✓</span>
+                      Up to {selectedPlan.max_bitrate}k bitrate ({selectedPlan.max_bitrate >= 6000 ? '1080p' : selectedPlan.max_bitrate >= 4000 ? '720p' : '480p'})
+                    </li>
+                    <li className="flex items-center">
+                      <span className="text-green-600 mr-2">✓</span>
+                      {selectedPlan.max_stream_duration ? `${selectedPlan.max_stream_duration} min per stream` : 'Unlimited stream duration'}
+                    </li>
+                    <li className="flex items-center">
+                      <span className="text-green-600 mr-2">✓</span>
+                      {selectedPlan.storage_limit_mb}MB storage
+                    </li>
+                    <li className="flex items-center">
+                      <span className={`mr-2 ${selectedPlan.custom_watermark ? "text-green-600" : "text-muted-foreground"}`}>
+                        {selectedPlan.custom_watermark ? '✓' : '✗'}
+                      </span>
+                      {selectedPlan.custom_watermark ? 'Custom watermark' : 'No custom watermark'}
+                    </li>
+                  </ul>
+
+                  {selectedPlan.price_monthly > 0 && (
+                    <div className="pt-4 space-y-2">
+                      <Label>Billing Cycle</Label>
+                      <div className="flex gap-4">
+                        <label className="flex items-center space-x-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="subscription_type"
+                            value="monthly"
+                            checked={formData.subscription_type === 'monthly'}
+                            onChange={handleChange}
+                            className="w-4 h-4 text-primary"
+                          />
+                          <span className="text-sm">Monthly (${selectedPlan.price_monthly}/mo)</span>
+                        </label>
+                        <label className="flex items-center space-x-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="subscription_type"
+                            value="yearly"
+                            checked={formData.subscription_type === 'yearly'}
+                            onChange={handleChange}
+                            className="w-4 h-4 text-primary"
+                          />
+                          <span className="text-sm">
+                            Yearly (${selectedPlan.price_yearly}/yr - Save ${(selectedPlan.price_monthly * 12 - selectedPlan.price_yearly)})
+                          </span>
+                        </label>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading}
+            >
+              {loading ? 'Creating Account...' : 'Create Account'}
+            </Button>
+          </form>
+        </CardContent>
+        <CardFooter className="flex justify-center">
+          <p className="text-sm text-muted-foreground">
+            Already have an account?{' '}
+            <Link to="/" className="text-primary hover:underline font-medium">
+              Sign in
+            </Link>
+          </p>
+        </CardFooter>
+      </Card>
     </div>
   );
 }

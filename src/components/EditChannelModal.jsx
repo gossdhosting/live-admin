@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { Button } from './ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { Alert } from './ui/alert';
 
-function EditChannelModal({ channel, onClose, onSuccess }) {
+function EditChannelModal({ channel, onClose, onSuccess, isOpen }) {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -18,7 +22,6 @@ function EditChannelModal({ channel, onClose, onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [mediaFiles, setMediaFiles] = useState([]);
-  const [needsRestart, setNeedsRestart] = useState(false);
 
   useEffect(() => {
     fetchMediaFiles();
@@ -94,25 +97,25 @@ function EditChannelModal({ channel, onClose, onSuccess }) {
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal">
-        <div className="modal-header">
-          <h2>Edit Channel</h2>
-          <button className="modal-close" onClick={onClose}>
-            &times;
-          </button>
-        </div>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Edit Channel</DialogTitle>
+        </DialogHeader>
 
-        {error && <div className="alert alert-error">{error}</div>}
+        {error && (
+          <Alert className="bg-red-50 border-red-200 text-red-800">
+            {error}
+          </Alert>
+        )}
 
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="name">Channel Name *</label>
-            <input
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Channel Name *</Label>
+            <Input
               type="text"
               id="name"
               name="name"
-              className="form-control"
               value={formData.name}
               onChange={handleChange}
               required
@@ -120,21 +123,20 @@ function EditChannelModal({ channel, onClose, onSuccess }) {
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="description">Description</label>
-            <input
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Input
               type="text"
               id="description"
               name="description"
-              className="form-control"
               value={formData.description}
               onChange={handleChange}
               placeholder="Optional description"
             />
           </div>
 
-          <div className="form-group">
-            <label>Input Type *</label>
+          <div className="space-y-2">
+            <Label>Input Type *</Label>
             <div className="flex gap-4 mt-2">
               <label className="flex items-center gap-2 mb-0">
                 <input
@@ -160,31 +162,30 @@ function EditChannelModal({ channel, onClose, onSuccess }) {
           </div>
 
           {formData.input_type === 'youtube' && (
-            <div className="form-group">
-              <label htmlFor="input_url">YouTube Live URL *</label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="input_url">YouTube Live URL *</Label>
+              <Input
                 type="url"
                 id="input_url"
                 name="input_url"
-                className="form-control"
                 value={formData.input_url}
                 onChange={handleChange}
                 required
                 placeholder="https://www.youtube.com/watch?v=..."
               />
-              <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
+              <p className="text-xs text-slate-500">
                 Paste the YouTube Live stream URL
-              </small>
+              </p>
             </div>
           )}
 
           {formData.input_type === 'video' && (
-            <div className="form-group">
-              <label htmlFor="media_file_id">Select Video *</label>
+            <div className="space-y-2">
+              <Label htmlFor="media_file_id">Select Video *</Label>
               <select
                 id="media_file_id"
                 name="media_file_id"
-                className="form-control"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={formData.media_file_id || ''}
                 onChange={handleChange}
                 required
@@ -197,16 +198,16 @@ function EditChannelModal({ channel, onClose, onSuccess }) {
                 ))}
               </select>
               {mediaFiles.length === 0 && (
-                <small style={{ color: '#e74c3c', fontSize: '0.85rem' }}>
+                <p className="text-xs text-red-600">
                   No videos uploaded yet. Please upload a video in Media Manager first.
-                </small>
+                </p>
               )}
             </div>
           )}
 
           {formData.input_type === 'video' && (
-            <div className="form-group">
-              <div className="checkbox-group">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
                   id="loop_video"
@@ -214,35 +215,34 @@ function EditChannelModal({ channel, onClose, onSuccess }) {
                   checked={formData.loop_video}
                   onChange={handleChange}
                 />
-                <label htmlFor="loop_video" style={{ marginBottom: 0 }}>
+                <Label htmlFor="loop_video" className="mb-0 cursor-pointer">
                   Loop video automatically
-                </label>
+                </Label>
               </div>
-              <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
+              <p className="text-xs text-slate-500">
                 When enabled, the video will restart automatically when it ends
-              </small>
+              </p>
             </div>
           )}
 
-          <div className="form-group">
-            <label htmlFor="stream_title">Stream Title</label>
-            <input
+          <div className="space-y-2">
+            <Label htmlFor="stream_title">Stream Title</Label>
+            <Input
               type="text"
               id="stream_title"
               name="stream_title"
-              className="form-control"
               value={formData.stream_title}
               onChange={handleChange}
               placeholder="e.g., Kata Srinivas Goud Followers Protest Outside Revanth Reddy House"
               maxLength="100"
             />
-            <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
+            <p className="text-xs text-slate-500">
               This title can be displayed as an overlay on the video (news headline style)
-            </small>
+            </p>
           </div>
 
-          <div className="form-group">
-            <div className="checkbox-group">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
               <input
                 type="checkbox"
                 id="title_enabled"
@@ -250,21 +250,21 @@ function EditChannelModal({ channel, onClose, onSuccess }) {
                 checked={formData.title_enabled}
                 onChange={handleChange}
               />
-              <label htmlFor="title_enabled" style={{ marginBottom: 0 }}>
+              <Label htmlFor="title_enabled" className="mb-0 cursor-pointer">
                 Show title overlay on video
-              </label>
+              </Label>
             </div>
-            <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
+            <p className="text-xs text-slate-500">
               Display the stream title as an overlay on the video. Configure appearance in Settings → Title Settings.
-            </small>
+            </p>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="quality_preset">Default Output Quality *</label>
+          <div className="space-y-2">
+            <Label htmlFor="quality_preset">Default Output Quality *</Label>
             <select
               id="quality_preset"
               name="quality_preset"
-              className="form-control"
+              className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={formData.quality_preset}
               onChange={handleChange}
               required
@@ -273,13 +273,13 @@ function EditChannelModal({ channel, onClose, onSuccess }) {
               <option value="720p">720p (1280x720) - HD (Recommended)</option>
               <option value="1080p">1080p (1920x1080) - Full HD (Max)</option>
             </select>
-            <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
+            <p className="text-xs text-slate-500">
               Maximum resolution for re-broadcasting. Higher quality requires more bandwidth.
-            </small>
+            </p>
           </div>
 
-          <div className="form-group">
-            <div className="checkbox-group">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
               <input
                 type="checkbox"
                 id="auto_restart"
@@ -287,23 +287,23 @@ function EditChannelModal({ channel, onClose, onSuccess }) {
                 checked={formData.auto_restart}
                 onChange={handleChange}
               />
-              <label htmlFor="auto_restart" style={{ marginBottom: 0 }}>
+              <Label htmlFor="auto_restart" className="mb-0 cursor-pointer">
                 Auto-restart on failure
-              </label>
+              </Label>
             </div>
           </div>
 
-          <div className="modal-actions">
+          <DialogFooter className="flex gap-2 justify-end pt-4">
             <Button type="button" variant="secondary" onClick={onClose}>
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
               {loading ? 'Saving...' : 'Save Changes'}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
