@@ -143,7 +143,7 @@ function Dashboard({ user }) {
           <div className="card-header">
             <h2>Your Plan & Usage</h2>
             <div style={{ fontSize: '0.85rem', color: '#95a5a6' }}>
-              {userStats.user_plan} Plan
+              {userStats.plan?.name} Plan
             </div>
           </div>
           <div style={{
@@ -250,10 +250,10 @@ function Dashboard({ user }) {
           </div>
           {userStats?.canCreate && !userStats.canCreate.stream && (
             <UpgradePrompt
-              currentPlan={userStats.user_plan}
-              requiredPlan={userStats.user_plan === 'Free' ? 'Basic' : userStats.user_plan === 'Basic' ? 'Pro' : 'Enterprise'}
+              currentPlan={userStats.plan?.name}
+              requiredPlan={userStats.plan?.name === 'Free' ? 'Basic' : userStats.plan?.name === 'Basic' ? 'Pro' : 'Enterprise'}
               currentLimit={`${userStats.limits.max_concurrent_streams} concurrent ${userStats.limits.max_concurrent_streams === 1 ? 'stream' : 'streams'}`}
-              requiredLimit={userStats.user_plan === 'Free' ? '3 concurrent streams' : userStats.user_plan === 'Basic' ? '10 concurrent streams' : '50 concurrent streams'}
+              requiredLimit={userStats.plan?.name === 'Free' ? '3 concurrent streams' : userStats.plan?.name === 'Basic' ? '10 concurrent streams' : '50 concurrent streams'}
               style={{ margin: '1rem' }}
             />
           )}
@@ -276,16 +276,16 @@ function Dashboard({ user }) {
           {/* Show upgrade prompt if storage near limit */}
           {userStats && (userStats?.usage?.storage_mb || 0) / userStats.limits.storage_limit_mb > 0.9 && (
             <UpgradePrompt
-              currentPlan={userStats.user_plan}
-              requiredPlan={userStats.user_plan === 'Free' ? 'Basic' : userStats.user_plan === 'Basic' ? 'Pro' : 'Enterprise'}
+              currentPlan={userStats.plan?.name}
+              requiredPlan={userStats.plan?.name === 'Free' ? 'Basic' : userStats.plan?.name === 'Basic' ? 'Pro' : 'Enterprise'}
               currentLimit={`${userStats.limits.storage_limit_mb} MB storage`}
-              requiredLimit={userStats.user_plan === 'Free' ? '5 GB storage' : userStats.user_plan === 'Basic' ? '50 GB storage' : '200 GB storage'}
+              requiredLimit={userStats.plan?.name === 'Free' ? '5 GB storage' : userStats.plan?.name === 'Basic' ? '50 GB storage' : '200 GB storage'}
               style={{ margin: '1rem' }}
             />
           )}
 
           {/* Show upgrade prompt for duration limit (Free plan only) */}
-          {userStats && userStats.user_plan === 'Free' && userStats.limits.max_stream_duration && (
+          {userStats && userStats.plan?.name === 'Free' && userStats.limits.max_stream_duration && (
             <div style={{
               margin: '1rem',
               padding: '0.75rem 1rem',
