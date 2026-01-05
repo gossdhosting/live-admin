@@ -44,8 +44,22 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit }) {
   useEffect(() => {
     if (channel.status === 'running' && channel.last_started_at) {
       const updateRuntime = () => {
-        const elapsed = Math.floor((Date.now() - new Date(channel.last_started_at)) / 1000);
-        setRuntime(elapsed);
+        // Parse the timestamp - handle both ISO format and SQLite CURRENT_TIMESTAMP format
+        let startTime;
+        try {
+          // SQLite returns UTC timestamp like "2025-01-06 12:34:56"
+          // Convert it to ISO format by replacing space with 'T' and adding 'Z'
+          const isoTimestamp = channel.last_started_at.includes('T')
+            ? channel.last_started_at
+            : channel.last_started_at.replace(' ', 'T') + 'Z';
+          startTime = new Date(isoTimestamp).getTime();
+        } catch (e) {
+          console.error('Failed to parse timestamp:', channel.last_started_at);
+          startTime = Date.now(); // Fallback to current time
+        }
+
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        setRuntime(Math.max(0, elapsed)); // Ensure non-negative
       };
 
       updateRuntime();
