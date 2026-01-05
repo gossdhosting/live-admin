@@ -4,7 +4,7 @@ import ChannelCard from '../components/ChannelCard';
 import CreateChannelModal from '../components/CreateChannelModal';
 import EditChannelModal from '../components/EditChannelModal';
 
-function Dashboard() {
+function Dashboard({ user }) {
   const [channels, setChannels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -13,6 +13,7 @@ function Dashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(new Date());
   const [serverStats, setServerStats] = useState(null);
+  const [userStats, setUserStats] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -50,13 +51,28 @@ function Dashboard() {
       }
     };
 
+    const fetchUserStats = async () => {
+      try {
+        const response = await api.get('/users/stats');
+        if (isMounted) {
+          setUserStats(response.data);
+        }
+      } catch (error) {
+        if (isMounted) {
+          console.error('Failed to fetch user stats:', error);
+        }
+      }
+    };
+
     fetchChannels();
     fetchServerStats();
+    fetchUserStats();
 
     // Auto-refresh every 5 seconds
     const interval = setInterval(() => {
       fetchChannels(true);
       fetchServerStats();
+      fetchUserStats();
     }, 5000);
 
     return () => {
@@ -120,8 +136,134 @@ function Dashboard() {
 
   return (
     <div className="container">
-      {/* Server Stats Section */}
-      {serverStats && (
+      {/* Plan & Usage Stats Section (for users) */}
+      {user && user.role !== 'admin' && userStats && (
+        <div className="card" style={{ marginBottom: '1.5rem' }}>
+          <div className="card-header">
+            <h2>Your Plan & Usage</h2>
+            <div style={{ fontSize: '0.85rem', color: '#95a5a6' }}>
+              {userStats.user_plan} Plan
+            </div>
+          </div>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '1rem',
+            padding: '1rem'
+          }}>
+            {/* Concurrent Streams */}
+            <div style={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              padding: '1.5rem',
+              borderRadius: '12px',
+              color: 'white',
+              boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+            }}>
+              <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '0.5rem' }}>Concurrent Streams</div>
+              <div style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
+                {stats.running} / {userStats.limits.max_concurrent_streams}
+              </div>
+              <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>
+                {userStats.limits.max_concurrent_streams - stats.running} available
+              </div>
+              <div style={{
+                marginTop: '0.5rem',
+                background: 'rgba(255,255,255,0.2)',
+                borderRadius: '4px',
+                height: '6px',
+                overflow: 'hidden'
+              }}>
+                <div style={{
+                  background: 'white',
+                  height: '100%',
+                  width: `${Math.min(100, (stats.running / userStats.limits.max_concurrent_streams) * 100)}%`,
+                  transition: 'width 0.3s ease'
+                }} />
+              </div>
+            </div>
+
+            {/* Max Quality/Bitrate */}
+            <div style={{
+              background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+              padding: '1.5rem',
+              borderRadius: '12px',
+              color: 'white',
+              boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+            }}>
+              <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '0.5rem' }}>Max Quality</div>
+              <div style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
+                {userStats.limits.max_bitrate >= 6000 ? '1080p' : userStats.limits.max_bitrate >= 4000 ? '720p' : '480p'}
+              </div>
+              <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>
+                {userStats.limits.max_bitrate}k bitrate
+              </div>
+            </div>
+
+            {/* Storage */}
+            <div style={{
+              background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+              padding: '1.5rem',
+              borderRadius: '12px',
+              color: 'white',
+              boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+            }}>
+              <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '0.5rem' }}>Storage</div>
+              <div style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
+                {userStats.usage.storage_mb} MB
+              </div>
+              <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>
+                {userStats.limits.storage_limit_mb} MB limit
+              </div>
+              <div style={{
+                marginTop: '0.5rem',
+                background: 'rgba(255,255,255,0.2)',
+                borderRadius: '4px',
+                height: '6px',
+                overflow: 'hidden'
+              }}>
+                <div style={{
+                  background: 'white',
+                  height: '100%',
+                  width: `${Math.min(100, (userStats.usage.storage_mb / userStats.limits.storage_limit_mb) * 100)}%`,
+                  transition: 'width 0.3s ease'
+                }} />
+              </div>
+            </div>
+
+            {/* Stream Duration */}
+            <div style={{
+              background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+              padding: '1.5rem',
+              borderRadius: '12px',
+              color: 'white',
+              boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+            }}>
+              <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '0.5rem' }}>Stream Duration</div>
+              <div style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
+                {userStats.limits.max_stream_duration || '∞'}
+              </div>
+              <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>
+                {userStats.limits.max_stream_duration ? `${userStats.limits.max_stream_duration} min max` : 'Unlimited'}
+              </div>
+            </div>
+          </div>
+          {!userStats.canCreate.stream && (
+            <div style={{
+              margin: '1rem',
+              padding: '1rem',
+              background: '#fff3cd',
+              border: '1px solid #ffc107',
+              borderRadius: '8px',
+              color: '#856404'
+            }}>
+              ⚠️ You've reached your concurrent stream limit. Stop a running stream to start a new one, or upgrade your plan.
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Server Stats Section (for admins) */}
+      {user && user.role === 'admin' && serverStats && (
         <div className="card" style={{ marginBottom: '1.5rem' }}>
           <div className="card-header">
             <h2>Server Status</h2>
