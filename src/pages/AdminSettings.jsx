@@ -191,23 +191,6 @@ function AdminSettings({ user }) {
               </div>
 
               <div className="form-group">
-                <div className="checkbox-group">
-                  <input
-                    type="checkbox"
-                    id="auto_restart_enabled"
-                    checked={settings.auto_restart_enabled === 'true'}
-                    onChange={(e) => handleChange('auto_restart_enabled', e.target.checked ? 'true' : 'false')}
-                  />
-                  <label htmlFor="auto_restart_enabled" style={{ marginBottom: 0 }}>
-                    Enable Auto-restart (global)
-                  </label>
-                </div>
-                <small style={{ color: '#7f8c8d', fontSize: '0.85rem', display: 'block', marginTop: '0.5rem' }}>
-                  When enabled, streams will automatically restart if they crash.
-                </small>
-              </div>
-
-              <div className="form-group">
                 <label htmlFor="ffmpeg_threading">FFmpeg Threading Mode</label>
                 <select
                   id="ffmpeg_threading"
