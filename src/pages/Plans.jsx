@@ -106,10 +106,10 @@ function Plans() {
           </div>
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: '0.85rem', color: '#7f8c8d' }}>
-              {userStats.stats.active_channels} / {userStats.limits.concurrent_streams} Active Streams
+              {userStats.running_channels || 0} / {userStats.limits?.max_concurrent_streams || 0} Active Streams
             </div>
             <div style={{ fontSize: '0.85rem', color: '#7f8c8d' }}>
-              {formatStorage(userStats.stats.total_storage / (1024 * 1024))} / {formatStorage(userStats.limits.storage_limit / (1024 * 1024))} Storage
+              {formatStorage(userStats.storage_used_mb || 0)} / {formatStorage(userStats.limits?.storage_limit_mb || 0)} Storage
             </div>
           </div>
         </div>
