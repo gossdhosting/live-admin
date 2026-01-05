@@ -13,7 +13,7 @@ function Settings({ user }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
-  const [activeTab, setActiveTab] = useState('system'); // system, profile, password, rtmp, title, platforms, users, plans
+  const [activeTab, setActiveTab] = useState(user && user.role === 'admin' ? 'system' : 'profile'); // system, profile, password, rtmp, title, platforms, users, plans
 
   // Password change state
   const [passwordData, setPasswordData] = useState({
@@ -281,22 +281,24 @@ function Settings({ user }) {
           gap: '0.5rem',
           flexWrap: 'wrap'
         }}>
-          <button
-            className={activeTab === 'system' ? 'tab-active' : 'tab-inactive'}
-            onClick={() => setActiveTab('system')}
-            style={{
-              padding: '0.75rem 1.5rem',
-              border: 'none',
-              background: activeTab === 'system' ? '#3498db' : 'transparent',
-              color: activeTab === 'system' ? '#fff' : '#7f8c8d',
-              cursor: 'pointer',
-              fontWeight: '500',
-              borderRadius: '4px 4px 0 0',
-              transition: 'all 0.2s'
-            }}
-          >
-            System Settings
-          </button>
+          {user && user.role === 'admin' && (
+            <button
+              className={activeTab === 'system' ? 'tab-active' : 'tab-inactive'}
+              onClick={() => setActiveTab('system')}
+              style={{
+                padding: '0.75rem 1.5rem',
+                border: 'none',
+                background: activeTab === 'system' ? '#3498db' : 'transparent',
+                color: activeTab === 'system' ? '#fff' : '#7f8c8d',
+                cursor: 'pointer',
+                fontWeight: '500',
+                borderRadius: '4px 4px 0 0',
+                transition: 'all 0.2s'
+              }}
+            >
+              System Settings
+            </button>
+          )}
           <button
             className={activeTab === 'profile' ? 'tab-active' : 'tab-inactive'}
             onClick={() => setActiveTab('profile')}
@@ -345,22 +347,24 @@ function Settings({ user }) {
           >
             RTMP Templates
           </button>
-          <button
-            className={activeTab === 'title' ? 'tab-active' : 'tab-inactive'}
-            onClick={() => setActiveTab('title')}
-            style={{
-              padding: '0.75rem 1.5rem',
-              border: 'none',
-              background: activeTab === 'title' ? '#3498db' : 'transparent',
-              color: activeTab === 'title' ? '#fff' : '#7f8c8d',
-              cursor: 'pointer',
-              fontWeight: '500',
-              borderRadius: '4px 4px 0 0',
-              transition: 'all 0.2s'
-            }}
-          >
-            Title Settings
-          </button>
+          {user && user.role === 'admin' && (
+            <button
+              className={activeTab === 'title' ? 'tab-active' : 'tab-inactive'}
+              onClick={() => setActiveTab('title')}
+              style={{
+                padding: '0.75rem 1.5rem',
+                border: 'none',
+                background: activeTab === 'title' ? '#3498db' : 'transparent',
+                color: activeTab === 'title' ? '#fff' : '#7f8c8d',
+                cursor: 'pointer',
+                fontWeight: '500',
+                borderRadius: '4px 4px 0 0',
+                transition: 'all 0.2s'
+              }}
+            >
+              Title Settings
+            </button>
+          )}
           <button
             className={activeTab === 'platforms' ? 'tab-active' : 'tab-inactive'}
             onClick={() => setActiveTab('platforms')}
@@ -415,8 +419,8 @@ function Settings({ user }) {
           )}
         </div>
 
-        {/* System Settings Tab */}
-        {activeTab === 'system' && (
+        {/* System Settings Tab (Admin Only) */}
+        {activeTab === 'system' && user && user.role === 'admin' && (
           <div>
             {message && (
               <div className={`alert ${message.includes('success') ? 'alert-success' : 'alert-error'}`}>
@@ -435,6 +439,7 @@ function Settings({ user }) {
                   onChange={(e) => handleChange('hls_segment_duration', e.target.value)}
                   min="1"
                   max="10"
+                  disabled={!user || user.role !== 'admin'}
                 />
                 <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
                   Recommended: 4 seconds. Lower values reduce latency but increase bandwidth.
@@ -511,11 +516,19 @@ function Settings({ user }) {
                 </small>
               </div>
 
-              <div className="modal-actions">
-                <button type="submit" className="btn btn-primary" disabled={saving}>
-                  {saving ? 'Saving...' : 'Save Settings'}
-                </button>
-              </div>
+              {user && user.role === 'admin' ? (
+                <div className="modal-actions">
+                  <button type="submit" className="btn btn-primary" disabled={saving}>
+                    {saving ? 'Saving...' : 'Save Settings'}
+                  </button>
+                </div>
+              ) : (
+                <div style={{ padding: '1rem', backgroundColor: '#f0f0f0', borderRadius: '4px', marginTop: '1rem' }}>
+                  <small style={{ color: '#666' }}>
+                    ℹ️ These are system-wide settings. Only administrators can modify them.
+                  </small>
+                </div>
+              )}
             </form>
 
             <div style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid #e1e8ed' }}>
@@ -686,8 +699,8 @@ function Settings({ user }) {
           </div>
         )}
 
-        {/* Title Settings Tab */}
-        {activeTab === 'title' && (
+        {/* Title Settings Tab (Admin Only) */}
+        {activeTab === 'title' && user && user.role === 'admin' && (
           <div>
             {message && (
               <div className={`alert ${message.includes('success') ? 'alert-success' : 'alert-error'}`}>
@@ -847,11 +860,19 @@ function Settings({ user }) {
                 </small>
               </div>
 
-              <div className="modal-actions">
-                <button type="submit" className="btn btn-primary" disabled={saving}>
-                  {saving ? 'Saving...' : 'Save Settings'}
-                </button>
-              </div>
+              {user && user.role === 'admin' ? (
+                <div className="modal-actions">
+                  <button type="submit" className="btn btn-primary" disabled={saving}>
+                    {saving ? 'Saving...' : 'Save Settings'}
+                  </button>
+                </div>
+              ) : (
+                <div style={{ padding: '1rem', backgroundColor: '#f0f0f0', borderRadius: '4px', marginTop: '1rem' }}>
+                  <small style={{ color: '#666' }}>
+                    ℹ️ These are system-wide title settings. Only administrators can modify them.
+                  </small>
+                </div>
+              )}
             </form>
 
             <div style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid #e1e8ed' }}>
