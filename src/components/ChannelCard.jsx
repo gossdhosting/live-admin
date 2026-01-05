@@ -25,7 +25,9 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit }) {
     }
   }, [activeTab]);
 
-  const streamUrl = `${window.location.protocol}//${window.location.host}/hls/channel_${channel.id}/index.m3u8`;
+  // Use stream_key if available, fallback to channel_id for backwards compatibility
+  const streamKey = channel.stream_key || `channel_${channel.id}`;
+  const streamUrl = `${window.location.protocol}//${window.location.host}/hls/${streamKey}/index.m3u8`;
 
   const fetchLogs = async () => {
     try {
