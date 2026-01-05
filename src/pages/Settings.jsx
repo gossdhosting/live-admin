@@ -875,14 +875,14 @@ function Settings({ user }) {
                     id="title_font_size"
                     min="16"
                     max="72"
-                    value={currentSettings.title_font_size || '32'}
+                    value={currentSettings.title_font_size || '16'}
                     onChange={(e) => handleSettingsChange('title_font_size', e.target.value)}
                     style={{ flex: 1 }}
                   />
                   <input
                     type="number"
                     className="form-control"
-                    value={currentSettings.title_font_size || '32'}
+                    value={currentSettings.title_font_size || '16'}
                     onChange={(e) => handleSettingsChange('title_font_size', e.target.value)}
                     min="16"
                     max="72"
@@ -890,7 +890,7 @@ function Settings({ user }) {
                   />
                 </div>
                 <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
-                  Font size for the title text. Current: {currentSettings.title_font_size || '32'}px
+                  Font size for the title text. Current: {currentSettings.title_font_size || '16'}px
                 </small>
               </div>
 

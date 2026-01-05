@@ -242,7 +242,7 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
                           Remove
                         </button>
                       </div>
-                    ) : (
+                    ) : channelStatus === 'stopped' ? (
                       <button
                         onClick={() => handleCreatePlatformStream(conn.platform, conn.id)}
                         disabled={creating === conn.platform}
@@ -257,8 +257,12 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
                           opacity: creating === conn.platform ? 0.6 : 1,
                         }}
                       >
-                        {creating === conn.platform ? 'Creating...' : 'Create Stream'}
+                        {creating === conn.platform ? 'Going Live...' : '🔴 Go Live'}
                       </button>
+                    ) : (
+                      <span style={{ fontSize: '0.85rem', color: '#7f8c8d' }}>
+                        Start stream to enable
+                      </span>
                     )}
                   </div>
                 </div>
@@ -353,7 +357,7 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
                           Disable
                         </button>
                       </div>
-                    ) : (
+                    ) : channelStatus === 'stopped' ? (
                       <button
                         onClick={() => handleToggleTemplate(template.id, false)}
                         style={{
@@ -366,8 +370,12 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
                           fontSize: '0.85rem',
                         }}
                       >
-                        Enable
+                        🔴 Go Live
                       </button>
+                    ) : (
+                      <span style={{ fontSize: '0.85rem', color: '#7f8c8d' }}>
+                        Start stream to enable
+                      </span>
                     )}
                   </div>
                 </div>

@@ -9,6 +9,8 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit }) {
   const [showPreview, setShowPreview] = useState(false);
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
+  const [userStats, setUserStats] = useState(null);
+  const [runtime, setRuntime] = useState(0);
   const copiedTimeoutRef = useRef(null);
 
   useEffect(() => {
@@ -24,6 +26,36 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit }) {
       fetchLogs();
     }
   }, [activeTab]);
+
+  // Fetch user stats for plan limits
+  useEffect(() => {
+    const fetchUserStats = async () => {
+      try {
+        const response = await api.get('/users/me/stats');
+        setUserStats(response.data);
+      } catch (error) {
+        console.error('Failed to load user stats');
+      }
+    };
+    fetchUserStats();
+  }, []);
+
+  // Track runtime when stream is running
+  useEffect(() => {
+    if (channel.status === 'running' && channel.last_started_at) {
+      const updateRuntime = () => {
+        const elapsed = Math.floor((Date.now() - new Date(channel.last_started_at)) / 1000);
+        setRuntime(elapsed);
+      };
+
+      updateRuntime();
+      const interval = setInterval(updateRuntime, 1000);
+
+      return () => clearInterval(interval);
+    } else {
+      setRuntime(0);
+    }
+  }, [channel.status, channel.last_started_at]);
 
   // Use stream_key if available, fallback to channel_id for backwards compatibility
   const streamKey = channel.stream_key || `channel_${channel.id}`;
@@ -151,6 +183,74 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit }) {
     return `${hours}h ${minutes}m ${secs}s`;
   };
 
+  const formatRuntime = (seconds) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  };
+
+  const getRuntimeInfo = () => {
+    if (channel.status !== 'running' || !userStats?.limits?.max_stream_duration) return null;
+
+    const runtimeMinutes = Math.floor(runtime / 60);
+    const maxDuration = userStats.limits.max_stream_duration;
+    const remainingMinutes = maxDuration - runtimeMinutes;
+    const percentComplete = (runtimeMinutes / maxDuration) * 100;
+
+    let statusColor = '#27ae60';
+    let statusIcon = '⏱️';
+    if (percentComplete >= 90) {
+      statusColor = '#e74c3c';
+      statusIcon = '⚠️';
+    } else if (percentComplete >= 75) {
+      statusColor = '#f39c12';
+      statusIcon = '⚠️';
+    }
+
+    return (
+      <div style={{
+        backgroundColor: '#f8f9fa',
+        padding: '1rem',
+        borderRadius: '6px',
+        marginTop: '1rem',
+        border: `2px solid ${statusColor}`
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+          <div style={{ fontSize: '0.9rem', fontWeight: '600', color: '#2c3e50' }}>
+            {statusIcon} Stream Duration
+          </div>
+          <div style={{ fontSize: '1.1rem', fontWeight: 'bold', fontFamily: 'monospace', color: statusColor }}>
+            {formatRuntime(runtime)}
+          </div>
+        </div>
+
+        <div style={{ marginTop: '0.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#6c757d', marginBottom: '0.25rem' }}>
+            <span>Plan Limit: {maxDuration} minutes</span>
+            <span style={{ color: statusColor, fontWeight: '600' }}>
+              {remainingMinutes > 0 ? `${remainingMinutes} min remaining` : 'Limit reached'}
+            </span>
+          </div>
+          <div style={{
+            width: '100%',
+            height: '6px',
+            backgroundColor: '#e9ecef',
+            borderRadius: '3px',
+            overflow: 'hidden'
+          }}>
+            <div style={{
+              width: `${Math.min(percentComplete, 100)}%`,
+              height: '100%',
+              backgroundColor: statusColor,
+              transition: 'width 0.3s ease'
+            }} />
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const getHealthInfo = () => {
     const runtime = channel.runtime_status || {};
 
@@ -276,6 +376,7 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit }) {
               </a>
             </div>
 
+            {getRuntimeInfo()}
             {getHealthInfo()}
             {getRtmpConnectionsInfo()}
 
