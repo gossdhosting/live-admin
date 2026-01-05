@@ -402,7 +402,7 @@ function MediaManager({ user }) {
                   borderRadius: '4px'
                 }}
               >
-                <source src={`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/uploads/${previewMedia.filename}`} type="video/mp4" />
+                <source src={`https://live.telanganatribune.com/uploads/${previewMedia.filename}`} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
 
