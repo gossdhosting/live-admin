@@ -10,6 +10,7 @@ function MediaManager({ user }) {
   const [error, setError] = useState('');
   const [uploadProgress, setUploadProgress] = useState(0);
   const [userStats, setUserStats] = useState(null);
+  const [previewMedia, setPreviewMedia] = useState(null);
   const isAdmin = user && user.role === 'admin';
 
   useEffect(() => {
@@ -312,19 +313,132 @@ function MediaManager({ user }) {
                 <div><strong>Uploaded:</strong> {new Date(media.created_at).toLocaleDateString()}</div>
               </div>
 
-              <button
-                onClick={() => handleDelete(media.id)}
-                className="btn btn-danger"
-                style={{
-                  width: '100%',
-                  marginTop: '0.5rem',
-                  padding: '0.5rem'
-                }}
-              >
-                Delete
-              </button>
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                <button
+                  onClick={() => setPreviewMedia(media)}
+                  className="btn btn-primary"
+                  style={{
+                    flex: 1,
+                    padding: '0.5rem'
+                  }}
+                >
+                  Preview
+                </button>
+                <button
+                  onClick={() => handleDelete(media.id)}
+                  className="btn btn-danger"
+                  style={{
+                    flex: 1,
+                    padding: '0.5rem'
+                  }}
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Preview Modal */}
+      {previewMedia && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '2rem'
+          }}
+          onClick={() => setPreviewMedia(null)}
+        >
+          <div
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              maxWidth: '900px',
+              width: '100%',
+              maxHeight: '90vh',
+              overflow: 'auto'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{
+              padding: '1.5rem',
+              borderBottom: '1px solid #ddd',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <h2 style={{ margin: 0 }}>Preview: {previewMedia.original_name}</h2>
+              <button
+                onClick={() => setPreviewMedia(null)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '1.5rem',
+                  cursor: 'pointer',
+                  color: '#7f8c8d'
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            <div style={{ padding: '1.5rem' }}>
+              <video
+                controls
+                autoPlay
+                style={{
+                  width: '100%',
+                  maxHeight: '500px',
+                  backgroundColor: '#000',
+                  borderRadius: '4px'
+                }}
+              >
+                <source src={`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/uploads/${previewMedia.filename}`} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+
+              <div style={{
+                marginTop: '1.5rem',
+                padding: '1rem',
+                backgroundColor: '#f8f9fa',
+                borderRadius: '4px'
+              }}>
+                <h3 style={{ marginBottom: '0.75rem' }}>Video Details</h3>
+                <div style={{ fontSize: '0.9rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                  <div><strong>File Name:</strong> {previewMedia.original_name}</div>
+                  <div><strong>Size:</strong> {formatFileSize(previewMedia.file_size)}</div>
+                  <div><strong>Duration:</strong> {formatDuration(previewMedia.duration)}</div>
+                  <div><strong>Uploaded:</strong> {new Date(previewMedia.created_at).toLocaleDateString()}</div>
+                  {isAdmin && previewMedia.user_email && (
+                    <div><strong>Uploaded by:</strong> {previewMedia.user_email}</div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div style={{
+              padding: '1rem 1.5rem',
+              borderTop: '1px solid #ddd',
+              display: 'flex',
+              justifyContent: 'flex-end'
+            }}>
+              <button
+                onClick={() => setPreviewMedia(null)}
+                className="btn btn-secondary"
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
