@@ -3,6 +3,9 @@ import api from '../services/api';
 import MultiPlatformStreaming from './MultiPlatformStreaming';
 import WatermarkSettings from './WatermarkSettings';
 import { Button } from './ui/button';
+import { Card, CardContent, CardHeader } from './ui/card';
+import { Badge } from './ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 
 function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
   const [loading, setLoading] = useState(false);
@@ -164,19 +167,22 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
     const runtime = channel.runtime_status || {};
     const health = runtime.healthMetrics || {};
 
-    let statusClass = `status-badge status-${channel.status}`;
+    let variant = 'default';
     let statusIcon = '';
     let statusText = channel.status.toUpperCase();
 
     if (channel.status === 'running') {
       if (health.status === 'healthy') {
         statusIcon = '✓ ';
-        statusClass = 'status-badge status-healthy';
+        variant = 'success';
       } else if (health.status === 'error' || health.errors > 0) {
         statusIcon = '⚠️ ';
-        statusClass = 'status-badge status-warning';
+        variant = 'warning';
       } else if (health.status === 'starting') {
         statusIcon = '⏳ ';
+        variant = 'running';
+      } else {
+        variant = 'running';
       }
 
       if (runtime.uptime) {
@@ -186,10 +192,13 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
       }
     } else if (channel.status === 'error') {
       statusIcon = '❌ ';
+      variant = 'error';
       statusText = `${statusIcon}${statusText}`;
+    } else if (channel.status === 'stopped') {
+      variant = 'stopped';
     }
 
-    return <span className={statusClass}>{statusText}</span>;
+    return <Badge variant={variant}>{statusText}</Badge>;
   };
 
   const formatUptime = (seconds) => {
@@ -225,42 +234,31 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
     }
 
     return (
-      <div style={{
-        backgroundColor: '#f8f9fa',
-        padding: '1rem',
-        borderRadius: '6px',
-        marginTop: '1rem',
-        border: `2px solid ${statusColor}`
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-          <div style={{ fontSize: '0.9rem', fontWeight: '600', color: '#2c3e50' }}>
+      <div className="bg-gray-50 p-4 rounded-md mt-4" style={{ border: `2px solid ${statusColor}` }}>
+        <div className="flex justify-between items-center mb-2">
+          <div className="text-sm font-semibold text-gray-800">
             {statusIcon} Stream Duration
           </div>
-          <div style={{ fontSize: '1.1rem', fontWeight: 'bold', fontFamily: 'monospace', color: statusColor }}>
+          <div className="text-lg font-bold font-mono" style={{ color: statusColor }}>
             {formatRuntime(runtime)}
           </div>
         </div>
 
-        <div style={{ marginTop: '0.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#6c757d', marginBottom: '0.25rem' }}>
+        <div className="mt-2">
+          <div className="flex justify-between text-xs text-gray-600 mb-1">
             <span>Plan Limit: {maxDuration} minutes</span>
-            <span style={{ color: statusColor, fontWeight: '600' }}>
+            <span className="font-semibold" style={{ color: statusColor }}>
               {remainingMinutes > 0 ? `${remainingMinutes} min remaining` : 'Limit reached'}
             </span>
           </div>
-          <div style={{
-            width: '100%',
-            height: '6px',
-            backgroundColor: '#e9ecef',
-            borderRadius: '3px',
-            overflow: 'hidden'
-          }}>
-            <div style={{
-              width: `${Math.min(percentComplete, 100)}%`,
-              height: '100%',
-              backgroundColor: statusColor,
-              transition: 'width 0.3s ease'
-            }} />
+          <div className="w-full h-1.5 bg-gray-200 rounded-sm overflow-hidden">
+            <div
+              className="h-full transition-all duration-300 ease-out"
+              style={{
+                width: `${Math.min(percentComplete, 100)}%`,
+                backgroundColor: statusColor
+              }}
+            />
           </div>
         </div>
       </div>
@@ -277,30 +275,23 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
     const maxReconnectAttempts = runtime.maxReconnectAttempts || 5;
 
     return (
-      <div style={{
-        backgroundColor: '#f8f9fa',
-        padding: '0.75rem',
-        borderRadius: '6px',
-        marginTop: '0.75rem',
-        fontSize: '0.85rem',
-        border: '1px solid #e9ecef'
-      }}>
-        <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+      <div className="bg-gray-50 p-3 rounded-md mt-3 text-sm border border-gray-200">
+        <div className="flex gap-6 flex-wrap">
           <div>
-            <strong>Health:</strong> <span style={{ color: '#27ae60' }}>{runtime.status || 'unknown'}</span>
+            <strong>Health:</strong> <span className="text-green-600">{runtime.status || 'unknown'}</span>
           </div>
           {errorCount > 0 && (
-            <div style={{ color: '#e67e22' }}>
+            <div className="text-orange-600">
               <strong>Errors:</strong> {errorCount}
             </div>
           )}
           {reconnectAttempts > 0 && (
-            <div style={{ color: '#e74c3c' }}>
+            <div className="text-red-600">
               <strong>Reconnect Attempts:</strong> {reconnectAttempts}/{maxReconnectAttempts}
             </div>
           )}
           {runtime.lastError && (
-            <div style={{ color: '#c0392b', flex: '1 1 100%', marginTop: '0.5rem' }}>
+            <div className="text-red-700 flex-1 w-full mt-2">
               <strong>Last Error:</strong> {runtime.lastError}
             </div>
           )}
