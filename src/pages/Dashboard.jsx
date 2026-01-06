@@ -374,40 +374,40 @@ function Dashboard({ user }) {
           ) : (
             <>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-4">
-                <Card className="bg-blue-50 border-blue-100">
+                <Card className="border-gray-200 hover:shadow-md transition-shadow">
                   <CardContent className="pt-4 pb-4 text-center">
-                    <div className="text-2xl sm:text-3xl font-bold text-blue-600">{stats.total}</div>
-                    <div className="text-xs sm:text-sm text-gray-500 mt-1">Total</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.total}</div>
+                    <div className="text-xs sm:text-sm text-gray-500 mt-1 font-medium">Total</div>
                   </CardContent>
                 </Card>
-                <Card className="bg-green-50 border-green-100">
+                <Card className="border-emerald-200 bg-emerald-50/50 hover:shadow-md transition-shadow">
                   <CardContent className="pt-4 pb-4 text-center">
-                    <div className="text-2xl sm:text-3xl font-bold text-green-700">{stats.running}</div>
-                    <div className="text-xs sm:text-sm text-gray-500 mt-1">Running</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-emerald-700">{stats.running}</div>
+                    <div className="text-xs sm:text-sm text-emerald-600 mt-1 font-medium">Running</div>
                   </CardContent>
                 </Card>
-                <Card className="bg-green-100 border-2 border-green-400">
+                <Card className="border-green-200 bg-green-50/50 hover:shadow-md transition-shadow">
                   <CardContent className="pt-4 pb-4 text-center">
-                    <div className="text-xl sm:text-2xl font-bold text-green-800">✓ {stats.healthy}</div>
-                    <div className="text-xs sm:text-sm text-green-800 mt-1">Healthy</div>
+                    <div className="text-xl sm:text-2xl font-bold text-green-700">✓ {stats.healthy}</div>
+                    <div className="text-xs sm:text-sm text-green-600 mt-1 font-medium">Healthy</div>
                   </CardContent>
                 </Card>
-                <Card className="bg-yellow-50 border-2 border-yellow-400">
+                <Card className="border-amber-200 bg-amber-50/50 hover:shadow-md transition-shadow">
                   <CardContent className="pt-4 pb-4 text-center">
-                    <div className="text-xl sm:text-2xl font-bold text-yellow-700">⚠️ {stats.warnings}</div>
-                    <div className="text-xs sm:text-sm text-yellow-700 mt-1">Warnings</div>
+                    <div className="text-xl sm:text-2xl font-bold text-amber-700">⚠️ {stats.warnings}</div>
+                    <div className="text-xs sm:text-sm text-amber-600 mt-1 font-medium">Warnings</div>
                   </CardContent>
                 </Card>
-                <Card className="bg-red-50 border-red-100">
+                <Card className="border-gray-200 hover:shadow-md transition-shadow">
                   <CardContent className="pt-4 pb-4 text-center">
-                    <div className="text-2xl sm:text-3xl font-bold text-red-600">{stats.stopped}</div>
-                    <div className="text-xs sm:text-sm text-gray-500 mt-1">Stopped</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.stopped}</div>
+                    <div className="text-xs sm:text-sm text-gray-500 mt-1 font-medium">Stopped</div>
                   </CardContent>
                 </Card>
-                <Card className="bg-red-100 border-2 border-red-400">
+                <Card className="border-rose-200 bg-rose-50/50 hover:shadow-md transition-shadow">
                   <CardContent className="pt-4 pb-4 text-center">
-                    <div className="text-xl sm:text-2xl font-bold text-red-800">❌ {stats.error}</div>
-                    <div className="text-xs sm:text-sm text-red-800 mt-1">Errors</div>
+                    <div className="text-xl sm:text-2xl font-bold text-rose-700">❌ {stats.error}</div>
+                    <div className="text-xs sm:text-sm text-rose-600 mt-1 font-medium">Errors</div>
                   </CardContent>
                 </Card>
               </div>
