@@ -188,17 +188,13 @@ function MediaManager({ user }) {
           id="file-upload"
         />
 
-        <label htmlFor="file-upload" className="cursor-pointer">
-          <Button
-            disabled={uploading}
-            type="button"
-            asChild
-          >
-            <span>
-              {uploading ? `Uploading... ${uploadProgress}%` : '📁 Choose File'}
-            </span>
-          </Button>
-        </label>
+        <Button
+          disabled={uploading}
+          type="button"
+          onClick={() => document.getElementById('file-upload').click()}
+        >
+          {uploading ? `Uploading... ${uploadProgress}%` : '📁 Choose File'}
+        </Button>
 
         {uploading && (
           <div className="mt-4 bg-gray-200 rounded h-6 overflow-hidden">
