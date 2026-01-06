@@ -120,15 +120,15 @@ function Navbar({ user, onLogout }) {
 
       {/* Mobile Menu */}
       <div
-        className={`md:hidden fixed top-16 right-0 w-64 h-[calc(100vh-4rem)] bg-gray-900 shadow-2xl p-4 transition-transform duration-300 ease-in-out overflow-y-auto ${
+        className={`md:hidden fixed top-16 right-0 w-64 h-[calc(100vh-4rem)] bg-gray-900 shadow-2xl p-4 transition-transform duration-300 ease-in-out overflow-y-auto z-50 ${
           mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
-        <div className="flex items-center gap-4 p-4 bg-white/15 rounded-xl mb-6">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-red-500 flex items-center justify-center font-bold text-white text-lg">
+        <div className="flex items-center gap-3 p-3 bg-gray-800 rounded-lg mb-4">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-red-500 flex items-center justify-center font-bold text-white">
             {user.email.charAt(0).toUpperCase()}
           </div>
-          <span className="text-sm font-medium break-all">{user.email}</span>
+          <span className="text-sm font-medium text-white break-all">{user.email}</span>
         </div>
 
         {isAdminSession && (
@@ -143,19 +143,19 @@ function Navbar({ user, onLogout }) {
           </Button>
         )}
 
-        <div className="space-y-2">
+        <div className="space-y-1">
           {navLinks.map((link) => (
             <Link
               key={link.path}
               to={link.path}
-              className={`flex items-center gap-4 px-4 py-3 rounded-lg transition-all font-medium ${
+              className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-all font-medium ${
                 isActive(link.path)
-                  ? 'bg-white/25 text-white font-semibold'
-                  : 'text-white/90 hover:bg-white/15 hover:text-white'
+                  ? 'bg-gray-700 text-white font-semibold'
+                  : 'text-gray-200 hover:bg-gray-800 hover:text-white'
               }`}
               onClick={() => setMobileMenuOpen(false)}
             >
-              <span className="text-xl">{link.icon}</span>
+              <span className="text-lg">{link.icon}</span>
               <span>{link.label}</span>
             </Link>
           ))}
