@@ -9,6 +9,7 @@ import { Button } from '../components/ui/button';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { Label } from '../components/ui/label';
 import { Input } from '../components/ui/input';
+import { User, Lock, Radio, FileText, Globe } from 'lucide-react';
 
 function Settings({ user }) {
   const navigate = useNavigate();
@@ -274,12 +275,27 @@ function Settings({ user }) {
 
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="profile">Profile</TabsTrigger>
-              <TabsTrigger value="password">Password</TabsTrigger>
-              <TabsTrigger value="rtmp">RTMP Templates</TabsTrigger>
-              <TabsTrigger value="title">Title Settings</TabsTrigger>
-              <TabsTrigger value="platforms">Platforms</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-5 h-auto">
+              <TabsTrigger value="profile" className="text-xs sm:text-sm gap-1.5 py-2">
+                <User className="w-4 h-4" />
+                <span className="hidden sm:inline">Profile</span>
+              </TabsTrigger>
+              <TabsTrigger value="password" className="text-xs sm:text-sm gap-1.5 py-2">
+                <Lock className="w-4 h-4" />
+                <span className="hidden sm:inline">Password</span>
+              </TabsTrigger>
+              <TabsTrigger value="rtmp" className="text-xs sm:text-sm gap-1.5 py-2">
+                <Radio className="w-4 h-4" />
+                <span className="hidden sm:inline">RTMP</span>
+              </TabsTrigger>
+              <TabsTrigger value="title" className="text-xs sm:text-sm gap-1.5 py-2">
+                <FileText className="w-4 h-4" />
+                <span className="hidden sm:inline">Title</span>
+              </TabsTrigger>
+              <TabsTrigger value="platforms" className="text-xs sm:text-sm gap-1.5 py-2">
+                <Globe className="w-4 h-4" />
+                <span className="hidden sm:inline">Platforms</span>
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="profile" className="mt-6">

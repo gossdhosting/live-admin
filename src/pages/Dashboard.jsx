@@ -6,6 +6,7 @@ import EditChannelModal from '../components/EditChannelModal';
 import UpgradePrompt from '../components/UpgradePrompt';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { RefreshCw, Plus, CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
 
 function Dashboard({ user }) {
   const [channels, setChannels] = useState([]);
@@ -358,10 +359,12 @@ function Dashboard({ user }) {
               className="gap-2 flex-1 sm:flex-none"
               size="sm"
             >
-              {refreshing ? '🔄' : '🔄'} <span className="hidden sm:inline">{refreshing ? 'Refreshing...' : 'Refresh'}</span>
+              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">{refreshing ? 'Refreshing...' : 'Refresh'}</span>
             </Button>
-            <Button onClick={() => setShowCreateModal(true)} className="flex-1 sm:flex-none" size="sm">
-              + <span className="hidden sm:inline">Create Channel</span><span className="sm:hidden">New</span>
+            <Button onClick={() => setShowCreateModal(true)} className="gap-2 flex-1 sm:flex-none" size="sm">
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">Create Channel</span><span className="sm:hidden">New</span>
             </Button>
           </div>
         </CardHeader>
@@ -388,13 +391,19 @@ function Dashboard({ user }) {
                 </Card>
                 <Card className="border-green-200 bg-green-50/50 hover:shadow-md transition-shadow">
                   <CardContent className="pt-4 pb-4 text-center">
-                    <div className="text-xl sm:text-2xl font-bold text-green-700">✓ {stats.healthy}</div>
+                    <div className="text-xl sm:text-2xl font-bold text-green-700 flex items-center justify-center gap-1">
+                      <CheckCircle className="w-5 h-5" />
+                      {stats.healthy}
+                    </div>
                     <div className="text-xs sm:text-sm text-green-600 mt-1 font-medium">Healthy</div>
                   </CardContent>
                 </Card>
                 <Card className="border-amber-200 bg-amber-50/50 hover:shadow-md transition-shadow">
                   <CardContent className="pt-4 pb-4 text-center">
-                    <div className="text-xl sm:text-2xl font-bold text-amber-700">⚠️ {stats.warnings}</div>
+                    <div className="text-xl sm:text-2xl font-bold text-amber-700 flex items-center justify-center gap-1">
+                      <AlertTriangle className="w-5 h-5" />
+                      {stats.warnings}
+                    </div>
                     <div className="text-xs sm:text-sm text-amber-600 mt-1 font-medium">Warnings</div>
                   </CardContent>
                 </Card>
@@ -406,7 +415,10 @@ function Dashboard({ user }) {
                 </Card>
                 <Card className="border-rose-200 bg-rose-50/50 hover:shadow-md transition-shadow">
                   <CardContent className="pt-4 pb-4 text-center">
-                    <div className="text-xl sm:text-2xl font-bold text-rose-700">❌ {stats.error}</div>
+                    <div className="text-xl sm:text-2xl font-bold text-rose-700 flex items-center justify-center gap-1">
+                      <XCircle className="w-5 h-5" />
+                      {stats.error}
+                    </div>
                     <div className="text-xs sm:text-sm text-rose-600 mt-1 font-medium">Errors</div>
                   </CardContent>
                 </Card>

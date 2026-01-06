@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from './ui/button';
+import { LayoutDashboard, Clapperboard, Gem, Settings, Crown, Video, LogOut } from 'lucide-react';
 
 function Navbar({ user, onLogout }) {
   const navigate = useNavigate();
@@ -31,11 +32,11 @@ function Navbar({ user, onLogout }) {
   };
 
   const navLinks = [
-    { path: '/', label: 'Dashboard', icon: '📊' },
-    { path: '/media', label: 'Media', icon: '🎬' },
-    { path: '/plans', label: 'Plans', icon: '💎' },
-    { path: '/settings', label: 'Settings', icon: '⚙️' },
-    ...(user && user.role === 'admin' ? [{ path: '/admin', label: 'Admin', icon: '👑' }] : [])
+    { path: '/', label: 'Dashboard', icon: LayoutDashboard },
+    { path: '/media', label: 'Media', icon: Clapperboard },
+    { path: '/plans', label: 'Plans', icon: Gem },
+    { path: '/settings', label: 'Settings', icon: Settings },
+    ...(user && user.role === 'admin' ? [{ path: '/admin', label: 'Admin', icon: Crown }] : [])
   ];
 
   return (
@@ -44,26 +45,29 @@ function Navbar({ user, onLogout }) {
         <div className="flex justify-between items-center h-16">
           {/* Logo/Brand */}
           <Link to="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
-            <span className="text-3xl">🎥</span>
+            <Video className="w-8 h-8" />
             <span className="text-xl font-bold tracking-tight hidden sm:block">TT Broadcast</span>
           </Link>
 
           {/* Desktop Navigation Links */}
           <div className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all font-medium text-sm ${
-                  isActive(link.path)
-                    ? 'bg-white/20 text-white font-semibold'
-                    : 'text-white/90 hover:bg-white/10 hover:text-white'
-                }`}
-              >
-                <span className="text-lg">{link.icon}</span>
-                <span>{link.label}</span>
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const IconComponent = link.icon;
+              return (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all font-medium text-sm ${
+                    isActive(link.path)
+                      ? 'bg-white/20 text-white font-semibold'
+                      : 'text-white/90 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  <IconComponent className="w-4 h-4" />
+                  <span>{link.label}</span>
+                </Link>
+              );
+            })}
           </div>
 
           {/* Desktop User Menu */}
@@ -71,9 +75,10 @@ function Navbar({ user, onLogout }) {
             {isAdminSession && (
               <Button
                 onClick={handleReturnToAdmin}
-                className="bg-orange-500 hover:bg-orange-600 text-white font-semibold"
+                className="bg-orange-500 hover:bg-orange-600 text-white font-semibold gap-2"
               >
-                👑 Return to Admin
+                <Crown className="w-4 h-4" />
+                Return to Admin
               </Button>
             )}
             <div className="flex items-center gap-3 px-4 py-2 bg-white/10 rounded-lg">
@@ -85,9 +90,9 @@ function Navbar({ user, onLogout }) {
             <Button
               onClick={handleLogout}
               variant="destructive"
-              className="bg-red-600 hover:bg-red-700 font-semibold"
+              className="bg-red-600 hover:bg-red-700 font-semibold gap-2"
             >
-              <span className="text-lg mr-1">🚪</span>
+              <LogOut className="w-4 h-4" />
               Logout
             </Button>
           </div>
@@ -137,28 +142,32 @@ function Navbar({ user, onLogout }) {
               handleReturnToAdmin();
               setMobileMenuOpen(false);
             }}
-            className="w-full mb-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold"
+            className="w-full mb-4 bg-orange-500 hover:bg-orange-600 text-white font-semibold gap-2"
           >
-            👑 Return to Admin
+            <Crown className="w-4 h-4" />
+            Return to Admin
           </Button>
         )}
 
         <div className="space-y-1">
-          {navLinks.map((link) => (
-            <Link
-              key={link.path}
-              to={link.path}
-              className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-all font-medium ${
-                isActive(link.path)
-                  ? 'bg-gray-700 text-white font-semibold'
-                  : 'text-gray-200 hover:bg-gray-800 hover:text-white'
-              }`}
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <span className="text-lg">{link.icon}</span>
-              <span>{link.label}</span>
-            </Link>
-          ))}
+          {navLinks.map((link) => {
+            const IconComponent = link.icon;
+            return (
+              <Link
+                key={link.path}
+                to={link.path}
+                className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-all font-medium ${
+                  isActive(link.path)
+                    ? 'bg-gray-700 text-white font-semibold'
+                    : 'text-gray-200 hover:bg-gray-800 hover:text-white'
+                }`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <IconComponent className="w-5 h-5" />
+                <span>{link.label}</span>
+              </Link>
+            );
+          })}
         </div>
 
         <Button
@@ -167,9 +176,9 @@ function Navbar({ user, onLogout }) {
             setMobileMenuOpen(false);
           }}
           variant="destructive"
-          className="w-full mt-6 bg-red-600 hover:bg-red-700 font-semibold"
+          className="w-full mt-6 bg-red-600 hover:bg-red-700 font-semibold gap-2"
         >
-          <span className="text-lg mr-2">🚪</span>
+          <LogOut className="w-4 h-4" />
           Logout
         </Button>
       </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import UpgradePrompt from '../components/UpgradePrompt';
 import { Button } from '../components/ui/button';
+import { Upload } from 'lucide-react';
 
 function MediaManager({ user }) {
   const [mediaFiles, setMediaFiles] = useState([]);
@@ -192,8 +193,10 @@ function MediaManager({ user }) {
           disabled={uploading}
           type="button"
           onClick={() => document.getElementById('file-upload').click()}
+          className="gap-2"
         >
-          {uploading ? `Uploading... ${uploadProgress}%` : '📁 Choose File'}
+          <Upload className="w-4 h-4" />
+          {uploading ? `Uploading... ${uploadProgress}%` : 'Choose File'}
         </Button>
 
         {uploading && (

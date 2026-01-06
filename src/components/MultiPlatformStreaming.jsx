@@ -4,6 +4,7 @@ import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Alert, AlertDescription } from './ui/alert';
+import { Facebook, Youtube, Twitch, Wrench, Radio, Circle, CheckCircle, Lightbulb } from 'lucide-react';
 
 function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDescription, channelStatus }) {
   const [platformConnections, setPlatformConnections] = useState([]);
@@ -122,23 +123,23 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
   };
 
   const getPlatformIcon = (platform) => {
-    const icons = {
-      facebook: '📘',
-      youtube: '📺',
-      twitch: '🎮',
-      custom: '🔧',
+    const iconMap = {
+      facebook: Facebook,
+      youtube: Youtube,
+      twitch: Twitch,
+      custom: Wrench,
     };
-    return icons[platform] || '🔗';
+    return iconMap[platform] || Radio;
   };
 
-  const getPlatformColor = (platform) => {
-    const colors = {
-      facebook: 'bg-blue-600 hover:bg-blue-700',
-      youtube: 'bg-red-600 hover:bg-red-700',
-      twitch: 'bg-purple-600 hover:bg-purple-700',
-      custom: 'bg-gray-600 hover:bg-gray-700',
+  const getPlatformButtonClass = (platform) => {
+    const classes = {
+      facebook: 'bg-blue-600 hover:bg-blue-700 text-white',
+      youtube: 'bg-red-600 hover:bg-red-700 text-white',
+      twitch: 'bg-purple-600 hover:bg-purple-700 text-white',
+      custom: 'bg-gray-600 hover:bg-gray-700 text-white',
     };
-    return colors[platform] || 'bg-gray-600 hover:bg-gray-700';
+    return classes[platform] || 'bg-gray-600 hover:bg-gray-700 text-white';
   };
 
   const getPlatformBorder = (platform) => {
@@ -178,13 +179,15 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
                 (s) => s.platform === conn.platform && s.platform_connection_id === conn.id
               );
 
+              const PlatformIcon = getPlatformIcon(conn.platform);
+
               return (
                 <div
                   key={conn.id}
                   className={`flex items-center justify-between p-4 bg-white rounded-md border ${getPlatformBorder(conn.platform)}`}
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-2xl">{getPlatformIcon(conn.platform)}</span>
+                    <PlatformIcon className="w-8 h-8" />
                     <div>
                       <div className="font-semibold capitalize">
                         {conn.platform}
@@ -199,12 +202,14 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
                     {existingStream ? (
                       <div className="flex items-center gap-2">
                         {channelStatus === 'running' ? (
-                          <Badge variant="success" className="font-semibold">
-                            🟢 Live - Broadcasting
+                          <Badge variant="success" className="font-semibold gap-1.5">
+                            <Circle className="w-3 h-3 fill-current" />
+                            Live - Broadcasting
                           </Badge>
                         ) : (
-                          <Badge variant="warning">
-                            ✓ Stream Created
+                          <Badge variant="warning" className="gap-1.5">
+                            <CheckCircle className="w-3 h-3" />
+                            Stream Created
                           </Badge>
                         )}
                         <Button
@@ -219,9 +224,11 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
                       <Button
                         onClick={() => handleCreatePlatformStream(conn.platform, conn.id)}
                         disabled={creating === conn.platform}
-                        className={getPlatformColor(conn.platform)}
+                        className={`gap-1.5 ${getPlatformButtonClass(conn.platform)}`}
+                        size="sm"
                       >
-                        {creating === conn.platform ? 'Going Live...' : '🔴 Go Live'}
+                        <Circle className="w-3 h-3 fill-current" />
+                        {creating === conn.platform ? 'Going Live...' : 'Go Live'}
                       </Button>
                     ) : (
                       <span className="text-sm text-gray-500">
@@ -259,7 +266,7 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
                   className={`flex items-center justify-between p-4 bg-white rounded-md border ${activeDestination ? getPlatformBorder(template.platform) : 'border-gray-200'}`}
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-2xl">🔧</span>
+                    <Wrench className="w-8 h-8" />
                     <div>
                       <div className="font-semibold">{template.name}</div>
                       <div className="text-sm text-gray-500 break-all">
@@ -272,12 +279,14 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
                     {activeDestination ? (
                       <div className="flex items-center gap-2">
                         {channelStatus === 'running' ? (
-                          <Badge variant="success" className="font-semibold">
-                            🟢 Live - Broadcasting
+                          <Badge variant="success" className="font-semibold gap-1.5">
+                            <Circle className="w-3 h-3 fill-current" />
+                            Live - Broadcasting
                           </Badge>
                         ) : (
-                          <Badge variant="warning">
-                            ✓ Enabled
+                          <Badge variant="warning" className="gap-1.5">
+                            <CheckCircle className="w-3 h-3" />
+                            Enabled
                           </Badge>
                         )}
                         <Button
@@ -291,9 +300,11 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
                     ) : channelStatus === 'stopped' ? (
                       <Button
                         onClick={() => handleToggleTemplate(template.id, false)}
-                        className={getPlatformColor(template.platform)}
+                        className={`gap-1.5 ${getPlatformButtonClass(template.platform)}`}
+                        size="sm"
                       >
-                        🔴 Go Live
+                        <Circle className="w-3 h-3 fill-current" />
+                        Go Live
                       </Button>
                     ) : (
                       <span className="text-sm text-gray-500">
@@ -309,9 +320,9 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
       </div>
 
       <Alert className="mt-4 bg-blue-50 border-blue-200">
-        <AlertDescription className="text-blue-900">
-          <strong>💡 Tip:</strong> OAuth platforms automatically manage stream keys. Custom RTMP
-          destinations require manual configuration.
+        <AlertDescription className="text-blue-900 flex items-start gap-2">
+          <Lightbulb className="w-4 h-4 flex-shrink-0 mt-0.5" />
+          <div><strong>Tip:</strong> OAuth platforms automatically manage stream keys. Custom RTMP destinations require manual configuration.</div>
         </AlertDescription>
       </Alert>
     </div>

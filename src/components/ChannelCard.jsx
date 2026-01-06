@@ -6,6 +6,11 @@ import { Button } from './ui/button';
 import { Card, CardContent, CardHeader } from './ui/card';
 import { Badge } from './ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import {
+  Play, Square, RotateCw, Pencil, Trash2, Copy, ExternalLink, Eye, EyeOff,
+  CheckCircle, AlertTriangle, XCircle, Loader2, BarChart3, Globe, Image as ImageIcon,
+  FileText, Video, Check, X
+} from 'lucide-react';
 
 function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
   const [loading, setLoading] = useState(false);
@@ -168,37 +173,39 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
     const health = runtime.healthMetrics || {};
 
     let variant = 'default';
-    let statusIcon = '';
+    let StatusIcon = null;
     let statusText = channel.status.toUpperCase();
 
     if (channel.status === 'running') {
       if (health.status === 'healthy') {
-        statusIcon = '✓ ';
+        StatusIcon = CheckCircle;
         variant = 'success';
       } else if (health.status === 'error' || health.errors > 0) {
-        statusIcon = '⚠️ ';
+        StatusIcon = AlertTriangle;
         variant = 'warning';
       } else if (health.status === 'starting') {
-        statusIcon = '⏳ ';
+        StatusIcon = Loader2;
         variant = 'running';
       } else {
         variant = 'running';
       }
 
       if (runtime.uptime) {
-        statusText = `${statusIcon}${statusText} (${formatUptime(runtime.uptime)})`;
-      } else {
-        statusText = `${statusIcon}${statusText}`;
+        statusText = `${statusText} (${formatUptime(runtime.uptime)})`;
       }
     } else if (channel.status === 'error') {
-      statusIcon = '❌ ';
+      StatusIcon = XCircle;
       variant = 'error';
-      statusText = `${statusIcon}${statusText}`;
     } else if (channel.status === 'stopped') {
       variant = 'stopped';
     }
 
-    return <Badge variant={variant}>{statusText}</Badge>;
+    return (
+      <Badge variant={variant} className="gap-1.5">
+        {StatusIcon && <StatusIcon className="w-3.5 h-3.5" />}
+        {statusText}
+      </Badge>
+    );
   };
 
   const formatUptime = (seconds) => {
@@ -236,8 +243,9 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
     return (
       <div className="bg-gray-50 p-4 rounded-md mt-4" style={{ border: `2px solid ${statusColor}` }}>
         <div className="flex justify-between items-center mb-2">
-          <div className="text-sm font-semibold text-gray-800">
-            {statusIcon} Stream Duration
+          <div className="text-sm font-semibold text-gray-800 flex items-center gap-1.5">
+            {statusIcon === '⚠️' ? <AlertTriangle className="w-4 h-4" style={{ color: statusColor }} /> : <Video className="w-4 h-4" style={{ color: statusColor }} />}
+            Stream Duration
           </div>
           <div className="text-lg font-bold font-mono" style={{ color: statusColor }}>
             {formatRuntime(runtime)}
@@ -317,8 +325,8 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
                                conn.status === 'connecting' ? 'border-yellow-500 text-yellow-600' : 'border-red-500 text-red-600';
             const dotColor = conn.status === 'connected' ? 'bg-green-500' :
                             conn.status === 'connecting' ? 'bg-yellow-500' : 'bg-red-500';
-            const statusIcon = conn.status === 'connected' ? '✓' :
-                              conn.status === 'connecting' ? '⟳' : '✗';
+            const StatusIcon = conn.status === 'connected' ? Check :
+                              conn.status === 'connecting' ? RotateCw : X;
             const statusText = conn.status === 'connected' ? 'Connected' :
                               conn.status === 'connecting' ? 'Connecting' : 'Disconnected';
 
@@ -329,8 +337,9 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
                   <div className="font-semibold capitalize text-sm text-gray-800">
                     {conn.platform}
                   </div>
-                  <div className="text-xs font-medium">
-                    {statusIcon} {statusText}
+                  <div className="text-xs font-medium flex items-center gap-1">
+                    <StatusIcon className="w-3 h-3" />
+                    {statusText}
                   </div>
                 </div>
               </div>
@@ -365,36 +374,43 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
             {getRtmpConnectionsInfo()}
 
             {channel.status === 'error' && channel.error_message && (
-              <div className="bg-red-50 border border-red-200 p-3 rounded-md mt-4 text-red-800 text-sm">
-                <strong>❌ Error:</strong> {channel.error_message}
+              <div className="bg-red-50 border border-red-200 p-3 rounded-md mt-4 text-red-800 text-sm flex items-start gap-2">
+                <XCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <div><strong>Error:</strong> {channel.error_message}</div>
               </div>
             )}
 
             {channel.status === 'running' && (
               <div className="bg-green-50 p-4 rounded-lg mt-4 border border-green-200">
                 <div className="flex items-center justify-between mb-3">
-                  <strong className="text-gray-800 text-sm">🎥 Stream URL</strong>
+                  <strong className="text-gray-800 text-sm flex items-center gap-2">
+                    <Video className="w-4 h-4" />
+                    Stream URL
+                  </strong>
                   <div className="flex gap-2">
                     <Button
                       size="sm"
                       onClick={handleCopyUrl}
-                      className={copied ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'}
+                      className={`gap-1.5 ${copied ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'}`}
                     >
-                      {copied ? '✓ Copied' : '📋 Copy'}
+                      <Copy className="w-3.5 h-3.5" />
+                      {copied ? 'Copied' : 'Copy'}
                     </Button>
                     <Button
                       size="sm"
                       onClick={handleOpenStream}
-                      className="bg-purple-600 hover:bg-purple-700"
+                      className="bg-purple-600 hover:bg-purple-700 gap-1.5"
                     >
-                      🔗 Open
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      Open
                     </Button>
                     <Button
                       size="sm"
                       onClick={() => setShowPreview(!showPreview)}
-                      className="bg-orange-600 hover:bg-orange-700"
+                      className="bg-orange-600 hover:bg-orange-700 gap-1.5"
                     >
-                      {showPreview ? '👁️ Hide' : '👁️ Preview'}
+                      {showPreview ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      {showPreview ? 'Hide' : 'Preview'}
                     </Button>
                   </div>
                 </div>
@@ -416,8 +432,9 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
                   >
                     Your browser does not support HLS playback.
                   </video>
-                  <div className="absolute top-2 right-2 bg-red-600/90 text-white px-3 py-1.5 rounded text-xs font-semibold">
-                    🔴 LIVE
+                  <div className="absolute top-2 right-2 bg-red-600/90 text-white px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1.5">
+                    <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                    LIVE
                   </div>
                 </div>
                 <p className="text-xs text-gray-500 mt-2 text-center">
@@ -437,8 +454,9 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
               </div>
               <div>
                 <div className="text-xs text-gray-500 mb-1">Auto-restart</div>
-                <div className={`font-semibold ${channel.auto_restart ? 'text-green-600' : 'text-gray-400'}`}>
-                  {channel.auto_restart ? '✅ Enabled' : '⭕ Disabled'}
+                <div className={`font-semibold flex items-center gap-1 ${channel.auto_restart ? 'text-green-600' : 'text-gray-400'}`}>
+                  {channel.auto_restart ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+                  {channel.auto_restart ? 'Enabled' : 'Disabled'}
                 </div>
               </div>
               {isAdmin && (
@@ -536,10 +554,11 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
           <Button
             onClick={handleStart}
             disabled={loading}
-            className="bg-green-600 hover:bg-green-700 text-white flex-1 sm:flex-none"
+            className="bg-green-600 hover:bg-green-700 text-white flex-1 sm:flex-none gap-1.5"
             size="sm"
           >
-            {loading ? '⏳' : '▶️'} <span className="hidden sm:inline">{loading ? 'Starting...' : 'Start Stream'}</span><span className="sm:hidden">Start</span>
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
+            <span className="hidden sm:inline">{loading ? 'Starting...' : 'Start Stream'}</span><span className="sm:hidden">Start</span>
           </Button>
         ) : (
           <>
@@ -547,18 +566,20 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
               variant="destructive"
               onClick={handleStop}
               disabled={loading}
-              className="flex-1 sm:flex-none"
+              className="flex-1 sm:flex-none gap-1.5"
               size="sm"
             >
-              {loading ? '⏳' : '⏹️'} <span className="hidden sm:inline">{loading ? 'Stopping...' : 'Stop Stream'}</span><span className="sm:hidden">Stop</span>
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Square className="w-4 h-4" />}
+              <span className="hidden sm:inline">{loading ? 'Stopping...' : 'Stop Stream'}</span><span className="sm:hidden">Stop</span>
             </Button>
             <Button
               onClick={handleRestart}
               disabled={loading}
-              className="bg-orange-500 hover:bg-orange-600 text-white flex-1 sm:flex-none"
+              className="bg-orange-500 hover:bg-orange-600 text-white flex-1 sm:flex-none gap-1.5"
               size="sm"
             >
-              {loading ? '⏳' : '🔄'} <span className="hidden sm:inline">{loading ? 'Restarting...' : 'Restart'}</span><span className="sm:hidden">Restart</span>
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RotateCw className="w-4 h-4" />}
+              <span className="hidden sm:inline">{loading ? 'Restarting...' : 'Restart'}</span><span className="sm:hidden">Restart</span>
             </Button>
           </>
         )}
@@ -566,41 +587,43 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
           <Button
             variant="secondary"
             onClick={() => onEdit(channel)}
-            className="ml-auto"
+            className="ml-auto gap-1.5"
             size="sm"
           >
-            ✏️ <span className="hidden sm:inline">Edit</span>
+            <Pencil className="w-4 h-4" />
+            <span className="hidden sm:inline">Edit</span>
           </Button>
         )}
         <Button
           variant="destructive"
           onClick={handleDelete}
           disabled={loading || channel.status === 'running'}
-          className={channel.status === 'running' ? 'ml-auto' : ''}
+          className={`gap-1.5 ${channel.status === 'running' ? 'ml-auto' : ''}`}
           size="sm"
         >
-          🗑️ <span className="hidden sm:inline">Delete</span>
+          <Trash2 className="w-4 h-4" />
+          <span className="hidden sm:inline">Delete</span>
         </Button>
       </div>
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-4 bg-gray-50 border-t-2 border-gray-200">
-          <TabsTrigger value="overview" className="text-xs sm:text-sm">
-            <span className="hidden sm:inline">📊 Overview</span>
-            <span className="sm:hidden">📊</span>
+          <TabsTrigger value="overview" className="text-xs sm:text-sm gap-1.5">
+            <BarChart3 className="w-4 h-4" />
+            <span className="hidden sm:inline">Overview</span>
           </TabsTrigger>
-          <TabsTrigger value="platforms" className="text-xs sm:text-sm">
-            <span className="hidden sm:inline">🌐 Multi-Platform</span>
-            <span className="sm:hidden">🌐</span>
+          <TabsTrigger value="platforms" className="text-xs sm:text-sm gap-1.5">
+            <Globe className="w-4 h-4" />
+            <span className="hidden sm:inline">Multi-Platform</span>
           </TabsTrigger>
-          <TabsTrigger value="watermark" className="text-xs sm:text-sm">
-            <span className="hidden sm:inline">🖼️ Watermark</span>
-            <span className="sm:hidden">🖼️</span>
+          <TabsTrigger value="watermark" className="text-xs sm:text-sm gap-1.5">
+            <ImageIcon className="w-4 h-4" />
+            <span className="hidden sm:inline">Watermark</span>
           </TabsTrigger>
-          <TabsTrigger value="logs" className="text-xs sm:text-sm">
-            <span className="hidden sm:inline">📋 Logs</span>
-            <span className="sm:hidden">📋</span>
+          <TabsTrigger value="logs" className="text-xs sm:text-sm gap-1.5">
+            <FileText className="w-4 h-4" />
+            <span className="hidden sm:inline">Logs</span>
           </TabsTrigger>
         </TabsList>
 
