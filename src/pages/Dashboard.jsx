@@ -346,21 +346,22 @@ function Dashboard({ user }) {
       )}
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4">
           <div>
             <CardTitle>Live Channels</CardTitle>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 w-full sm:w-auto">
             <Button
               variant="outline"
               onClick={handleRefresh}
               disabled={refreshing}
-              className="gap-2"
+              className="gap-2 flex-1 sm:flex-none"
+              size="sm"
             >
-              {refreshing ? '🔄 Refreshing...' : '🔄 Refresh'}
+              {refreshing ? '🔄' : '🔄'} <span className="hidden sm:inline">{refreshing ? 'Refreshing...' : 'Refresh'}</span>
             </Button>
-            <Button onClick={() => setShowCreateModal(true)}>
-              + Create Channel
+            <Button onClick={() => setShowCreateModal(true)} className="flex-1 sm:flex-none" size="sm">
+              + <span className="hidden sm:inline">Create Channel</span><span className="sm:hidden">New</span>
             </Button>
           </div>
         </CardHeader>
@@ -372,41 +373,41 @@ function Dashboard({ user }) {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-4">
                 <Card className="bg-blue-50 border-blue-100">
-                  <CardContent className="pt-6 text-center">
-                    <div className="text-3xl font-bold text-blue-600">{stats.total}</div>
-                    <div className="text-sm text-gray-500 mt-1">Total</div>
+                  <CardContent className="pt-4 pb-4 text-center">
+                    <div className="text-2xl sm:text-3xl font-bold text-blue-600">{stats.total}</div>
+                    <div className="text-xs sm:text-sm text-gray-500 mt-1">Total</div>
                   </CardContent>
                 </Card>
                 <Card className="bg-green-50 border-green-100">
-                  <CardContent className="pt-6 text-center">
-                    <div className="text-3xl font-bold text-green-700">{stats.running}</div>
-                    <div className="text-sm text-gray-500 mt-1">Running</div>
+                  <CardContent className="pt-4 pb-4 text-center">
+                    <div className="text-2xl sm:text-3xl font-bold text-green-700">{stats.running}</div>
+                    <div className="text-xs sm:text-sm text-gray-500 mt-1">Running</div>
                   </CardContent>
                 </Card>
                 <Card className="bg-green-100 border-2 border-green-400">
-                  <CardContent className="pt-6 text-center">
-                    <div className="text-3xl font-bold text-green-800">✓ {stats.healthy}</div>
-                    <div className="text-sm text-green-800 mt-1">Healthy</div>
+                  <CardContent className="pt-4 pb-4 text-center">
+                    <div className="text-xl sm:text-2xl font-bold text-green-800">✓ {stats.healthy}</div>
+                    <div className="text-xs sm:text-sm text-green-800 mt-1">Healthy</div>
                   </CardContent>
                 </Card>
                 <Card className="bg-yellow-50 border-2 border-yellow-400">
-                  <CardContent className="pt-6 text-center">
-                    <div className="text-3xl font-bold text-yellow-700">⚠️ {stats.warnings}</div>
-                    <div className="text-sm text-yellow-700 mt-1">Warnings</div>
+                  <CardContent className="pt-4 pb-4 text-center">
+                    <div className="text-xl sm:text-2xl font-bold text-yellow-700">⚠️ {stats.warnings}</div>
+                    <div className="text-xs sm:text-sm text-yellow-700 mt-1">Warnings</div>
                   </CardContent>
                 </Card>
                 <Card className="bg-red-50 border-red-100">
-                  <CardContent className="pt-6 text-center">
-                    <div className="text-3xl font-bold text-red-600">{stats.stopped}</div>
-                    <div className="text-sm text-gray-500 mt-1">Stopped</div>
+                  <CardContent className="pt-4 pb-4 text-center">
+                    <div className="text-2xl sm:text-3xl font-bold text-red-600">{stats.stopped}</div>
+                    <div className="text-xs sm:text-sm text-gray-500 mt-1">Stopped</div>
                   </CardContent>
                 </Card>
                 <Card className="bg-red-100 border-2 border-red-400">
-                  <CardContent className="pt-6 text-center">
-                    <div className="text-3xl font-bold text-red-800">❌ {stats.error}</div>
-                    <div className="text-sm text-red-800 mt-1">Errors</div>
+                  <CardContent className="pt-4 pb-4 text-center">
+                    <div className="text-xl sm:text-2xl font-bold text-red-800">❌ {stats.error}</div>
+                    <div className="text-xs sm:text-sm text-red-800 mt-1">Errors</div>
                   </CardContent>
                 </Card>
               </div>

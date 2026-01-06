@@ -516,29 +516,30 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
       {/* Header */}
-      <div className="px-6 py-5 border-b border-gray-200 flex items-center justify-between bg-gray-50">
-        <div className="flex-1">
-          <h2 className="m-0 text-xl text-gray-800 font-semibold">
+      <div className="px-4 sm:px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-gray-50">
+        <div className="flex-1 min-w-0 w-full sm:w-auto">
+          <h2 className="m-0 text-lg sm:text-xl text-gray-800 font-semibold break-words">
             {channel.name}
           </h2>
           {channel.description && (
-            <p className="text-gray-600 mt-1 mb-0 text-sm">
+            <p className="text-gray-600 mt-1 mb-0 text-xs sm:text-sm break-words">
               {channel.description}
             </p>
           )}
         </div>
-        {getStatusBadge()}
+        <div className="self-start sm:self-auto">{getStatusBadge()}</div>
       </div>
 
       {/* Control Buttons */}
-      <div className="px-6 py-4 border-b border-gray-200 flex gap-3 flex-wrap bg-white">
+      <div className="px-4 sm:px-6 py-4 border-b border-gray-200 flex gap-2 sm:gap-3 flex-wrap bg-white">
         {channel.status !== 'running' ? (
           <Button
             onClick={handleStart}
             disabled={loading}
-            className="bg-green-600 hover:bg-green-700 text-white"
+            className="bg-green-600 hover:bg-green-700 text-white flex-1 sm:flex-none"
+            size="sm"
           >
-            {loading ? '⏳ Starting...' : '▶️ Start Stream'}
+            {loading ? '⏳' : '▶️'} <span className="hidden sm:inline">{loading ? 'Starting...' : 'Start Stream'}</span><span className="sm:hidden">Start</span>
           </Button>
         ) : (
           <>
@@ -546,15 +547,18 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
               variant="destructive"
               onClick={handleStop}
               disabled={loading}
+              className="flex-1 sm:flex-none"
+              size="sm"
             >
-              {loading ? '⏳ Stopping...' : '⏹️ Stop Stream'}
+              {loading ? '⏳' : '⏹️'} <span className="hidden sm:inline">{loading ? 'Stopping...' : 'Stop Stream'}</span><span className="sm:hidden">Stop</span>
             </Button>
             <Button
               onClick={handleRestart}
               disabled={loading}
-              className="bg-orange-500 hover:bg-orange-600 text-white"
+              className="bg-orange-500 hover:bg-orange-600 text-white flex-1 sm:flex-none"
+              size="sm"
             >
-              {loading ? '⏳ Restarting...' : '🔄 Restart Stream'}
+              {loading ? '⏳' : '🔄'} <span className="hidden sm:inline">{loading ? 'Restarting...' : 'Restart'}</span><span className="sm:hidden">Restart</span>
             </Button>
           </>
         )}
@@ -563,8 +567,9 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
             variant="secondary"
             onClick={() => onEdit(channel)}
             className="ml-auto"
+            size="sm"
           >
-            ✏️ Edit
+            ✏️ <span className="hidden sm:inline">Edit</span>
           </Button>
         )}
         <Button
@@ -572,18 +577,31 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
           onClick={handleDelete}
           disabled={loading || channel.status === 'running'}
           className={channel.status === 'running' ? 'ml-auto' : ''}
+          size="sm"
         >
-          🗑️ Delete
+          🗑️ <span className="hidden sm:inline">Delete</span>
         </Button>
       </div>
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-4 bg-gray-50 border-t-2 border-gray-200">
-          <TabsTrigger value="overview">📊 Overview</TabsTrigger>
-          <TabsTrigger value="platforms">🌐 Multi-Platform</TabsTrigger>
-          <TabsTrigger value="watermark">🖼️ Watermark</TabsTrigger>
-          <TabsTrigger value="logs">📋 Logs</TabsTrigger>
+          <TabsTrigger value="overview" className="text-xs sm:text-sm">
+            <span className="hidden sm:inline">📊 Overview</span>
+            <span className="sm:hidden">📊</span>
+          </TabsTrigger>
+          <TabsTrigger value="platforms" className="text-xs sm:text-sm">
+            <span className="hidden sm:inline">🌐 Multi-Platform</span>
+            <span className="sm:hidden">🌐</span>
+          </TabsTrigger>
+          <TabsTrigger value="watermark" className="text-xs sm:text-sm">
+            <span className="hidden sm:inline">🖼️ Watermark</span>
+            <span className="sm:hidden">🖼️</span>
+          </TabsTrigger>
+          <TabsTrigger value="logs" className="text-xs sm:text-sm">
+            <span className="hidden sm:inline">📋 Logs</span>
+            <span className="sm:hidden">📋</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="min-h-[200px] mt-0">

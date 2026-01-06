@@ -39,7 +39,7 @@ function Navbar({ user, onLogout }) {
   ];
 
   return (
-    <nav className="bg-gradient-to-r from-purple-600 via-purple-700 to-indigo-800 text-white shadow-lg sticky top-0 z-50">
+    <nav className="bg-gray-800 text-white shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo/Brand */}
@@ -120,7 +120,7 @@ function Navbar({ user, onLogout }) {
 
       {/* Mobile Menu */}
       <div
-        className={`md:hidden fixed top-16 right-0 w-72 h-[calc(100vh-4rem)] bg-gradient-to-b from-purple-700 to-indigo-900 p-6 transition-transform duration-300 ease-in-out overflow-y-auto ${
+        className={`md:hidden fixed top-16 right-0 w-64 h-[calc(100vh-4rem)] bg-gray-900 shadow-2xl p-4 transition-transform duration-300 ease-in-out overflow-y-auto ${
           mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
