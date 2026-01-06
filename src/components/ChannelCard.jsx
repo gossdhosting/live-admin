@@ -307,47 +307,29 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
     if (channel.status !== 'running' || rtmpConnections.length === 0) return null;
 
     return (
-      <div style={{
-        backgroundColor: '#f0f8ff',
-        padding: '0.75rem',
-        borderRadius: '6px',
-        marginTop: '0.75rem',
-        border: '1px solid #d4e9ff'
-      }}>
-        <div style={{ marginBottom: '0.75rem', fontWeight: '600', color: '#2c3e50', fontSize: '0.9rem' }}>
+      <div className="bg-blue-50 p-3 rounded-md mt-3 border border-blue-200">
+        <div className="mb-3 font-semibold text-gray-800 text-sm">
           RTMP Destinations
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '0.75rem' }}>
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
           {rtmpConnections.map((conn) => {
-            const statusColor = conn.status === 'connected' ? '#27ae60' :
-                               conn.status === 'connecting' ? '#f39c12' : '#e74c3c';
+            const statusColor = conn.status === 'connected' ? 'border-green-500 text-green-600' :
+                               conn.status === 'connecting' ? 'border-yellow-500 text-yellow-600' : 'border-red-500 text-red-600';
+            const dotColor = conn.status === 'connected' ? 'bg-green-500' :
+                            conn.status === 'connecting' ? 'bg-yellow-500' : 'bg-red-500';
             const statusIcon = conn.status === 'connected' ? '✓' :
                               conn.status === 'connecting' ? '⟳' : '✗';
             const statusText = conn.status === 'connected' ? 'Connected' :
                               conn.status === 'connecting' ? 'Connecting' : 'Disconnected';
 
             return (
-              <div key={conn.destinationId} style={{
-                backgroundColor: 'white',
-                border: `2px solid ${statusColor}`,
-                borderRadius: '6px',
-                padding: '0.75rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
-              }}>
-                <div style={{
-                  width: '10px',
-                  height: '10px',
-                  borderRadius: '50%',
-                  backgroundColor: statusColor,
-                  flexShrink: 0
-                }} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: '600', textTransform: 'capitalize', fontSize: '0.9rem', color: '#2c3e50' }}>
+              <div key={conn.destinationId} className={`bg-white border-2 rounded-md p-3 flex items-center gap-2 ${statusColor}`}>
+                <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${dotColor}`} />
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold capitalize text-sm text-gray-800">
                     {conn.platform}
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: statusColor, fontWeight: '500' }}>
+                  <div className="text-xs font-medium">
                     {statusIcon} {statusText}
                   </div>
                 </div>
@@ -363,21 +345,16 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
     switch (activeTab) {
       case 'overview':
         return (
-          <div style={{ padding: '1.25rem' }}>
-            <div style={{ marginBottom: '1rem' }}>
-              <div style={{ fontSize: '0.85rem', color: '#6c757d', marginBottom: '0.25rem', fontWeight: '500' }}>
+          <div className="p-5">
+            <div className="mb-4">
+              <div className="text-sm text-gray-600 mb-1 font-medium">
                 Input Source
               </div>
               <a
                 href={channel.input_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{
-                  color: '#3498db',
-                  textDecoration: 'none',
-                  fontSize: '0.9rem',
-                  wordBreak: 'break-all'
-                }}
+                className="text-blue-600 no-underline text-sm break-all hover:underline"
               >
                 {channel.input_url}
               </a>
@@ -388,15 +365,7 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
             {getRtmpConnectionsInfo()}
 
             {channel.status === 'error' && channel.error_message && (
-              <div style={{
-                backgroundColor: '#fee',
-                border: '1px solid #fcc',
-                padding: '0.75rem',
-                borderRadius: '6px',
-                marginTop: '1rem',
-                color: '#c0392b',
-                fontSize: '0.85rem'
-              }}>
+              <div className="bg-red-50 border border-red-200 p-3 rounded-md mt-4 text-red-800 text-sm">
                 <strong>❌ Error:</strong> {channel.error_message}
               </div>
             )}
@@ -436,37 +405,22 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
             )}
 
             {showPreview && channel.status === 'running' && (
-              <div style={{ marginTop: '1rem' }}>
-                <div style={{
-                  backgroundColor: '#000',
-                  borderRadius: '8px',
-                  overflow: 'hidden',
-                  position: 'relative'
-                }}>
+              <div className="mt-4">
+                <div className="bg-black rounded-lg overflow-hidden relative">
                   <video
                     controls
                     autoPlay
                     muted
-                    style={{ width: '100%', maxHeight: '400px' }}
+                    className="w-full max-h-96"
                     src={streamUrl}
                   >
                     Your browser does not support HLS playback.
                   </video>
-                  <div style={{
-                    position: 'absolute',
-                    top: '0.5rem',
-                    right: '0.5rem',
-                    backgroundColor: 'rgba(231, 76, 60, 0.9)',
-                    color: 'white',
-                    padding: '0.35rem 0.75rem',
-                    borderRadius: '4px',
-                    fontSize: '0.75rem',
-                    fontWeight: '600'
-                  }}>
+                  <div className="absolute top-2 right-2 bg-red-600/90 text-white px-3 py-1.5 rounded text-xs font-semibold">
                     🔴 LIVE
                   </div>
                 </div>
-                <p style={{ fontSize: '0.8rem', color: '#7f8c8d', marginTop: '0.5rem', textAlign: 'center' }}>
+                <p className="text-xs text-gray-500 mt-2 text-center">
                   Note: Some browsers may not support HLS natively. Use VLC or a dedicated player for best results.
                 </p>
               </div>
@@ -518,47 +472,37 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
 
       case 'watermark':
         return (
-          <div style={{ padding: '1rem' }}>
+          <div className="p-4">
             <WatermarkSettings channel={channel} onUpdate={onUpdate} />
           </div>
         );
 
       case 'logs':
         return (
-          <div style={{ padding: '1rem' }}>
-            <div className="logs-container" style={{
-              backgroundColor: '#1e1e1e',
-              borderRadius: '6px',
-              padding: '1rem',
-              maxHeight: '400px',
-              overflowY: 'auto',
-              fontFamily: 'monospace',
-              fontSize: '0.85rem'
-            }}>
+          <div className="p-4">
+            <div className="bg-gray-900 rounded-md p-4 max-h-96 overflow-y-auto font-mono text-sm">
               {logs.length === 0 ? (
-                <div style={{ color: '#95a5a6', textAlign: 'center', padding: '2rem' }}>No logs available</div>
+                <div className="text-gray-400 text-center p-8">No logs available</div>
               ) : (
-                logs.map((log) => (
-                  <div
-                    key={log.id}
-                    style={{
-                      padding: '0.5rem',
-                      marginBottom: '0.25rem',
-                      borderLeft: `3px solid ${
-                        log.log_type === 'error' ? '#e74c3c' :
-                        log.log_type === 'warning' ? '#f39c12' :
-                        log.log_type === 'info' ? '#3498db' : '#95a5a6'
-                      }`,
-                      color: log.log_type === 'error' ? '#e74c3c' :
-                            log.log_type === 'warning' ? '#f39c12' :
-                            log.log_type === 'info' ? '#3498db' : '#ecf0f1'
-                    }}
-                  >
-                    <span style={{ color: '#7f8c8d' }}>[{new Date(log.created_at).toLocaleString()}]</span>{' '}
-                    <span style={{ fontWeight: '600' }}>[{log.log_type.toUpperCase()}]</span>{' '}
-                    {log.message}
-                  </div>
-                ))
+                logs.map((log) => {
+                  const borderColor = log.log_type === 'error' ? 'border-red-600' :
+                                     log.log_type === 'warning' ? 'border-yellow-500' :
+                                     log.log_type === 'info' ? 'border-blue-500' : 'border-gray-500';
+                  const textColor = log.log_type === 'error' ? 'text-red-500' :
+                                   log.log_type === 'warning' ? 'text-yellow-500' :
+                                   log.log_type === 'info' ? 'text-blue-400' : 'text-gray-300';
+
+                  return (
+                    <div
+                      key={log.id}
+                      className={`p-2 mb-1 border-l-4 ${borderColor} ${textColor}`}
+                    >
+                      <span className="text-gray-500">[{new Date(log.created_at).toLocaleString()}]</span>{' '}
+                      <span className="font-semibold">[{log.log_type.toUpperCase()}]</span>{' '}
+                      {log.message}
+                    </div>
+                  );
+                })
               )}
             </div>
           </div>
@@ -634,34 +578,30 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b-2 border-gray-200 bg-gray-50">
-        {[
-          { id: 'overview', label: '📊 Overview', icon: '📊' },
-          { id: 'platforms', label: '🌐 Multi-Platform', icon: '🌐' },
-          { id: 'watermark', label: '🖼️ Watermark', icon: '🖼️' },
-          { id: 'logs', label: '📋 Logs', icon: '📋' }
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 p-4 text-sm font-semibold border-none bg-transparent transition-all outline-none cursor-pointer ${
-              activeTab === tab.id
-                ? 'border-b-3 border-blue-500 text-blue-500'
-                : 'border-b-3 border-transparent text-gray-500 hover:text-gray-700'
-            }`}
-            style={{
-              borderBottom: activeTab === tab.id ? '3px solid #3498db' : '3px solid transparent'
-            }}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-4 bg-gray-50 border-t-2 border-gray-200">
+          <TabsTrigger value="overview">📊 Overview</TabsTrigger>
+          <TabsTrigger value="platforms">🌐 Multi-Platform</TabsTrigger>
+          <TabsTrigger value="watermark">🖼️ Watermark</TabsTrigger>
+          <TabsTrigger value="logs">📋 Logs</TabsTrigger>
+        </TabsList>
 
-      {/* Tab Content */}
-      <div className="min-h-[200px]">
-        {renderTabContent()}
-      </div>
+        <TabsContent value="overview" className="min-h-[200px] mt-0">
+          {renderTabContent()}
+        </TabsContent>
+
+        <TabsContent value="platforms" className="min-h-[200px] mt-0">
+          {renderTabContent()}
+        </TabsContent>
+
+        <TabsContent value="watermark" className="min-h-[200px] mt-0">
+          {renderTabContent()}
+        </TabsContent>
+
+        <TabsContent value="logs" className="min-h-[200px] mt-0">
+          {renderTabContent()}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

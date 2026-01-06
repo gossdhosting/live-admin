@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
+import { Button } from './ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Badge } from './ui/badge';
+import { Alert, AlertDescription } from './ui/alert';
 
 function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDescription, channelStatus }) {
   const [platformConnections, setPlatformConnections] = useState([]);
@@ -17,15 +21,10 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
     try {
       const [connectionsRes, templatesRes, destinationsRes, streamsRes] = await Promise.all([
         api.get('/platforms/connections'),
-        api.get('/rtmp/templates?enabled=true'), // Only fetch enabled templates
-        api.get(`/channels/${channelId}/rtmp`), // Fetch RTMP destinations for this channel
+        api.get('/rtmp/templates?enabled=true'),
+        api.get(`/channels/${channelId}/rtmp`),
         api.get(`/platforms/streams/${channelId}`),
       ]);
-
-      console.log('Platform connections:', connectionsRes.data.connections);
-      console.log('RTMP templates:', templatesRes.data.templates);
-      console.log('RTMP destinations:', destinationsRes.data.destinations);
-      console.log('Platform streams:', streamsRes.data.streams);
 
       setPlatformConnections(connectionsRes.data.connections || []);
       setRtmpTemplates(templatesRes.data.templates || []);
@@ -47,7 +46,6 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
       const description = streamDescription || '';
 
       if (platform === 'facebook') {
-        // For Facebook, we need to select a page first
         const pagesRes = await api.get('/platforms/facebook/pages');
         const pages = pagesRes.data.pages;
 
@@ -57,7 +55,6 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
           return;
         }
 
-        // Use first page (or could show selection UI)
         const page = pages[0];
         response = await api.post('/platforms/facebook/create-stream', {
           channelId,
@@ -106,8 +103,6 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
     try {
       const enabled = !currentlyEnabled;
       await api.post(`/channels/${channelId}/rtmp/template/${templateId}/toggle`, { enabled });
-
-      // Refresh data
       fetchAll();
     } catch (error) {
       console.error('Failed to toggle template:', error);
@@ -138,36 +133,46 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
 
   const getPlatformColor = (platform) => {
     const colors = {
-      facebook: '#1877f2',
-      youtube: '#ff0000',
-      twitch: '#9146ff',
-      custom: '#6c757d',
+      facebook: 'bg-blue-600 hover:bg-blue-700',
+      youtube: 'bg-red-600 hover:bg-red-700',
+      twitch: 'bg-purple-600 hover:bg-purple-700',
+      custom: 'bg-gray-600 hover:bg-gray-700',
     };
-    return colors[platform] || '#6c757d';
+    return colors[platform] || 'bg-gray-600 hover:bg-gray-700';
+  };
+
+  const getPlatformBorder = (platform) => {
+    const borders = {
+      facebook: 'border-blue-200',
+      youtube: 'border-red-200',
+      twitch: 'border-purple-200',
+      custom: 'border-gray-200',
+    };
+    return borders[platform] || 'border-gray-200';
   };
 
   if (loading) {
-    return <div style={{ padding: '1rem' }}>Loading...</div>;
+    return <div className="p-4">Loading...</div>;
   }
 
   return (
-    <div style={{ padding: '1.5rem', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
-      <h3 style={{ marginTop: 0, marginBottom: '1rem', fontSize: '1.1rem' }}>
+    <div className="p-6 bg-gray-50 rounded-lg">
+      <h3 className="mt-0 mb-4 text-lg font-semibold">
         Multi-Platform Streaming
       </h3>
 
       {/* OAuth Platform Connections */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <h4 style={{ fontSize: '0.95rem', color: '#6c757d', marginBottom: '0.75rem' }}>
+      <div className="mb-6">
+        <h4 className="text-sm text-gray-600 mb-3 font-medium">
           Connected Platforms (OAuth)
         </h4>
 
         {platformConnections.length === 0 ? (
-          <p style={{ color: '#7f8c8d', fontSize: '0.9rem', margin: 0 }}>
+          <p className="text-gray-500 text-sm m-0">
             No platforms connected. Go to Settings → Platforms to connect your accounts.
           </p>
         ) : (
-          <div style={{ display: 'grid', gap: '0.75rem' }}>
+          <div className="grid gap-3">
             {platformConnections.map((conn) => {
               const existingStream = platformStreams.find(
                 (s) => s.platform === conn.platform && s.platform_connection_id === conn.id
@@ -176,23 +181,15 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
               return (
                 <div
                   key={conn.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '0.75rem 1rem',
-                    backgroundColor: '#fff',
-                    borderRadius: '6px',
-                    border: `1px solid ${getPlatformColor(conn.platform)}33`,
-                  }}
+                  className={`flex items-center justify-between p-4 bg-white rounded-md border ${getPlatformBorder(conn.platform)}`}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <span style={{ fontSize: '1.5rem' }}>{getPlatformIcon(conn.platform)}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{getPlatformIcon(conn.platform)}</span>
                     <div>
-                      <div style={{ fontWeight: '600', textTransform: 'capitalize' }}>
+                      <div className="font-semibold capitalize">
                         {conn.platform}
                       </div>
-                      <div style={{ fontSize: '0.85rem', color: '#7f8c8d' }}>
+                      <div className="text-sm text-gray-500">
                         {conn.platform_channel_name || conn.platform_user_name}
                       </div>
                     </div>
@@ -200,67 +197,34 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
 
                   <div>
                     {existingStream ? (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <div className="flex items-center gap-2">
                         {channelStatus === 'running' ? (
-                          <span
-                            style={{
-                              padding: '0.25rem 0.5rem',
-                              backgroundColor: '#d4edda',
-                              color: '#155724',
-                              borderRadius: '4px',
-                              fontSize: '0.8rem',
-                              fontWeight: '600',
-                            }}
-                          >
+                          <Badge variant="success" className="font-semibold">
                             🟢 Live - Broadcasting
-                          </span>
+                          </Badge>
                         ) : (
-                          <span
-                            style={{
-                              padding: '0.25rem 0.5rem',
-                              backgroundColor: '#fff3cd',
-                              color: '#856404',
-                              borderRadius: '4px',
-                              fontSize: '0.8rem',
-                            }}
-                          >
+                          <Badge variant="warning">
                             ✓ Stream Created
-                          </span>
+                          </Badge>
                         )}
-                        <button
+                        <Button
+                          size="sm"
+                          variant="destructive"
                           onClick={() => handleDeletePlatformStream(existingStream.id)}
-                          style={{
-                            padding: '0.25rem 0.5rem',
-                            backgroundColor: '#dc3545',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '0.8rem',
-                          }}
                         >
                           Remove
-                        </button>
+                        </Button>
                       </div>
                     ) : channelStatus === 'stopped' ? (
-                      <button
+                      <Button
                         onClick={() => handleCreatePlatformStream(conn.platform, conn.id)}
                         disabled={creating === conn.platform}
-                        style={{
-                          padding: '0.5rem 1rem',
-                          backgroundColor: getPlatformColor(conn.platform),
-                          color: '#fff',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: creating === conn.platform ? 'not-allowed' : 'pointer',
-                          fontSize: '0.85rem',
-                          opacity: creating === conn.platform ? 0.6 : 1,
-                        }}
+                        className={getPlatformColor(conn.platform)}
                       >
                         {creating === conn.platform ? 'Going Live...' : '🔴 Go Live'}
-                      </button>
+                      </Button>
                     ) : (
-                      <span style={{ fontSize: '0.85rem', color: '#7f8c8d' }}>
+                      <span className="text-sm text-gray-500">
                         Stop stream to enable
                       </span>
                     )}
@@ -274,18 +238,17 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
 
       {/* Custom RTMP Templates */}
       <div>
-        <h4 style={{ fontSize: '0.95rem', color: '#6c757d', marginBottom: '0.75rem' }}>
+        <h4 className="text-sm text-gray-600 mb-3 font-medium">
           Custom RTMP Destinations
         </h4>
 
         {rtmpTemplates.length === 0 ? (
-          <p style={{ color: '#7f8c8d', fontSize: '0.9rem', margin: 0 }}>
+          <p className="text-gray-500 text-sm m-0">
             No custom RTMP templates. Go to Settings → RTMP to create custom destinations.
           </p>
         ) : (
-          <div style={{ display: 'grid', gap: '0.75rem' }}>
+          <div className="grid gap-3">
             {rtmpTemplates.map((template) => {
-              // Check if this template has an active destination for this channel
               const activeDestination = rtmpDestinations.find(
                 (dest) => dest.template_id === template.id && dest.enabled === 1
               );
@@ -293,21 +256,13 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
               return (
                 <div
                   key={template.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '0.75rem 1rem',
-                    backgroundColor: '#fff',
-                    borderRadius: '6px',
-                    border: `1px solid ${activeDestination ? getPlatformColor(template.platform) + '33' : '#dee2e6'}`,
-                  }}
+                  className={`flex items-center justify-between p-4 bg-white rounded-md border ${activeDestination ? getPlatformBorder(template.platform) : 'border-gray-200'}`}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <span style={{ fontSize: '1.5rem' }}>🔧</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">🔧</span>
                     <div>
-                      <div style={{ fontWeight: '600' }}>{template.name}</div>
-                      <div style={{ fontSize: '0.85rem', color: '#7f8c8d' }}>
+                      <div className="font-semibold">{template.name}</div>
+                      <div className="text-sm text-gray-500 break-all">
                         {template.rtmp_url}
                       </div>
                     </div>
@@ -315,65 +270,33 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
 
                   <div>
                     {activeDestination ? (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <div className="flex items-center gap-2">
                         {channelStatus === 'running' ? (
-                          <span
-                            style={{
-                              padding: '0.25rem 0.5rem',
-                              backgroundColor: '#d4edda',
-                              color: '#155724',
-                              borderRadius: '4px',
-                              fontSize: '0.8rem',
-                              fontWeight: '600',
-                            }}
-                          >
+                          <Badge variant="success" className="font-semibold">
                             🟢 Live - Broadcasting
-                          </span>
+                          </Badge>
                         ) : (
-                          <span
-                            style={{
-                              padding: '0.25rem 0.5rem',
-                              backgroundColor: '#fff3cd',
-                              color: '#856404',
-                              borderRadius: '4px',
-                              fontSize: '0.8rem',
-                            }}
-                          >
+                          <Badge variant="warning">
                             ✓ Enabled
-                          </span>
+                          </Badge>
                         )}
-                        <button
+                        <Button
+                          size="sm"
+                          variant="destructive"
                           onClick={() => handleRemoveDestination(activeDestination.id)}
-                          style={{
-                            padding: '0.25rem 0.5rem',
-                            backgroundColor: '#dc3545',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '0.8rem',
-                          }}
                         >
                           Disable
-                        </button>
+                        </Button>
                       </div>
                     ) : channelStatus === 'stopped' ? (
-                      <button
+                      <Button
                         onClick={() => handleToggleTemplate(template.id, false)}
-                        style={{
-                          padding: '0.5rem 1rem',
-                          backgroundColor: getPlatformColor(template.platform),
-                          color: '#fff',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          fontSize: '0.85rem',
-                        }}
+                        className={getPlatformColor(template.platform)}
                       >
                         🔴 Go Live
-                      </button>
+                      </Button>
                     ) : (
-                      <span style={{ fontSize: '0.85rem', color: '#7f8c8d' }}>
+                      <span className="text-sm text-gray-500">
                         Stop stream to enable
                       </span>
                     )}
@@ -385,19 +308,12 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
         )}
       </div>
 
-      <div
-        style={{
-          marginTop: '1rem',
-          padding: '0.75rem',
-          backgroundColor: '#e7f3ff',
-          borderLeft: '3px solid #2196f3',
-          fontSize: '0.85rem',
-          color: '#1976d2',
-        }}
-      >
-        <strong>💡 Tip:</strong> OAuth platforms automatically manage stream keys. Custom RTMP
-        destinations require manual configuration.
-      </div>
+      <Alert className="mt-4 bg-blue-50 border-blue-200">
+        <AlertDescription className="text-blue-900">
+          <strong>💡 Tip:</strong> OAuth platforms automatically manage stream keys. Custom RTMP
+          destinations require manual configuration.
+        </AlertDescription>
+      </Alert>
     </div>
   );
 }
