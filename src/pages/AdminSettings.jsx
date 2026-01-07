@@ -99,6 +99,9 @@ function AdminSettings({ user }) {
         default_watermark_path: response.data.path,
       }));
 
+      // Refresh settings from server to get updated path
+      await fetchSettings();
+
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
       setMessage(error.response?.data?.error || 'Failed to upload watermark');
@@ -295,10 +298,13 @@ function AdminSettings({ user }) {
                       <div className="flex items-center gap-4">
                         <div className="p-4 border rounded bg-gray-50">
                           <img
-                            src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/${settings.default_watermark_path.replace(/\\/g, '/').replace('uploads/', 'uploads/')}`}
+                            src={`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/${settings.default_watermark_path.replace(/\\/g, '/')}`}
                             alt="Default watermark"
-                            className="max-h-32 max-w-xs"
-                            onError={(e) => { e.target.src = ''; e.target.alt = 'Watermark file not accessible'; }}
+                            className="max-h-32 max-w-xs object-contain"
+                            onError={(e) => {
+                              console.error('Failed to load watermark:', e.target.src);
+                              e.target.alt = 'Watermark file not accessible';
+                            }}
                           />
                         </div>
                         <Button
@@ -391,6 +397,12 @@ function AdminSettings({ user }) {
                     <p className="text-sm text-gray-500">
                       Scale relative to video size (0.15 = 15% of video width)
                     </p>
+                  </div>
+
+                  <div className="flex justify-end pt-4">
+                    <Button onClick={handleSubmit} disabled={saving}>
+                      {saving ? 'Saving...' : 'Save Watermark Settings'}
+                    </Button>
                   </div>
                 </div>
               </div>
