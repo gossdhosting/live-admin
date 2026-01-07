@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
+import { Wrench, CheckCircle, XCircle, Pencil, Trash2, Plus, Lightbulb } from 'lucide-react';
 
 function RtmpTemplatesManager() {
   const [templates, setTemplates] = useState([]);
@@ -145,9 +146,9 @@ function RtmpTemplatesManager() {
     setShowAddForm(false);
   };
 
-  const getPlatformIcon = (platform) => {
+  const getPlatformIcon = () => {
     // All templates are custom RTMP now
-    return '🔧';
+    return Wrench;
   };
 
   const getPlatformLabel = (platform) => {
@@ -171,16 +172,19 @@ function RtmpTemplatesManager() {
           <p style={{ margin: '0.5rem 0 0 0', color: '#7f8c8d', fontSize: '0.9rem' }}>
             Add custom RTMP servers (Restream.io, custom CDN, backup servers, etc.)
           </p>
-          <p style={{ margin: '0.25rem 0 0 0', color: '#95a5a6', fontSize: '0.85rem' }}>
-            💡 For Facebook, YouTube, and Twitch, use the Platforms tab to connect via OAuth
+          <p style={{ margin: '0.25rem 0 0 0', color: '#95a5a6', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Lightbulb className="w-4 h-4" />
+            <span>For Facebook, YouTube, and Twitch, use the Platforms tab to connect via OAuth</span>
           </p>
         </div>
         <button
           className="btn btn-primary"
           onClick={() => setShowAddForm(!showAddForm)}
-          style={{ padding: '0.75rem 1.5rem', fontSize: '1rem' }}
+          style={{ padding: '0.75rem 1.5rem', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
         >
-          {showAddForm ? 'Cancel' : '+ Add Template'}
+          {!showAddForm && <Plus className="w-4 h-4" />}
+          <span className="hidden sm:inline">{showAddForm ? 'Cancel' : 'Add Template'}</span>
+          <span className="sm:hidden">{showAddForm ? 'Cancel' : 'Add'}</span>
         </button>
       </div>
 
@@ -285,7 +289,9 @@ function RtmpTemplatesManager() {
             >
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-                  <span style={{ fontSize: '2rem' }}>{getPlatformIcon(template.platform)}</span>
+                  <div style={{ padding: '0.5rem', backgroundColor: '#f0f0f0', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {React.createElement(getPlatformIcon(), { className: 'w-8 h-8 text-gray-700' })}
+                  </div>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                       <h4 style={{ margin: 0, color: '#2c3e50', fontSize: '1.1rem' }}>
@@ -297,9 +303,22 @@ function RtmpTemplatesManager() {
                         borderRadius: '4px',
                         backgroundColor: template.enabled ? '#d4edda' : '#f8d7da',
                         color: template.enabled ? '#155724' : '#721c24',
-                        fontWeight: '600'
+                        fontWeight: '600',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.35rem'
                       }}>
-                        {template.enabled ? '✓ Enabled' : '✗ Disabled'}
+                        {template.enabled ? (
+                          <>
+                            <CheckCircle className="w-3.5 h-3.5" />
+                            <span>Enabled</span>
+                          </>
+                        ) : (
+                          <>
+                            <XCircle className="w-3.5 h-3.5" />
+                            <span>Disabled</span>
+                          </>
+                        )}
                       </span>
                     </div>
                     <span style={{
@@ -316,7 +335,7 @@ function RtmpTemplatesManager() {
                   {template.rtmp_url}
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
                 <button
                   className="btn"
                   onClick={() => handleToggleEnabled(template.id, template.enabled)}
@@ -327,24 +346,39 @@ function RtmpTemplatesManager() {
                     color: 'white',
                     border: 'none',
                     borderRadius: '4px',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
                   }}
                 >
-                  {template.enabled ? 'Disable' : 'Enable'}
+                  {template.enabled ? (
+                    <>
+                      <XCircle className="w-4 h-4" />
+                      <span className="hidden sm:inline">Disable</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="w-4 h-4" />
+                      <span className="hidden sm:inline">Enable</span>
+                    </>
+                  )}
                 </button>
                 <button
                   className="btn btn-primary"
                   onClick={() => handleEdit(template)}
-                  style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}
+                  style={{ fontSize: '0.9rem', padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
                 >
-                  Edit
+                  <Pencil className="w-4 h-4" />
+                  <span className="hidden sm:inline">Edit</span>
                 </button>
                 <button
                   className="btn btn-danger"
                   onClick={() => handleDelete(template.id)}
-                  style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}
+                  style={{ fontSize: '0.9rem', padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
                 >
-                  Delete
+                  <Trash2 className="w-4 h-4" />
+                  <span className="hidden sm:inline">Delete</span>
                 </button>
               </div>
             </div>

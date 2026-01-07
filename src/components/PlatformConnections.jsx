@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
+import { Facebook, Youtube, Twitch, Radio, CheckCircle, AlertTriangle } from 'lucide-react';
 
 function PlatformConnections() {
   const [connections, setConnections] = useState([]);
@@ -81,12 +82,12 @@ function PlatformConnections() {
   };
 
   const getPlatformIcon = (platform) => {
-    const icons = {
-      facebook: '📘',
-      youtube: '📺',
-      twitch: '🎮',
+    const iconMap = {
+      facebook: Facebook,
+      youtube: Youtube,
+      twitch: Twitch,
     };
-    return icons[platform] || '🔗';
+    return iconMap[platform] || Radio;
   };
 
   const getPlatformColor = (platform) => {
@@ -134,6 +135,7 @@ function PlatformConnections() {
         {['facebook', 'youtube', 'twitch'].map((platform) => {
           const connection = connections.find((c) => c.platform === platform);
           const isConnected = !!connection;
+          const PlatformIcon = getPlatformIcon(platform);
 
           return (
             <div
@@ -151,7 +153,6 @@ function PlatformConnections() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <div
                   style={{
-                    fontSize: '2rem',
                     width: '50px',
                     height: '50px',
                     display: 'flex',
@@ -161,7 +162,7 @@ function PlatformConnections() {
                     borderRadius: '8px',
                   }}
                 >
-                  {getPlatformIcon(platform)}
+                  <PlatformIcon size={32} color={getPlatformColor(platform)} />
                 </div>
                 <div>
                   <h4
@@ -176,8 +177,9 @@ function PlatformConnections() {
                   </h4>
                   {isConnected ? (
                     <div>
-                      <p style={{ margin: '0.25rem 0 0 0', color: '#2ecc71', fontSize: '0.9rem' }}>
-                        ✓ Connected as {connection.platform_user_name || connection.platform_user_email}
+                      <p style={{ margin: '0.25rem 0 0 0', color: '#2ecc71', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <CheckCircle size={16} />
+                        Connected as {connection.platform_user_name || connection.platform_user_email}
                       </p>
                       {connection.platform_channel_name && (
                         <p style={{ margin: '0.25rem 0 0 0', color: '#7f8c8d', fontSize: '0.85rem' }}>
@@ -185,8 +187,9 @@ function PlatformConnections() {
                         </p>
                       )}
                       {connection.is_expired && (
-                        <p style={{ margin: '0.25rem 0 0 0', color: '#e74c3c', fontSize: '0.85rem' }}>
-                          ⚠ Token expired - reconnect required
+                        <p style={{ margin: '0.25rem 0 0 0', color: '#e74c3c', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <AlertTriangle size={16} />
+                          Token expired - reconnect required
                         </p>
                       )}
                     </div>
