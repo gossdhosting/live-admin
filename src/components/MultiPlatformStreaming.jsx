@@ -193,7 +193,10 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
                         {conn.platform}
                       </div>
                       <div className="text-sm text-gray-500">
-                        {conn.platform_channel_name || conn.platform_user_name}
+                        {conn.platform === 'facebook'
+                          ? (conn.platform_page_name || conn.platform_user_name)
+                          : (conn.platform_channel_name || conn.platform_user_name)
+                        }
                       </div>
                     </div>
                   </div>

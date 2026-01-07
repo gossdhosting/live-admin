@@ -181,7 +181,12 @@ function PlatformConnections() {
                         <CheckCircle size={16} />
                         Connected as {connection.platform_user_name || connection.platform_user_email}
                       </p>
-                      {connection.platform_channel_name && (
+                      {(platform === 'facebook' && connection.platform_page_name) && (
+                        <p style={{ margin: '0.25rem 0 0 0', color: '#7f8c8d', fontSize: '0.85rem' }}>
+                          Page: {connection.platform_page_name}
+                        </p>
+                      )}
+                      {(platform !== 'facebook' && connection.platform_channel_name) && (
                         <p style={{ margin: '0.25rem 0 0 0', color: '#7f8c8d', fontSize: '0.85rem' }}>
                           Channel: {connection.platform_channel_name}
                         </p>
