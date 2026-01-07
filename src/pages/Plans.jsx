@@ -185,17 +185,17 @@ function Plans() {
                   </div>
 
                   <div className="flex items-center gap-2 text-sm">
+                    <span className="text-green-600 text-lg">✓</span>
+                    <span><strong>{plan.max_platform_connections || 1}</strong> Platform Connection{(plan.max_platform_connections || 1) > 1 ? 's' : ''}</span>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-sm">
                     <span className={`text-lg ${plan.custom_watermark ? 'text-green-600' : 'text-red-600'}`}>
                       {plan.custom_watermark ? '✓' : '✗'}
                     </span>
                     <span className={plan.custom_watermark ? '' : 'text-gray-500'}>
                       Custom Watermarks
                     </span>
-                  </div>
-
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="text-green-600 text-lg">✓</span>
-                    <span>Multi-platform Streaming</span>
                   </div>
 
                   <div className="flex items-center gap-2 text-sm">

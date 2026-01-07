@@ -19,6 +19,7 @@ function PlanManagement() {
     max_stream_duration: null,
     storage_limit_mb: 500,
     custom_watermark: false,
+    max_platform_connections: 1,
     is_active: true
   });
 
@@ -66,6 +67,7 @@ function PlanManagement() {
       max_stream_duration: null,
       storage_limit_mb: 500,
       custom_watermark: false,
+      max_platform_connections: 1,
       is_active: true
     });
     setShowModal(true);
@@ -84,6 +86,7 @@ function PlanManagement() {
       max_stream_duration: plan.max_stream_duration,
       storage_limit_mb: plan.storage_limit_mb,
       custom_watermark: plan.custom_watermark === 1,
+      max_platform_connections: plan.max_platform_connections || 1,
       is_active: plan.is_active === 1
     });
     setShowModal(true);
@@ -173,6 +176,7 @@ function PlanManagement() {
               <th style={{ padding: '0.75rem', textAlign: 'left' }}>Name</th>
               <th style={{ padding: '0.75rem', textAlign: 'left' }}>Price</th>
               <th style={{ padding: '0.75rem', textAlign: 'left' }}>Streams</th>
+              <th style={{ padding: '0.75rem', textAlign: 'left' }}>Platforms</th>
               <th style={{ padding: '0.75rem', textAlign: 'left' }}>Bitrate</th>
               <th style={{ padding: '0.75rem', textAlign: 'left' }}>Storage</th>
               <th style={{ padding: '0.75rem', textAlign: 'left' }}>Subscribers</th>
@@ -194,6 +198,7 @@ function PlanManagement() {
                   <div style={{ fontSize: '0.8rem', color: '#666' }}>${plan.price_yearly}/yr</div>
                 </td>
                 <td style={{ padding: '0.75rem' }}>{plan.max_concurrent_streams}</td>
+                <td style={{ padding: '0.75rem' }}>{plan.max_platform_connections || 1}</td>
                 <td style={{ padding: '0.75rem' }}>{plan.max_bitrate}k</td>
                 <td style={{ padding: '0.75rem' }}>
                   {plan.storage_limit_mb >= 1024
@@ -375,6 +380,23 @@ function PlanManagement() {
                   />
                   <small style={{ color: '#666' }}>1024 MB = 1 GB</small>
                 </div>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="max_platform_connections">Max Platform Connections *</label>
+                <input
+                  type="number"
+                  id="max_platform_connections"
+                  name="max_platform_connections"
+                  className="form-control"
+                  value={formData.max_platform_connections}
+                  onChange={handleInputChange}
+                  min="1"
+                  required
+                />
+                <small style={{ color: '#666' }}>
+                  Max number of platforms (Facebook, YouTube, Twitch, Custom RTMP) users can connect
+                </small>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
