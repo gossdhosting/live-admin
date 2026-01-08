@@ -256,7 +256,11 @@ function PlanManagement() {
 
       {/* Create/Edit Modal */}
       {showModal && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+        <div className="modal-overlay" onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            setShowModal(false);
+          }
+        }}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', background: '#fff' }}>
             <h3>{modalMode === 'create' ? 'Create New Plan' : 'Edit Plan'}</h3>
 

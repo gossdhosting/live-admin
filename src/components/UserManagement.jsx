@@ -271,7 +271,11 @@ function UserManagement() {
 
       {/* Create/Edit Modal */}
       {showModal && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+        <div className="modal-overlay" onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            setShowModal(false);
+          }
+        }}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px', background: '#fff' }}>
             <h3>{modalMode === 'create' ? 'Create New User' : 'Edit User'}</h3>
 
@@ -396,7 +400,11 @@ function UserManagement() {
 
       {/* User Details Modal */}
       {showDetailsModal && (
-        <div className="modal-overlay" onClick={() => setShowDetailsModal(false)}>
+        <div className="modal-overlay" onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            setShowDetailsModal(false);
+          }
+        }}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto' }}>
             <h3>User Details: {selectedUser?.email}</h3>
 
