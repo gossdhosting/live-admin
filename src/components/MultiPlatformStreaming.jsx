@@ -171,25 +171,33 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
           <h4 className="text-sm text-gray-600 font-medium">
             Connected Platforms (OAuth)
           </h4>
-          {userStats && (
-            <Badge variant={(platformStreams.length + rtmpDestinations.length) >= userStats.limits.max_platform_connections ? 'destructive' : 'secondary'}>
-              {platformStreams.length + rtmpDestinations.length} / {userStats.limits.max_platform_connections} Streaming
-            </Badge>
-          )}
+          {userStats && (() => {
+            const enabledRtmpCount = rtmpDestinations.filter(d => d.enabled === 1).length;
+            const totalStreams = platformStreams.length + enabledRtmpCount;
+            return (
+              <Badge variant={totalStreams >= userStats.limits.max_platform_connections ? 'destructive' : 'secondary'}>
+                {totalStreams} / {userStats.limits.max_platform_connections} Streaming
+              </Badge>
+            );
+          })()}
         </div>
 
         {/* Platform Streaming Limit Warning */}
-        {userStats && (platformStreams.length + rtmpDestinations.length) >= userStats.limits.max_platform_connections && (
-          <Alert className="mb-4 bg-yellow-50 border-yellow-300">
-            <Lightbulb className="h-4 w-4 text-yellow-600" />
-            <AlertDescription className="text-yellow-800">
-              <strong>Streaming Limit Reached!</strong> Your <strong>{userStats.plan?.name}</strong> plan allows streaming to <strong>{userStats.limits.max_platform_connections}</strong> destination{userStats.limits.max_platform_connections === 1 ? '' : 's'} simultaneously (platforms + custom RTMP).
-              {userStats.limits.max_platform_connections < 3 && (
-                <span> Remove an active stream or <a href="/plans" className="underline font-semibold">upgrade your plan</a> to stream to more destinations.</span>
-              )}
-            </AlertDescription>
-          </Alert>
-        )}
+        {userStats && (() => {
+          const enabledRtmpCount = rtmpDestinations.filter(d => d.enabled === 1).length;
+          const totalStreams = platformStreams.length + enabledRtmpCount;
+          return totalStreams >= userStats.limits.max_platform_connections && (
+            <Alert className="mb-4 bg-yellow-50 border-yellow-300">
+              <Lightbulb className="h-4 w-4 text-yellow-600" />
+              <AlertDescription className="text-yellow-800">
+                <strong>Streaming Limit Reached!</strong> Your <strong>{userStats.plan?.name}</strong> plan allows streaming to <strong>{userStats.limits.max_platform_connections}</strong> destination{userStats.limits.max_platform_connections === 1 ? '' : 's'} simultaneously (platforms + custom RTMP).
+                {userStats.limits.max_platform_connections < 3 && (
+                  <span> Remove an active stream or <a href="/plans" className="underline font-semibold">upgrade your plan</a> to stream to more destinations.</span>
+                )}
+              </AlertDescription>
+            </Alert>
+          );
+        })()}
 
         {platformConnections.length === 0 ? (
           <p className="text-gray-500 text-sm m-0">
@@ -204,10 +212,11 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
 
               const PlatformIcon = getPlatformIcon(conn.platform);
 
-              // Check if limit is reached - count both platform streams and RTMP destinations
+              // Check if limit is reached - count both platform streams and enabled RTMP destinations
               // If this platform already has a stream, always allow showing it
               // Otherwise, check if we've reached the limit for new streams
-              const totalStreams = platformStreams.length + rtmpDestinations.length;
+              const enabledRtmpCount = rtmpDestinations.filter(d => d.enabled === 1).length;
+              const totalStreams = platformStreams.length + enabledRtmpCount;
               const canGoLive = existingStream || !userStats || totalStreams < userStats.limits.max_platform_connections;
 
               return (
@@ -299,8 +308,9 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
                 (dest) => dest.template_id === template.id && dest.enabled === 1
               );
 
-              // Check if limit is reached - count both platform streams and RTMP destinations
-              const totalStreams = platformStreams.length + rtmpDestinations.length;
+              // Check if limit is reached - count both platform streams and enabled RTMP destinations
+              const enabledRtmpCount = rtmpDestinations.filter(d => d.enabled === 1).length;
+              const totalStreams = platformStreams.length + enabledRtmpCount;
               const canGoLive = activeDestination || !userStats || totalStreams < userStats.limits.max_platform_connections;
 
               return (
