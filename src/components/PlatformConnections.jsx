@@ -8,6 +8,9 @@ function PlatformConnections() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [connecting, setConnecting] = useState(null);
+  const [facebookPages, setFacebookPages] = useState([]);
+  const [selectedFacebookPage, setSelectedFacebookPage] = useState(null);
+  const [loadingPages, setLoadingPages] = useState(false);
 
   useEffect(() => {
     fetchConnections();
@@ -21,11 +24,47 @@ function PlatformConnections() {
       ]);
       setConnections(connectionsRes.data.connections || []);
       setUserStats(statsRes.data);
+
+      // If Facebook is connected, fetch available pages
+      const fbConnection = connectionsRes.data.connections.find(c => c.platform === 'facebook');
+      if (fbConnection) {
+        fetchFacebookPages();
+      }
     } catch (error) {
       console.error('Failed to fetch platform connections:', error);
       setMessage('Failed to load platform connections');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchFacebookPages = async () => {
+    setLoadingPages(true);
+    try {
+      const response = await api.get('/platforms/facebook/pages');
+      setFacebookPages(response.data.pages || []);
+      setSelectedFacebookPage(response.data.selectedPageId);
+    } catch (error) {
+      console.error('Failed to fetch Facebook pages:', error);
+    } finally {
+      setLoadingPages(false);
+    }
+  };
+
+  const handlePageChange = async (e) => {
+    const pageId = e.target.value;
+    setLoadingPages(true);
+    try {
+      await api.put('/platforms/facebook/select-page', { pageId });
+      setSelectedFacebookPage(pageId);
+      setMessage('Facebook page updated successfully');
+      fetchConnections(); // Refresh to show updated page name
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      console.error('Failed to update Facebook page:', error);
+      setMessage('Failed to update Facebook page');
+    } finally {
+      setLoadingPages(false);
     }
   };
 
@@ -186,7 +225,34 @@ function PlatformConnections() {
                         <CheckCircle size={16} />
                         Connected as {connection.platform_user_name || connection.platform_user_email}
                       </p>
-                      {(platform === 'facebook' && connection.platform_page_name) && (
+                      {(platform === 'facebook' && facebookPages.length > 0) && (
+                        <div style={{ marginTop: '0.5rem' }}>
+                          <label style={{ display: 'block', fontSize: '0.85rem', color: '#7f8c8d', marginBottom: '0.25rem' }}>
+                            Select Page:
+                          </label>
+                          <select
+                            value={selectedFacebookPage || ''}
+                            onChange={handlePageChange}
+                            disabled={loadingPages}
+                            style={{
+                              padding: '0.4rem 0.6rem',
+                              fontSize: '0.85rem',
+                              border: '1px solid #e0e0e0',
+                              borderRadius: '4px',
+                              backgroundColor: loadingPages ? '#f5f5f5' : '#fff',
+                              cursor: loadingPages ? 'not-allowed' : 'pointer',
+                              minWidth: '200px'
+                            }}
+                          >
+                            {facebookPages.map(page => (
+                              <option key={page.id} value={page.id}>
+                                {page.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+                      {(platform === 'facebook' && connection.platform_page_name && facebookPages.length === 0) && (
                         <p style={{ margin: '0.25rem 0 0 0', color: '#7f8c8d', fontSize: '0.85rem' }}>
                           Page: {connection.platform_page_name}
                         </p>
