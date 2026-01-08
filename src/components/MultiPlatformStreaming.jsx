@@ -52,6 +52,7 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
       if (platform === 'facebook') {
         const pagesRes = await api.get('/platforms/facebook/pages');
         const pages = pagesRes.data.pages;
+        const selectedPageId = pagesRes.data.selectedPageId;
 
         if (pages.length === 0) {
           alert('No Facebook pages found. Please ensure your account has pages with publishing permissions.');
@@ -59,7 +60,15 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
           return;
         }
 
-        const page = pages[0];
+        // Use the selected page from settings, or fall back to first page
+        const page = pages.find(p => p.id === selectedPageId) || pages[0];
+
+        if (!page || !page.access_token) {
+          alert('Facebook page access token not found. Please reconnect your Facebook account.');
+          setCreating(null);
+          return;
+        }
+
         response = await api.post('/platforms/facebook/create-stream', {
           channelId,
           pageId: page.id,
