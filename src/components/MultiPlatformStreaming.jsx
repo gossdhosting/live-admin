@@ -172,20 +172,20 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
             Connected Platforms (OAuth)
           </h4>
           {userStats && (
-            <Badge variant={platformStreams.length >= userStats.limits.max_platform_connections ? 'destructive' : 'secondary'}>
-              {platformStreams.length} / {userStats.limits.max_platform_connections} Streaming
+            <Badge variant={(platformStreams.length + rtmpDestinations.length) >= userStats.limits.max_platform_connections ? 'destructive' : 'secondary'}>
+              {platformStreams.length + rtmpDestinations.length} / {userStats.limits.max_platform_connections} Streaming
             </Badge>
           )}
         </div>
 
         {/* Platform Streaming Limit Warning */}
-        {userStats && platformStreams.length >= userStats.limits.max_platform_connections && (
+        {userStats && (platformStreams.length + rtmpDestinations.length) >= userStats.limits.max_platform_connections && (
           <Alert className="mb-4 bg-yellow-50 border-yellow-300">
             <Lightbulb className="h-4 w-4 text-yellow-600" />
             <AlertDescription className="text-yellow-800">
-              <strong>Streaming Limit Reached!</strong> Your <strong>{userStats.plan?.name}</strong> plan allows streaming to <strong>{userStats.limits.max_platform_connections}</strong> platform{userStats.limits.max_platform_connections === 1 ? '' : 's'} simultaneously.
+              <strong>Streaming Limit Reached!</strong> Your <strong>{userStats.plan?.name}</strong> plan allows streaming to <strong>{userStats.limits.max_platform_connections}</strong> destination{userStats.limits.max_platform_connections === 1 ? '' : 's'} simultaneously (platforms + custom RTMP).
               {userStats.limits.max_platform_connections < 3 && (
-                <span> Remove an active stream or <a href="/plans" className="underline font-semibold">upgrade your plan</a> to stream to more platforms.</span>
+                <span> Remove an active stream or <a href="/plans" className="underline font-semibold">upgrade your plan</a> to stream to more destinations.</span>
               )}
             </AlertDescription>
           </Alert>
@@ -204,9 +204,11 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
 
               const PlatformIcon = getPlatformIcon(conn.platform);
 
-              // Check if limit is reached - if this platform already has a stream, always allow showing it
+              // Check if limit is reached - count both platform streams and RTMP destinations
+              // If this platform already has a stream, always allow showing it
               // Otherwise, check if we've reached the limit for new streams
-              const canGoLive = existingStream || !userStats || platformStreams.length < userStats.limits.max_platform_connections;
+              const totalStreams = platformStreams.length + rtmpDestinations.length;
+              const canGoLive = existingStream || !userStats || totalStreams < userStats.limits.max_platform_connections;
 
               return (
                 <div
@@ -297,6 +299,10 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
                 (dest) => dest.template_id === template.id && dest.enabled === 1
               );
 
+              // Check if limit is reached - count both platform streams and RTMP destinations
+              const totalStreams = platformStreams.length + rtmpDestinations.length;
+              const canGoLive = activeDestination || !userStats || totalStreams < userStats.limits.max_platform_connections;
+
               return (
                 <div
                   key={template.id}
@@ -335,14 +341,21 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
                         </Button>
                       </div>
                     ) : channelStatus === 'stopped' ? (
-                      <Button
-                        onClick={() => handleToggleTemplate(template.id, false)}
-                        className={`gap-1.5 ${getPlatformButtonClass(template.platform)}`}
-                        size="sm"
-                      >
-                        <Circle className="w-3 h-3 fill-current" />
-                        Go Live
-                      </Button>
+                      canGoLive ? (
+                        <Button
+                          onClick={() => handleToggleTemplate(template.id, false)}
+                          className={`gap-1.5 ${getPlatformButtonClass(template.platform)}`}
+                          size="sm"
+                        >
+                          <Circle className="w-3 h-3 fill-current" />
+                          Go Live
+                        </Button>
+                      ) : (
+                        <Badge variant="destructive" className="gap-1.5">
+                          <AlertTriangle className="w-3 h-3" />
+                          Limit Reached
+                        </Badge>
+                      )
                     ) : (
                       <span className="text-sm text-gray-500">
                         Stop stream to enable
