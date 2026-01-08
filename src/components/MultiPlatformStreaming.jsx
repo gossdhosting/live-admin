@@ -11,6 +11,7 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
   const [rtmpTemplates, setRtmpTemplates] = useState([]);
   const [rtmpDestinations, setRtmpDestinations] = useState([]);
   const [platformStreams, setPlatformStreams] = useState([]);
+  const [userStats, setUserStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(null);
 
@@ -20,17 +21,19 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
 
   const fetchAll = async () => {
     try {
-      const [connectionsRes, templatesRes, destinationsRes, streamsRes] = await Promise.all([
+      const [connectionsRes, templatesRes, destinationsRes, streamsRes, statsRes] = await Promise.all([
         api.get('/platforms/connections'),
         api.get('/rtmp/templates?enabled=true'),
         api.get(`/channels/${channelId}/rtmp`),
         api.get(`/platforms/streams/${channelId}`),
+        api.get('/users/stats'),
       ]);
 
       setPlatformConnections(connectionsRes.data.connections || []);
       setRtmpTemplates(templatesRes.data.templates || []);
       setRtmpDestinations(destinationsRes.data.destinations || []);
       setPlatformStreams(streamsRes.data.streams || []);
+      setUserStats(statsRes.data);
     } catch (error) {
       console.error('Failed to fetch multi-platform data:', error);
     } finally {
@@ -164,9 +167,29 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
 
       {/* OAuth Platform Connections */}
       <div className="mb-6">
-        <h4 className="text-sm text-gray-600 mb-3 font-medium">
-          Connected Platforms (OAuth)
-        </h4>
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="text-sm text-gray-600 font-medium">
+            Connected Platforms (OAuth)
+          </h4>
+          {userStats && (
+            <Badge variant={platformConnections.length >= userStats.limits.max_platform_connections ? 'destructive' : 'secondary'}>
+              {platformConnections.length} / {userStats.limits.max_platform_connections} Connected
+            </Badge>
+          )}
+        </div>
+
+        {/* Platform Connection Limit Warning */}
+        {userStats && platformConnections.length >= userStats.limits.max_platform_connections && (
+          <Alert className="mb-4 bg-yellow-50 border-yellow-300">
+            <Lightbulb className="h-4 w-4 text-yellow-600" />
+            <AlertDescription className="text-yellow-800">
+              <strong>Platform Limit Reached!</strong> Your <strong>{userStats.plan?.name}</strong> plan allows <strong>{userStats.limits.max_platform_connections}</strong> platform connection{userStats.limits.max_platform_connections === 1 ? '' : 's'}.
+              {userStats.limits.max_platform_connections < 3 && (
+                <span> Upgrade to connect more platforms. <a href="/plans" className="underline font-semibold">View Plans</a></span>
+              )}
+            </AlertDescription>
+          </Alert>
+        )}
 
         {platformConnections.length === 0 ? (
           <p className="text-gray-500 text-sm m-0">

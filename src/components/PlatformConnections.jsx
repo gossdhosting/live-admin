@@ -4,6 +4,7 @@ import { Facebook, Youtube, Twitch, Radio, CheckCircle, AlertTriangle } from 'lu
 
 function PlatformConnections() {
   const [connections, setConnections] = useState([]);
+  const [userStats, setUserStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [connecting, setConnecting] = useState(null);
@@ -14,8 +15,12 @@ function PlatformConnections() {
 
   const fetchConnections = async () => {
     try {
-      const response = await api.get('/platforms/connections');
-      setConnections(response.data.connections || []);
+      const [connectionsRes, statsRes] = await Promise.all([
+        api.get('/platforms/connections'),
+        api.get('/users/stats'),
+      ]);
+      setConnections(connectionsRes.data.connections || []);
+      setUserStats(statsRes.data);
     } catch (error) {
       console.error('Failed to fetch platform connections:', error);
       setMessage('Failed to load platform connections');
@@ -25,6 +30,12 @@ function PlatformConnections() {
   };
 
   const handleConnect = async (platform) => {
+    // Check platform connection limit
+    if (userStats && connections.length >= userStats.limits.max_platform_connections) {
+      setMessage(`Platform Limit Reached! Your ${userStats.plan?.name} plan allows ${userStats.limits.max_platform_connections} platform connection${userStats.limits.max_platform_connections === 1 ? '' : 's'}. Please upgrade to connect more platforms.`);
+      return;
+    }
+
     setConnecting(platform);
     setMessage('');
 
@@ -109,9 +120,23 @@ function PlatformConnections() {
 
   return (
     <div>
-      <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem', fontWeight: '600' }}>
-        Platform Connections
-      </h3>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '600' }}>
+          Platform Connections
+        </h3>
+        {userStats && (
+          <span style={{
+            padding: '0.25rem 0.75rem',
+            backgroundColor: connections.length >= userStats.limits.max_platform_connections ? '#fee' : '#e8f4fd',
+            color: connections.length >= userStats.limits.max_platform_connections ? '#c00' : '#0066cc',
+            borderRadius: '12px',
+            fontSize: '0.85rem',
+            fontWeight: '600',
+          }}>
+            {connections.length} / {userStats.limits.max_platform_connections} Connected
+          </span>
+        )}
+      </div>
       <p style={{ color: '#7f8c8d', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
         Connect your Facebook, YouTube, and Twitch accounts to stream directly to these platforms.
       </p>
