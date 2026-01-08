@@ -298,7 +298,7 @@ function AdminSettings({ user }) {
                       <div className="flex items-center gap-4">
                         <div className="p-4 border rounded bg-gray-50">
                           <img
-                            src={`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/${settings.default_watermark_path.replace(/\\/g, '/')}`}
+                            src={`${(import.meta.env.VITE_API_URL || 'http://localhost:3000').replace('/api', '')}/${settings.default_watermark_path.replace(/\\/g, '/')}`}
                             alt="Default watermark"
                             className="max-h-32 max-w-xs object-contain"
                             onError={(e) => {
