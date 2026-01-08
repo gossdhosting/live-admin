@@ -9,7 +9,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Alert, AlertDescription } from '../components/ui/alert';
-import { Settings as SettingsIcon, Users, Gem } from 'lucide-react';
+import { Settings as SettingsIcon, Users, Gem, Mail } from 'lucide-react';
 
 function AdminSettings({ user }) {
   const navigate = useNavigate();
@@ -21,6 +21,9 @@ function AdminSettings({ user }) {
   const [watermarkFile, setWatermarkFile] = useState(null);
   const [watermarkUploading, setWatermarkUploading] = useState(false);
   const [watermarkPreview, setWatermarkPreview] = useState(null);
+  const [testEmail, setTestEmail] = useState('');
+  const [testingSMTP, setTestingSMTP] = useState(false);
+  const [smtpMessage, setSmtpMessage] = useState('');
 
   useEffect(() => {
     // Redirect if not admin
@@ -147,6 +150,28 @@ function AdminSettings({ user }) {
     }
   };
 
+  const handleTestSMTP = async () => {
+    if (!testEmail) {
+      setSmtpMessage('Please enter a test email address');
+      setTimeout(() => setSmtpMessage(''), 3000);
+      return;
+    }
+
+    setTestingSMTP(true);
+    setSmtpMessage('');
+
+    try {
+      const response = await api.post('/settings/test-smtp', { testEmail });
+      setSmtpMessage(response.data.message);
+      setTimeout(() => setSmtpMessage(''), 5000);
+    } catch (error) {
+      setSmtpMessage(error.response?.data?.error || 'Failed to send test email');
+      setTimeout(() => setSmtpMessage(''), 5000);
+    } finally {
+      setTestingSMTP(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -169,11 +194,15 @@ function AdminSettings({ user }) {
 
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 h-auto">
+            <TabsList className="grid w-full grid-cols-4 h-auto">
               <TabsTrigger value="system" className="text-xs sm:text-sm gap-1.5 py-2">
                 <SettingsIcon className="w-4 h-4" />
                 <span className="hidden sm:inline">System Settings</span>
                 <span className="sm:hidden">System</span>
+              </TabsTrigger>
+              <TabsTrigger value="smtp" className="text-xs sm:text-sm gap-1.5 py-2">
+                <Mail className="w-4 h-4" />
+                <span>SMTP</span>
               </TabsTrigger>
               <TabsTrigger value="users" className="text-xs sm:text-sm gap-1.5 py-2">
                 <Users className="w-4 h-4" />
@@ -419,6 +448,174 @@ function AdminSettings({ user }) {
                   <p className="text-gray-500">
                     Update these values in the backend .env file
                   </p>
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* SMTP Settings Tab */}
+            <TabsContent value="smtp" className="mt-6 space-y-6">
+              {smtpMessage && (
+                <Alert className={smtpMessage.includes('success') || smtpMessage.includes('sent') ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
+                  <AlertDescription className={smtpMessage.includes('success') || smtpMessage.includes('sent') ? 'text-green-800' : 'text-red-800'}>
+                    {smtpMessage}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Email Configuration</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Configure SMTP settings for sending email notifications (stream alerts, user notifications, etc.)
+                </p>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="smtp_host">SMTP Host *</Label>
+                    <Input
+                      type="text"
+                      id="smtp_host"
+                      placeholder="smtp.gmail.com"
+                      value={settings.smtp_host || ''}
+                      onChange={(e) => handleChange('smtp_host', e.target.value)}
+                    />
+                    <p className="text-xs text-gray-500">
+                      Your SMTP server address
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="smtp_port">SMTP Port *</Label>
+                    <Input
+                      type="number"
+                      id="smtp_port"
+                      placeholder="587"
+                      value={settings.smtp_port || ''}
+                      onChange={(e) => handleChange('smtp_port', e.target.value)}
+                    />
+                    <p className="text-xs text-gray-500">
+                      Common: 587 (TLS), 465 (SSL), 25 (no encryption)
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="smtp_secure">Use SSL/TLS</Label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="smtp_secure"
+                      checked={settings.smtp_secure === '1'}
+                      onChange={(e) => handleChange('smtp_secure', e.target.checked ? '1' : '0')}
+                      className="h-4 w-4"
+                    />
+                    <label htmlFor="smtp_secure" className="text-sm">
+                      Enable SSL/TLS encryption (recommended for port 465)
+                    </label>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    For port 587, leave unchecked (it uses STARTTLS automatically)
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="smtp_user">SMTP Username *</Label>
+                    <Input
+                      type="text"
+                      id="smtp_user"
+                      placeholder="your-email@example.com"
+                      value={settings.smtp_user || ''}
+                      onChange={(e) => handleChange('smtp_user', e.target.value)}
+                      autoComplete="username"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="smtp_password">SMTP Password *</Label>
+                    <Input
+                      type="password"
+                      id="smtp_password"
+                      placeholder="••••••••"
+                      value={settings.smtp_password || ''}
+                      onChange={(e) => handleChange('smtp_password', e.target.value)}
+                      autoComplete="current-password"
+                    />
+                    <p className="text-xs text-gray-500">
+                      For Gmail, use an App Password
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="smtp_from_email">From Email Address *</Label>
+                    <Input
+                      type="email"
+                      id="smtp_from_email"
+                      placeholder="noreply@zebcast.app"
+                      value={settings.smtp_from_email || ''}
+                      onChange={(e) => handleChange('smtp_from_email', e.target.value)}
+                    />
+                    <p className="text-xs text-gray-500">
+                      Email address shown as sender
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="smtp_from_name">From Name</Label>
+                    <Input
+                      type="text"
+                      id="smtp_from_name"
+                      placeholder="ZebCast"
+                      value={settings.smtp_from_name || ''}
+                      onChange={(e) => handleChange('smtp_from_name', e.target.value)}
+                    />
+                    <p className="text-xs text-gray-500">
+                      Display name for sender
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex justify-end">
+                  <Button type="submit" disabled={saving}>
+                    {saving ? 'Saving...' : 'Save SMTP Settings'}
+                  </Button>
+                </div>
+              </form>
+
+              <div className="pt-6 border-t">
+                <h3 className="text-lg font-semibold mb-4">Test SMTP Configuration</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Send a test email to verify your SMTP settings are working correctly.
+                </p>
+
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <Input
+                      type="email"
+                      placeholder="Enter test email address"
+                      value={testEmail}
+                      onChange={(e) => setTestEmail(e.target.value)}
+                    />
+                  </div>
+                  <Button
+                    onClick={handleTestSMTP}
+                    disabled={testingSMTP || !testEmail}
+                  >
+                    {testingSMTP ? 'Sending...' : 'Send Test Email'}
+                  </Button>
+                </div>
+
+                <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded text-sm">
+                  <p className="font-semibold text-blue-900 mb-2">Gmail Configuration Tips:</p>
+                  <ul className="list-disc list-inside space-y-1 text-blue-800">
+                    <li>Enable 2-Step Verification in your Google Account</li>
+                    <li>Generate an App Password at: myaccount.google.com/apppasswords</li>
+                    <li>Use smtp.gmail.com as host, port 587, SSL/TLS unchecked</li>
+                    <li>Use your Gmail address as username and the App Password as password</li>
+                  </ul>
                 </div>
               </div>
             </TabsContent>
