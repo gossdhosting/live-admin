@@ -172,8 +172,8 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
             Connected Platforms (OAuth)
           </h4>
           {userStats && (
-            <Badge variant={platformConnections.length >= userStats.limits.max_platform_connections ? 'destructive' : 'secondary'}>
-              {platformConnections.length} / {userStats.limits.max_platform_connections} Connected
+            <Badge variant={platformStreams.length >= userStats.limits.max_platform_connections ? 'destructive' : 'secondary'}>
+              {platformStreams.length} / {userStats.limits.max_platform_connections} Streaming
             </Badge>
           )}
         </div>
@@ -204,9 +204,9 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
 
               const PlatformIcon = getPlatformIcon(conn.platform);
 
-              // Check if limit is reached (count active streams, not just created ones)
-              const activeStreamCount = platformStreams.filter(s => s.status === 'active' || s.platform_stream_id).length;
-              const canGoLive = !userStats || activeStreamCount < userStats.limits.max_platform_connections;
+              // Check if limit is reached - if this platform already has a stream, always allow showing it
+              // Otherwise, check if we've reached the limit for new streams
+              const canGoLive = existingStream || !userStats || platformStreams.length < userStats.limits.max_platform_connections;
 
               return (
                 <div
