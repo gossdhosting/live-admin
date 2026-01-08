@@ -4,7 +4,7 @@ import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Alert, AlertDescription } from './ui/alert';
-import { Facebook, Youtube, Twitch, Wrench, Radio, Circle, CheckCircle, Lightbulb } from 'lucide-react';
+import { Facebook, Youtube, Twitch, Wrench, Radio, Circle, CheckCircle, Lightbulb, AlertTriangle } from 'lucide-react';
 
 function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDescription, channelStatus }) {
   const [platformConnections, setPlatformConnections] = useState([]);
@@ -178,14 +178,14 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
           )}
         </div>
 
-        {/* Platform Connection Limit Warning */}
-        {userStats && platformConnections.length >= userStats.limits.max_platform_connections && (
+        {/* Platform Streaming Limit Warning */}
+        {userStats && platformStreams.length >= userStats.limits.max_platform_connections && (
           <Alert className="mb-4 bg-yellow-50 border-yellow-300">
             <Lightbulb className="h-4 w-4 text-yellow-600" />
             <AlertDescription className="text-yellow-800">
-              <strong>Platform Limit Reached!</strong> Your <strong>{userStats.plan?.name}</strong> plan allows <strong>{userStats.limits.max_platform_connections}</strong> platform connection{userStats.limits.max_platform_connections === 1 ? '' : 's'}.
+              <strong>Streaming Limit Reached!</strong> Your <strong>{userStats.plan?.name}</strong> plan allows streaming to <strong>{userStats.limits.max_platform_connections}</strong> platform{userStats.limits.max_platform_connections === 1 ? '' : 's'} simultaneously.
               {userStats.limits.max_platform_connections < 3 && (
-                <span> Upgrade to connect more platforms. <a href="/plans" className="underline font-semibold">View Plans</a></span>
+                <span> Remove an active stream or <a href="/plans" className="underline font-semibold">upgrade your plan</a> to stream to more platforms.</span>
               )}
             </AlertDescription>
           </Alert>
@@ -203,6 +203,10 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
               );
 
               const PlatformIcon = getPlatformIcon(conn.platform);
+
+              // Check if limit is reached (count active streams, not just created ones)
+              const activeStreamCount = platformStreams.filter(s => s.status === 'active' || s.platform_stream_id).length;
+              const canGoLive = !userStats || activeStreamCount < userStats.limits.max_platform_connections;
 
               return (
                 <div
@@ -247,15 +251,22 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
                         </Button>
                       </div>
                     ) : channelStatus === 'stopped' ? (
-                      <Button
-                        onClick={() => handleCreatePlatformStream(conn.platform, conn.id)}
-                        disabled={creating === conn.platform}
-                        className={`gap-1.5 ${getPlatformButtonClass(conn.platform)}`}
-                        size="sm"
-                      >
-                        <Circle className="w-3 h-3 fill-current" />
-                        {creating === conn.platform ? 'Going Live...' : 'Go Live'}
-                      </Button>
+                      canGoLive ? (
+                        <Button
+                          onClick={() => handleCreatePlatformStream(conn.platform, conn.id)}
+                          disabled={creating === conn.platform}
+                          className={`gap-1.5 ${getPlatformButtonClass(conn.platform)}`}
+                          size="sm"
+                        >
+                          <Circle className="w-3 h-3 fill-current" />
+                          {creating === conn.platform ? 'Going Live...' : 'Go Live'}
+                        </Button>
+                      ) : (
+                        <Badge variant="destructive" className="gap-1.5">
+                          <AlertTriangle className="w-3 h-3" />
+                          Limit Reached
+                        </Badge>
+                      )
                     ) : (
                       <span className="text-sm text-gray-500">
                         Stop stream to enable

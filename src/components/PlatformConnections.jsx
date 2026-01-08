@@ -30,12 +30,6 @@ function PlatformConnections() {
   };
 
   const handleConnect = async (platform) => {
-    // Check platform connection limit
-    if (userStats && connections.length >= userStats.limits.max_platform_connections) {
-      setMessage(`Platform Limit Reached! Your ${userStats.plan?.name} plan allows ${userStats.limits.max_platform_connections} platform connection${userStats.limits.max_platform_connections === 1 ? '' : 's'}. Please upgrade to connect more platforms.`);
-      return;
-    }
-
     setConnecting(platform);
     setMessage('');
 
@@ -120,23 +114,9 @@ function PlatformConnections() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '600' }}>
-          Platform Connections
-        </h3>
-        {userStats && (
-          <span style={{
-            padding: '0.25rem 0.75rem',
-            backgroundColor: connections.length >= userStats.limits.max_platform_connections ? '#fee' : '#e8f4fd',
-            color: connections.length >= userStats.limits.max_platform_connections ? '#c00' : '#0066cc',
-            borderRadius: '12px',
-            fontSize: '0.85rem',
-            fontWeight: '600',
-          }}>
-            {connections.length} / {userStats.limits.max_platform_connections} Connected
-          </span>
-        )}
-      </div>
+      <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem', fontWeight: '600' }}>
+        Platform Connections
+      </h3>
       <p style={{ color: '#7f8c8d', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
         Connect your Facebook, YouTube, and Twitch accounts to stream directly to these platforms.
       </p>
