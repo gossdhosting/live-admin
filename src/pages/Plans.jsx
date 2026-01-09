@@ -118,7 +118,7 @@ function Plans() {
 
       {/* Plans Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {plans.map((plan) => {
+        {plans.filter(plan => !plan.is_hidden).map((plan) => {
           const isCurrentPlan = userStats && userStats.plan.id === plan.id;
           const colorClass = planColors[plan.name] || 'bg-blue-500';
           const borderClass = planBorderColors[plan.name] || 'border-blue-500';

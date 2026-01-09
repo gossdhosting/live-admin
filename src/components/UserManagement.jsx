@@ -56,12 +56,13 @@ function UserManagement() {
   const openCreateModal = () => {
     setModalMode('create');
     setSelectedUser(null);
+    const visiblePlans = plans.filter(plan => !plan.is_hidden);
     setFormData({
       email: '',
       password: '',
       name: '',
       role: 'user',
-      plan_id: plans.length > 0 ? plans[0].id : '',
+      plan_id: visiblePlans.length > 0 ? visiblePlans[0].id : '',
       subscription_type: 'monthly',
       status: 'active'
     });
@@ -396,7 +397,7 @@ function UserManagement() {
                   onChange={handleInputChange}
                   required
                 >
-                  {plans.map(plan => (
+                  {plans.filter(plan => !plan.is_hidden).map(plan => (
                     <option key={plan.id} value={plan.id}>
                       {plan.name} - ${plan.price_monthly}/month
                     </option>
