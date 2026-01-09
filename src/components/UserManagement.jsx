@@ -42,7 +42,8 @@ function UserManagement() {
 
   const fetchPlans = async () => {
     try {
-      const response = await api.get('/plans');
+      // Use admin endpoint to get all plans including hidden ones
+      const response = await api.get('/plans/admin/all');
       setPlans(response.data.plans);
     } catch (error) {
       console.error('Failed to fetch plans:', error);
