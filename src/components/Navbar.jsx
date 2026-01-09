@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from './ui/button';
-import { LayoutDashboard, Clapperboard, Gem, Settings, Crown, Video, LogOut } from 'lucide-react';
+import { Badge } from './ui/badge';
+import { LayoutDashboard, Clapperboard, Gem, Settings, Crown, Video, LogOut, ArrowUpCircle } from 'lucide-react';
 
 function Navbar({ user, onLogout }) {
   const navigate = useNavigate();
@@ -85,8 +86,21 @@ function Navbar({ user, onLogout }) {
               <div className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-500 to-red-500 flex items-center justify-center font-bold text-white">
                 {user.email.charAt(0).toUpperCase()}
               </div>
-              <span className="text-sm font-medium">{user.email}</span>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium">{user.plan_name || 'Free'} Plan</span>
+                <Badge variant="secondary" className="text-xs w-fit">
+                  {user.plan_name || 'Free'}
+                </Badge>
+              </div>
             </div>
+            {(!user.plan_name || user.plan_name === 'Free') && (
+              <Link to="/plans">
+                <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 font-semibold gap-2">
+                  <ArrowUpCircle className="w-4 h-4" />
+                  Upgrade
+                </Button>
+              </Link>
+            )}
             <Button
               onClick={handleLogout}
               variant="destructive"
@@ -133,8 +147,22 @@ function Navbar({ user, onLogout }) {
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-red-500 flex items-center justify-center font-bold text-white">
             {user.email.charAt(0).toUpperCase()}
           </div>
-          <span className="text-sm font-medium text-white break-all">{user.email}</span>
+          <div className="flex flex-col">
+            <span className="text-sm font-medium text-white">{user.plan_name || 'Free'} Plan</span>
+            <Badge variant="secondary" className="text-xs w-fit">
+              {user.plan_name || 'Free'}
+            </Badge>
+          </div>
         </div>
+
+        {(!user.plan_name || user.plan_name === 'Free') && (
+          <Link to="/plans" onClick={() => setMobileMenuOpen(false)}>
+            <Button className="w-full mb-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 font-semibold gap-2">
+              <ArrowUpCircle className="w-4 h-4" />
+              Upgrade Plan
+            </Button>
+          </Link>
+        )}
 
         {isAdminSession && (
           <Button

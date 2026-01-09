@@ -6,7 +6,6 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card';
 import { Alert, AlertDescription } from '../components/ui/alert';
-import { Badge } from '../components/ui/badge';
 import { signInWithGoogle, signInWithFacebook, signInWithTwitter, isFirebaseAvailable } from '../config/firebase';
 
 function Register() {
@@ -87,10 +86,6 @@ function Register() {
     });
   };
 
-  const getSelectedPlan = () => {
-    return plans.find(p => p.id === parseInt(formData.plan_id));
-  };
-
   const handleSocialSignup = async (provider, signInFunction) => {
     setError('');
     setSocialLoading(provider);
@@ -127,8 +122,6 @@ function Register() {
     }
   };
 
-  const selectedPlan = getSelectedPlan();
-
   if (success) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 p-4">
@@ -154,7 +147,7 @@ function Register() {
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">Create Account</CardTitle>
           <CardDescription className="text-center">
-            Sign up to start streaming to multiple platforms
+            Sign up to start streaming to multiple platforms - Free plan included!
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -290,96 +283,6 @@ function Register() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="plan_id">Select Plan</Label>
-              <select
-                id="plan_id"
-                name="plan_id"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                value={formData.plan_id}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Choose a plan...</option>
-                {plans.map(plan => (
-                  <option key={plan.id} value={plan.id}>
-                    {plan.name} - ${plan.price_monthly}/month
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {selectedPlan && (
-              <Card className="bg-muted/50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center justify-between">
-                    {selectedPlan.name} Plan
-                    <Badge variant={selectedPlan.price_monthly === 0 ? 'secondary' : 'default'}>
-                      ${selectedPlan.price_monthly}/mo
-                    </Badge>
-                  </CardTitle>
-                  <CardDescription>{selectedPlan.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <ul className="space-y-1 text-sm">
-                    <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✓</span>
-                      {selectedPlan.max_concurrent_streams} concurrent stream{selectedPlan.max_concurrent_streams > 1 ? 's' : ''}
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✓</span>
-                      Up to {selectedPlan.max_bitrate}k bitrate ({selectedPlan.max_bitrate >= 6000 ? '1080p' : selectedPlan.max_bitrate >= 4000 ? '720p' : '480p'})
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✓</span>
-                      {selectedPlan.max_stream_duration ? `${selectedPlan.max_stream_duration} min per stream` : 'Unlimited stream duration'}
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✓</span>
-                      {selectedPlan.storage_limit_mb}MB storage
-                    </li>
-                    <li className="flex items-center">
-                      <span className={`mr-2 ${selectedPlan.custom_watermark ? "text-green-600" : "text-muted-foreground"}`}>
-                        {selectedPlan.custom_watermark ? '✓' : '✗'}
-                      </span>
-                      {selectedPlan.custom_watermark ? 'Custom watermark' : 'No custom watermark'}
-                    </li>
-                  </ul>
-
-                  {selectedPlan.price_monthly > 0 && (
-                    <div className="pt-4 space-y-2">
-                      <Label>Billing Cycle</Label>
-                      <div className="flex gap-4">
-                        <label className="flex items-center space-x-2 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="subscription_type"
-                            value="monthly"
-                            checked={formData.subscription_type === 'monthly'}
-                            onChange={handleChange}
-                            className="w-4 h-4 text-primary"
-                          />
-                          <span className="text-sm">Monthly (${selectedPlan.price_monthly}/mo)</span>
-                        </label>
-                        <label className="flex items-center space-x-2 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="subscription_type"
-                            value="yearly"
-                            checked={formData.subscription_type === 'yearly'}
-                            onChange={handleChange}
-                            className="w-4 h-4 text-primary"
-                          />
-                          <span className="text-sm">
-                            Yearly (${selectedPlan.price_yearly}/yr - Save ${(selectedPlan.price_monthly * 12 - selectedPlan.price_yearly)})
-                          </span>
-                        </label>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
 
             <Button
               type="submit"
