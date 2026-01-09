@@ -21,7 +21,8 @@ function PlanManagement() {
     custom_watermark: false,
     max_platform_connections: 1,
     is_active: true,
-    is_hidden: false
+    is_hidden: false,
+    youtube_restreaming: false
   });
 
   useEffect(() => {
@@ -71,7 +72,8 @@ function PlanManagement() {
       custom_watermark: false,
       max_platform_connections: 1,
       is_active: true,
-      is_hidden: false
+      is_hidden: false,
+      youtube_restreaming: false
     });
     setShowModal(true);
   };
@@ -91,7 +93,8 @@ function PlanManagement() {
       custom_watermark: plan.custom_watermark === 1,
       max_platform_connections: plan.max_platform_connections || 1,
       is_active: plan.is_active === 1,
-      is_hidden: plan.is_hidden === 1
+      is_hidden: plan.is_hidden === 1,
+      youtube_restreaming: plan.youtube_restreaming === 1
     });
     setShowModal(true);
   };
@@ -449,6 +452,24 @@ function PlanManagement() {
                       Active
                     </label>
                   </div>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <div className="checkbox-group">
+                  <input
+                    type="checkbox"
+                    id="youtube_restreaming"
+                    name="youtube_restreaming"
+                    checked={formData.youtube_restreaming}
+                    onChange={handleInputChange}
+                  />
+                  <label htmlFor="youtube_restreaming" style={{ marginBottom: 0 }}>
+                    YouTube Restreaming Access
+                  </label>
+                  <small style={{ color: '#666', display: 'block', marginLeft: '1.5rem' }}>
+                    Allow users on this plan to restream from YouTube live URLs
+                  </small>
                 </div>
               </div>
 

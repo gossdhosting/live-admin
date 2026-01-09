@@ -19,7 +19,8 @@ function UserManagement() {
     role: 'user',
     plan_id: '',
     subscription_type: 'monthly',
-    status: 'active'
+    status: 'active',
+    youtube_restreaming: false
   });
 
   useEffect(() => {
@@ -63,7 +64,8 @@ function UserManagement() {
       role: 'user',
       plan_id: plans.length > 0 ? plans[0].id : '',
       subscription_type: 'monthly',
-      status: 'active'
+      status: 'active',
+      youtube_restreaming: false
     });
     setShowModal(true);
   };
@@ -78,7 +80,8 @@ function UserManagement() {
       role: user.role,
       plan_id: user.plan_id,
       subscription_type: user.subscription_type || 'monthly',
-      status: user.status
+      status: user.status,
+      youtube_restreaming: user.youtube_restreaming === 1
     });
     setShowModal(true);
   };
@@ -432,6 +435,24 @@ function UserManagement() {
                   <option value="active">Active</option>
                   <option value="suspended">Suspended</option>
                 </select>
+              </div>
+
+              <div className="form-group">
+                <div className="checkbox-group">
+                  <input
+                    type="checkbox"
+                    id="youtube_restreaming"
+                    name="youtube_restreaming"
+                    checked={formData.youtube_restreaming || false}
+                    onChange={(e) => setFormData({...formData, youtube_restreaming: e.target.checked})}
+                  />
+                  <label htmlFor="youtube_restreaming" style={{ marginBottom: 0, marginLeft: '0.5rem' }}>
+                    Enable YouTube Restreaming
+                  </label>
+                </div>
+                <small style={{ color: '#666', display: 'block', marginTop: '0.25rem' }}>
+                  Allow this user to restream from YouTube live URLs (independent of plan settings)
+                </small>
               </div>
 
               <div className="modal-actions">
