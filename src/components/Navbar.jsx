@@ -45,9 +45,9 @@ function Navbar({ user, onLogout }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo/Brand */}
-          <Link to="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
-            <Video className="w-8 h-8" />
-            <span className="text-xl font-bold tracking-tight hidden sm:block">ZebCast</span>
+          <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
+            <Video className="w-7 h-7 sm:w-8 sm:h-8" />
+            <span className="text-lg sm:text-xl font-bold tracking-tight">ZebCast</span>
           </Link>
 
           {/* Desktop Navigation Links */}
@@ -72,41 +72,40 @@ function Navbar({ user, onLogout }) {
           </div>
 
           {/* Desktop User Menu */}
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-2">
             {isAdminSession && (
               <Button
                 onClick={handleReturnToAdmin}
-                className="bg-orange-500 hover:bg-orange-600 text-white font-semibold gap-2"
+                size="sm"
+                className="bg-orange-500 hover:bg-orange-600 text-white font-semibold gap-1.5 text-xs"
               >
-                <Crown className="w-4 h-4" />
+                <Crown className="w-3.5 h-3.5" />
                 Return to Admin
               </Button>
             )}
-            <div className="flex items-center gap-3 px-4 py-2 bg-white/10 rounded-lg">
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-500 to-red-500 flex items-center justify-center font-bold text-white">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-lg">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-red-500 flex items-center justify-center font-bold text-white text-sm">
                 {user.email.charAt(0).toUpperCase()}
               </div>
-              <div className="flex flex-col">
-                <span className="text-sm font-medium">{user.plan_name || 'Free'} Plan</span>
-                <Badge variant="secondary" className="text-xs w-fit">
-                  {user.plan_name || 'Free'}
-                </Badge>
-              </div>
+              <Badge variant="secondary" className="text-xs font-medium">
+                {user.plan_name || 'Free'}
+              </Badge>
             </div>
             {(!user.plan_name || user.plan_name === 'Free') && (
               <Link to="/plans">
-                <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 font-semibold gap-2">
-                  <ArrowUpCircle className="w-4 h-4" />
+                <Button size="sm" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 font-semibold gap-1.5 text-xs">
+                  <ArrowUpCircle className="w-3.5 h-3.5" />
                   Upgrade
                 </Button>
               </Link>
             )}
             <Button
               onClick={handleLogout}
+              size="sm"
               variant="destructive"
-              className="bg-red-600 hover:bg-red-700 font-semibold gap-2"
+              className="bg-red-600 hover:bg-red-700 font-semibold gap-1.5 text-xs"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-3.5 h-3.5" />
               Logout
             </Button>
           </div>

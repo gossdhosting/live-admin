@@ -6,7 +6,7 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card';
 import { Alert, AlertDescription } from '../components/ui/alert';
-import { signInWithGoogle, signInWithFacebook, signInWithTwitter, isFirebaseAvailable } from '../config/firebase';
+import { signInWithGoogle, signInWithFacebook, signInWithApple, isFirebaseAvailable } from '../config/firebase';
 
 function Register() {
   const navigate = useNavigate();
@@ -199,14 +199,14 @@ function Register() {
                   type="button"
                   variant="outline"
                   disabled={socialLoading !== null}
-                  onClick={() => handleSocialSignup('twitter', signInWithTwitter)}
+                  onClick={() => handleSocialSignup('apple', signInWithApple)}
                   className="w-full"
                 >
-                  {socialLoading === 'twitter' ? (
+                  {socialLoading === 'apple' ? (
                     <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
                   ) : (
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                      <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
                     </svg>
                   )}
                 </Button>

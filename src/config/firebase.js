@@ -3,7 +3,7 @@ import {
   getAuth,
   GoogleAuthProvider,
   FacebookAuthProvider,
-  TwitterAuthProvider,
+  OAuthProvider,
   signInWithPopup,
   signOut as firebaseSignOut
 } from 'firebase/auth';
@@ -42,7 +42,7 @@ if (isFirebaseConfigured()) {
 // Providers
 const googleProvider = auth ? new GoogleAuthProvider() : null;
 const facebookProvider = auth ? new FacebookAuthProvider() : null;
-const twitterProvider = auth ? new TwitterAuthProvider() : null;
+const appleProvider = auth ? new OAuthProvider('apple.com') : null;
 
 // Configure providers
 if (googleProvider) {
@@ -53,6 +53,11 @@ if (googleProvider) {
 if (facebookProvider) {
   facebookProvider.addScope('email');
   facebookProvider.addScope('public_profile');
+}
+
+if (appleProvider) {
+  appleProvider.addScope('email');
+  appleProvider.addScope('name');
 }
 
 /**
@@ -78,13 +83,13 @@ export const signInWithFacebook = async () => {
 };
 
 /**
- * Sign in with Twitter
+ * Sign in with Apple
  */
-export const signInWithTwitter = async () => {
-  if (!auth || !twitterProvider) {
+export const signInWithApple = async () => {
+  if (!auth || !appleProvider) {
     throw new Error('Firebase is not configured');
   }
-  const result = await signInWithPopup(auth, twitterProvider);
+  const result = await signInWithPopup(auth, appleProvider);
   return result;
 };
 
