@@ -9,7 +9,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Alert, AlertDescription } from '../components/ui/alert';
-import { Settings as SettingsIcon, Users, Gem, Mail } from 'lucide-react';
+import { Settings as SettingsIcon, Users, Gem, Mail, FileText, Bell } from 'lucide-react';
 
 function AdminSettings({ user }) {
   const navigate = useNavigate();
@@ -24,6 +24,8 @@ function AdminSettings({ user }) {
   const [testEmail, setTestEmail] = useState('');
   const [testingSMTP, setTestingSMTP] = useState(false);
   const [smtpMessage, setSmtpMessage] = useState('');
+  const [testingPushover, setTestingPushover] = useState(false);
+  const [pushoverMessage, setPushoverMessage] = useState('');
 
   useEffect(() => {
     // Redirect if not admin
@@ -172,6 +174,22 @@ function AdminSettings({ user }) {
     }
   };
 
+  const handleTestPushover = async () => {
+    setTestingPushover(true);
+    setPushoverMessage('');
+
+    try {
+      const response = await api.post('/settings/test-pushover');
+      setPushoverMessage(response.data.message);
+      setTimeout(() => setPushoverMessage(''), 5000);
+    } catch (error) {
+      setPushoverMessage(error.response?.data?.error || 'Failed to send notification');
+      setTimeout(() => setPushoverMessage(''), 5000);
+    } finally {
+      setTestingPushover(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -194,15 +212,22 @@ function AdminSettings({ user }) {
 
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4 h-auto">
+            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 h-auto gap-1">
               <TabsTrigger value="system" className="text-xs sm:text-sm gap-1.5 py-2">
                 <SettingsIcon className="w-4 h-4" />
-                <span className="hidden sm:inline">System Settings</span>
-                <span className="sm:hidden">System</span>
+                <span className="hidden sm:inline">System</span>
               </TabsTrigger>
               <TabsTrigger value="smtp" className="text-xs sm:text-sm gap-1.5 py-2">
                 <Mail className="w-4 h-4" />
                 <span>SMTP</span>
+              </TabsTrigger>
+              <TabsTrigger value="email-templates" className="text-xs sm:text-sm gap-1.5 py-2">
+                <FileText className="w-4 h-4" />
+                <span>Email</span>
+              </TabsTrigger>
+              <TabsTrigger value="notifications" className="text-xs sm:text-sm gap-1.5 py-2">
+                <Bell className="w-4 h-4" />
+                <span>Notify</span>
               </TabsTrigger>
               <TabsTrigger value="users" className="text-xs sm:text-sm gap-1.5 py-2">
                 <Users className="w-4 h-4" />
@@ -618,6 +643,193 @@ function AdminSettings({ user }) {
                   </ul>
                 </div>
               </div>
+            </TabsContent>
+
+            {/* Email Templates Tab */}
+            <TabsContent value="email-templates" className="mt-6 space-y-6">
+              {message && (
+                <Alert className={message.includes('success') ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
+                  <AlertDescription className={message.includes('success') ? 'text-green-800' : 'text-red-800'}>
+                    {message}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Email Templates</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Customize email templates sent to users. Use variables like {'${name}'}, {'${email}'}, {'${resetLink}'} in your templates.
+                </p>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="email_header">Email Header</Label>
+                  <textarea
+                    id="email_header"
+                    className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={settings.email_header || ''}
+                    onChange={(e) => handleChange('email_header', e.target.value)}
+                    placeholder='<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5;"><div style="background: white; padding: 20px; border-radius: 8px;">'
+                  />
+                  <p className="text-sm text-gray-500">
+                    HTML header added to all emails (logo, branding, etc.)
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email_footer">Email Footer</Label>
+                  <textarea
+                    id="email_footer"
+                    className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={settings.email_footer || ''}
+                    onChange={(e) => handleChange('email_footer', e.target.value)}
+                    placeholder='</div><p style="text-align: center; color: #666; font-size: 12px; margin-top: 20px;">© 2026 ZebCast. All rights reserved.</p></div>'
+                  />
+                  <p className="text-sm text-gray-500">
+                    HTML footer added to all emails (copyright, unsubscribe, etc.)
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email_template_registration">Registration Email Template</Label>
+                  <textarea
+                    id="email_template_registration"
+                    className="flex min-h-[150px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={settings.email_template_registration || ''}
+                    onChange={(e) => handleChange('email_template_registration', e.target.value)}
+                    placeholder={'<h2>Welcome to ZebCast!</h2><p>Hi ${name},</p><p>Thank you for registering...</p>'}
+                  />
+                  <p className="text-sm text-gray-500">
+                    Variables: {'${name}'}, {'${email}'}
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email_template_forgot_password">Forgot Password Email Template</Label>
+                  <textarea
+                    id="email_template_forgot_password"
+                    className="flex min-h-[150px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={settings.email_template_forgot_password || ''}
+                    onChange={(e) => handleChange('email_template_forgot_password', e.target.value)}
+                    placeholder={'<h2>Reset Your Password</h2><p>Click the button below:</p><a href="${resetLink}" style="...">Reset Password</a>'}
+                  />
+                  <p className="text-sm text-gray-500">
+                    Variables: {'${resetLink}'} (required)
+                  </p>
+                </div>
+
+                <div className="flex justify-end">
+                  <Button type="submit" disabled={saving}>
+                    {saving ? 'Saving...' : 'Save Email Templates'}
+                  </Button>
+                </div>
+              </form>
+            </TabsContent>
+
+            {/* Notifications Tab */}
+            <TabsContent value="notifications" className="mt-6 space-y-6">
+              {pushoverMessage && (
+                <Alert className={pushoverMessage.includes('success') || pushoverMessage.includes('sent') ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
+                  <AlertDescription className={pushoverMessage.includes('success') || pushoverMessage.includes('sent') ? 'text-green-800' : 'text-red-800'}>
+                    {pushoverMessage}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Notification Settings</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Configure email and push notifications for admin alerts
+                </p>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Admin Email Notifications */}
+                <div className="p-4 border rounded-lg space-y-4">
+                  <h4 className="font-semibold">Admin Email Notifications</h4>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="admin_notification_email">Admin Email Address</Label>
+                    <Input
+                      type="email"
+                      id="admin_notification_email"
+                      placeholder="admin@example.com"
+                      value={settings.admin_notification_email || ''}
+                      onChange={(e) => handleChange('admin_notification_email', e.target.value)}
+                    />
+                    <p className="text-sm text-gray-500">
+                      Email address to receive admin notifications (new signups, etc.)
+                    </p>
+                  </div>
+                </div>
+
+                {/* Pushover Settings */}
+                <div className="p-4 border rounded-lg space-y-4">
+                  <h4 className="font-semibold">Pushover Push Notifications</h4>
+                  <p className="text-sm text-gray-600">
+                    Get instant push notifications on your phone via <a href="https://pushover.net" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Pushover</a>
+                  </p>
+
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="pushover_enabled"
+                      checked={settings.pushover_enabled === 'true'}
+                      onChange={(e) => handleChange('pushover_enabled', e.target.checked ? 'true' : 'false')}
+                      className="w-4 h-4"
+                    />
+                    <Label htmlFor="pushover_enabled" className="cursor-pointer">
+                      Enable Pushover Notifications
+                    </Label>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="pushover_token">Application Token</Label>
+                    <Input
+                      type="text"
+                      id="pushover_token"
+                      placeholder="azGDORePK8gMaC0QOYAMyEEuzJnyUi"
+                      value={settings.pushover_token || ''}
+                      onChange={(e) => handleChange('pushover_token', e.target.value)}
+                    />
+                    <p className="text-sm text-gray-500">
+                      Get your API token from <a href="https://pushover.net/apps/build" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">pushover.net/apps/build</a>
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="pushover_user">User Key</Label>
+                    <Input
+                      type="text"
+                      id="pushover_user"
+                      placeholder="uQiRzpo4DXghDmr9QzzfQu27cmVRsG"
+                      value={settings.pushover_user || ''}
+                      onChange={(e) => handleChange('pushover_user', e.target.value)}
+                    />
+                    <p className="text-sm text-gray-500">
+                      Find your user key at <a href="https://pushover.net" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">pushover.net</a> (top right)
+                    </p>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      onClick={handleTestPushover}
+                      disabled={testingPushover || !settings.pushover_token || !settings.pushover_user}
+                      variant="outline"
+                    >
+                      {testingPushover ? 'Sending...' : 'Test Notification'}
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="flex justify-end">
+                  <Button type="submit" disabled={saving}>
+                    {saving ? 'Saving...' : 'Save Notification Settings'}
+                  </Button>
+                </div>
+              </form>
             </TabsContent>
 
             {/* Users Tab */}
