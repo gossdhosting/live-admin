@@ -22,9 +22,11 @@ function EditChannelModal({ channel, onClose, onSuccess, isOpen }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [mediaFiles, setMediaFiles] = useState([]);
+  const [userStats, setUserStats] = useState(null);
 
   useEffect(() => {
     fetchMediaFiles();
+    fetchUserStats();
     // Populate form with channel data
     if (channel) {
       setFormData({
@@ -41,6 +43,15 @@ function EditChannelModal({ channel, onClose, onSuccess, isOpen }) {
       });
     }
   }, [channel]);
+
+  const fetchUserStats = async () => {
+    try {
+      const response = await api.get('/users/stats');
+      setUserStats(response.data);
+    } catch (err) {
+      console.error('Failed to fetch user stats:', err);
+    }
+  };
 
   const fetchMediaFiles = async () => {
     try {
@@ -138,16 +149,18 @@ function EditChannelModal({ channel, onClose, onSuccess, isOpen }) {
           <div className="space-y-2">
             <Label>Input Type *</Label>
             <div className="flex gap-4 mt-2">
-              <label className="flex items-center gap-2 mb-0">
-                <input
-                  type="radio"
-                  name="input_type"
-                  value="youtube"
-                  checked={formData.input_type === 'youtube'}
-                  onChange={handleChange}
-                />
-                YouTube Live
-              </label>
+              {userStats?.youtube_restreaming && (
+                <label className="flex items-center gap-2 mb-0">
+                  <input
+                    type="radio"
+                    name="input_type"
+                    value="youtube"
+                    checked={formData.input_type === 'youtube'}
+                    onChange={handleChange}
+                  />
+                  YouTube Live
+                </label>
+              )}
               <label className="flex items-center gap-2 mb-0">
                 <input
                   type="radio"
@@ -159,6 +172,11 @@ function EditChannelModal({ channel, onClose, onSuccess, isOpen }) {
                 Pre-recorded Video
               </label>
             </div>
+            {!userStats?.youtube_restreaming && formData.input_type === 'youtube' && (
+              <p className="text-xs text-amber-600 mt-1">
+                This channel uses YouTube, but your account no longer has YouTube restreaming access. Switch to pre-recorded video or contact admin.
+              </p>
+            )}
           </div>
 
           {formData.input_type === 'youtube' && (

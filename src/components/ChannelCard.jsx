@@ -359,14 +359,21 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
               <div className="text-sm text-gray-600 mb-1 font-medium">
                 Input Source
               </div>
-              <a
-                href={channel.input_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 no-underline text-sm break-all hover:underline"
-              >
-                {channel.input_url}
-              </a>
+              {channel.input_type === 'youtube' ? (
+                <a
+                  href={channel.input_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 no-underline text-sm break-all hover:underline"
+                >
+                  {channel.input_url}
+                </a>
+              ) : (
+                <div className="text-sm text-gray-700 flex items-center gap-2">
+                  <Video className="w-4 h-4" />
+                  <span>{channel.media_file_name || 'Pre-uploaded Video'}</span>
+                </div>
+              )}
             </div>
 
             {getRuntimeInfo()}
