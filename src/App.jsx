@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
 import AdminSettings from './pages/AdminSettings';
@@ -56,6 +58,14 @@ function App() {
         <Route
           path="/register"
           element={user ? <Navigate to="/" /> : <Register />}
+        />
+        <Route
+          path="/forgot-password"
+          element={user ? <Navigate to="/" /> : <ForgotPassword />}
+        />
+        <Route
+          path="/reset-password"
+          element={user ? <Navigate to="/" /> : <ResetPassword />}
         />
         <Route
           path="/"

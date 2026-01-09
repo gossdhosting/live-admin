@@ -110,6 +110,15 @@ function Login({ onLogin }) {
               />
             </div>
 
+            <div className="flex items-center justify-end mb-4">
+              <Link
+                to="/forgot-password"
+                className="text-sm text-blue-600 hover:underline"
+              >
+                Forgot password?
+              </Link>
+            </div>
+
             <Button
               type="submit"
               className="w-full"
