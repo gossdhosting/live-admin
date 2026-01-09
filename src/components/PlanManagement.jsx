@@ -20,7 +20,8 @@ function PlanManagement() {
     storage_limit_mb: 500,
     custom_watermark: false,
     max_platform_connections: 1,
-    is_active: true
+    is_active: true,
+    is_hidden: false
   });
 
   useEffect(() => {
@@ -30,7 +31,8 @@ function PlanManagement() {
 
   const fetchPlans = async () => {
     try {
-      const response = await api.get('/plans');
+      // Use admin endpoint to get all plans including hidden
+      const response = await api.get('/plans/admin/all');
       setPlans(response.data.plans);
     } catch (error) {
       console.error('Failed to fetch plans:', error);
@@ -68,7 +70,8 @@ function PlanManagement() {
       storage_limit_mb: 500,
       custom_watermark: false,
       max_platform_connections: 1,
-      is_active: true
+      is_active: true,
+      is_hidden: false
     });
     setShowModal(true);
   };
@@ -87,7 +90,8 @@ function PlanManagement() {
       storage_limit_mb: plan.storage_limit_mb,
       custom_watermark: plan.custom_watermark === 1,
       max_platform_connections: plan.max_platform_connections || 1,
-      is_active: plan.is_active === 1
+      is_active: plan.is_active === 1,
+      is_hidden: plan.is_hidden === 1
     });
     setShowModal(true);
   };
@@ -216,15 +220,28 @@ function PlanManagement() {
                   </span>
                 </td>
                 <td style={{ padding: '0.75rem' }}>
-                  <span style={{
-                    padding: '0.25rem 0.5rem',
-                    borderRadius: '4px',
-                    fontSize: '0.8rem',
-                    backgroundColor: plan.is_active ? '#27ae60' : '#95a5a6',
-                    color: '#fff'
-                  }}>
-                    {plan.is_active ? 'Active' : 'Inactive'}
-                  </span>
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <span style={{
+                      padding: '0.25rem 0.5rem',
+                      borderRadius: '4px',
+                      fontSize: '0.8rem',
+                      backgroundColor: plan.is_active ? '#27ae60' : '#95a5a6',
+                      color: '#fff'
+                    }}>
+                      {plan.is_active ? 'Active' : 'Inactive'}
+                    </span>
+                    {plan.is_hidden === 1 && (
+                      <span style={{
+                        padding: '0.25rem 0.5rem',
+                        borderRadius: '4px',
+                        fontSize: '0.8rem',
+                        backgroundColor: '#f39c12',
+                        color: '#fff'
+                      }}>
+                        Hidden
+                      </span>
+                    )}
+                  </div>
                 </td>
                 <td style={{ padding: '0.75rem', textAlign: 'right' }}>
                   <button
@@ -432,6 +449,24 @@ function PlanManagement() {
                       Active
                     </label>
                   </div>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <div className="checkbox-group">
+                  <input
+                    type="checkbox"
+                    id="is_hidden"
+                    name="is_hidden"
+                    checked={formData.is_hidden}
+                    onChange={handleInputChange}
+                  />
+                  <label htmlFor="is_hidden" style={{ marginBottom: 0 }}>
+                    Hidden from Plans Page
+                  </label>
+                  <small style={{ color: '#666', display: 'block', marginLeft: '1.5rem' }}>
+                    Hide this plan from the public plans page while keeping it active in the system
+                  </small>
                 </div>
               </div>
 
