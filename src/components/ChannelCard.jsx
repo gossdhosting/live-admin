@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import {
   Play, Square, RotateCw, Pencil, Trash2,
   CheckCircle, AlertTriangle, XCircle, Loader2, BarChart3, Globe, Image as ImageIcon,
-  FileText, Video, Check, X, ChevronDown, ChevronUp
+  FileText, Video, Check, X, ChevronDown, ChevronUp, Server, Key, Copy
 } from 'lucide-react';
 import { useAlertDialog } from './ui/alert-dialog-modern';
 
@@ -405,9 +405,58 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
                     {channel.input_url}
                   </a>
                 ) : channel.input_type === 'rtmp' ? (
-                  <div className="text-sm text-gray-800 font-medium flex items-center gap-2">
-                    <Video className="w-4 h-4 text-indigo-600" />
-                    <span>RTMP Input (OBS/vMix/etc.)</span>
+                  <div className="space-y-3">
+                    <div className="text-sm text-gray-800 font-medium flex items-center gap-2">
+                      <Video className="w-4 h-4 text-indigo-600" />
+                      <span>RTMP Input (OBS/vMix/etc.)</span>
+                    </div>
+
+                    {/* RTMP Connection Details */}
+                    <div className="bg-white/70 border border-indigo-200 rounded-md p-3 space-y-2">
+                      {/* Server URL */}
+                      <div className="flex items-start gap-2">
+                        <Server className="w-4 h-4 text-indigo-600 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs font-semibold text-gray-600 mb-1">Server URL</div>
+                          <div className="flex items-center gap-2">
+                            <code className="text-xs bg-indigo-50 px-2 py-1 rounded border border-indigo-200 font-mono text-indigo-900 break-all flex-1">
+                              rtmp://live.telanganatribune.com:1935/live
+                            </code>
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText('rtmp://live.telanganatribune.com:1935/live');
+                              }}
+                              className="p-1.5 hover:bg-indigo-100 rounded transition-colors flex-shrink-0"
+                              title="Copy Server URL"
+                            >
+                              <Copy className="w-3.5 h-3.5 text-indigo-600" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Stream Key */}
+                      <div className="flex items-start gap-2">
+                        <Key className="w-4 h-4 text-indigo-600 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs font-semibold text-gray-600 mb-1">Stream Key</div>
+                          <div className="flex items-center gap-2">
+                            <code className="text-xs bg-indigo-50 px-2 py-1 rounded border border-indigo-200 font-mono text-indigo-900 break-all flex-1">
+                              {channel.stream_key}
+                            </code>
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(channel.stream_key);
+                              }}
+                              className="p-1.5 hover:bg-indigo-100 rounded transition-colors flex-shrink-0"
+                              title="Copy Stream Key"
+                            >
+                              <Copy className="w-3.5 h-3.5 text-indigo-600" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   <div className="text-sm text-gray-800 font-medium flex items-center gap-2">
