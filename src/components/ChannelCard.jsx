@@ -482,18 +482,6 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
                   {channel.auto_restart ? 'Enabled' : 'Disabled'}
                 </div>
               </div>
-              {isAdmin && (
-                <div className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow">
-                  <div className="text-xs text-gray-500 mb-1.5 font-medium">User ID</div>
-                  <div className="font-bold text-gray-900 font-mono">#{channel.user_id}</div>
-                </div>
-              )}
-              {isAdmin && channel.process_id && (
-                <div className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow">
-                  <div className="text-xs text-gray-500 mb-1.5 font-medium">Process ID</div>
-                  <div className="font-bold text-gray-900 font-mono">{channel.process_id}</div>
-                </div>
-              )}
             </div>
           </div>
         );
