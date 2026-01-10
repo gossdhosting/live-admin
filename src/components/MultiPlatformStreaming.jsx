@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Alert, AlertDescription } from './ui/alert';
 import { Facebook, Youtube, Twitch, Wrench, Radio, Circle, CheckCircle, Lightbulb, AlertTriangle } from 'lucide-react';
+import { useAlertDialog } from './ui/alert-dialog-modern';
 
 function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDescription, channelStatus }) {
   const [platformConnections, setPlatformConnections] = useState([]);
@@ -14,6 +15,7 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
   const [userStats, setUserStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(null);
+  const { showAlert, showConfirm } = useAlertDialog();
 
   useEffect(() => {
     fetchAll();
@@ -55,7 +57,11 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
         const selectedPageId = pagesRes.data.selectedPageId;
 
         if (pages.length === 0) {
-          alert('No Facebook pages found. Please ensure your account has pages with publishing permissions.');
+          await showAlert({
+            title: 'No Facebook Pages',
+            message: 'No Facebook pages found. Please ensure your account has pages with publishing permissions.',
+            type: 'warning'
+          });
           setCreating(null);
           return;
         }
@@ -64,7 +70,11 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
         const page = pages.find(p => p.id === selectedPageId) || pages[0];
 
         if (!page || !page.access_token) {
-          alert('Facebook page access token not found. Please reconnect your Facebook account.');
+          await showAlert({
+            title: 'Facebook Page Access Error',
+            message: 'Facebook page access token not found. Please reconnect your Facebook account.',
+            type: 'error'
+          });
           setCreating(null);
           return;
         }
@@ -90,25 +100,44 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
       }
 
       if (response?.data?.success) {
-        alert(`${platform} stream created successfully!`);
+        await showAlert({
+          title: 'Stream Created',
+          message: `${platform.charAt(0).toUpperCase() + platform.slice(1)} stream created successfully!`,
+          type: 'success'
+        });
         fetchAll();
       }
     } catch (error) {
       console.error(`Failed to create ${platform} stream:`, error);
-      alert(error.response?.data?.error || `Failed to create ${platform} stream`);
+      await showAlert({
+        title: 'Failed to Create Stream',
+        message: error.response?.data?.error || `Failed to create ${platform} stream`,
+        type: 'error'
+      });
     } finally {
       setCreating(null);
     }
   };
 
   const handleDeletePlatformStream = async (streamId) => {
-    if (!window.confirm('Delete this platform stream?')) return;
+    const confirmed = await showConfirm({
+      title: 'Delete Platform Stream',
+      message: 'Are you sure you want to delete this platform stream?',
+      confirmText: 'Delete',
+      variant: 'destructive'
+    });
+
+    if (!confirmed) return;
 
     try {
       await api.delete(`/platforms/streams/${streamId}`);
       fetchAll();
     } catch (error) {
-      alert('Failed to delete stream');
+      await showAlert({
+        title: 'Failed to Delete',
+        message: 'Failed to delete stream',
+        type: 'error'
+      });
     }
   };
 
@@ -119,18 +148,33 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
       fetchAll();
     } catch (error) {
       console.error('Failed to toggle template:', error);
-      alert(error.response?.data?.error || 'Failed to toggle template');
+      await showAlert({
+        title: 'Failed to Toggle Template',
+        message: error.response?.data?.error || 'Failed to toggle template',
+        type: 'error'
+      });
     }
   };
 
   const handleRemoveDestination = async (destinationId) => {
-    if (!window.confirm('Remove this RTMP destination?')) return;
+    const confirmed = await showConfirm({
+      title: 'Remove RTMP Destination',
+      message: 'Are you sure you want to remove this RTMP destination?',
+      confirmText: 'Remove',
+      variant: 'destructive'
+    });
+
+    if (!confirmed) return;
 
     try {
       await api.delete(`/rtmp/${destinationId}`);
       fetchAll();
     } catch (error) {
-      alert('Failed to remove destination');
+      await showAlert({
+        title: 'Failed to Remove',
+        message: 'Failed to remove destination',
+        type: 'error'
+      });
     }
   };
 

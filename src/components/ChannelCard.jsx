@@ -10,6 +10,7 @@ import {
   CheckCircle, AlertTriangle, XCircle, Loader2, BarChart3, Globe, Image as ImageIcon,
   FileText, Video, Check, X, ChevronDown, ChevronUp
 } from 'lucide-react';
+import { useAlertDialog } from './ui/alert-dialog-modern';
 
 function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
   const [loading, setLoading] = useState(false);
@@ -21,6 +22,7 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
   const [watermarkEnabled, setWatermarkEnabled] = useState(Boolean(channel.watermark_enabled));
   const [configuredPlatforms, setConfiguredPlatforms] = useState([]);
   const isAdmin = user && user.role === 'admin';
+  const { showAlert } = useAlertDialog();
 
   // Update local watermark state when channel prop changes
   useEffect(() => {
@@ -131,7 +133,11 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
       await api.post(`/channels/${channel.id}/start`);
       onUpdate();
     } catch (error) {
-      alert(error.response?.data?.error || 'Failed to start stream');
+      await showAlert({
+        title: 'Failed to Start Stream',
+        message: error.response?.data?.error || 'Failed to start stream',
+        type: 'error'
+      });
     } finally {
       setLoading(false);
     }
@@ -145,7 +151,11 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
       await api.post(`/channels/${channel.id}/stop`);
       onUpdate();
     } catch (error) {
-      alert(error.response?.data?.error || 'Failed to stop stream');
+      await showAlert({
+        title: 'Failed to Stop Stream',
+        message: error.response?.data?.error || 'Failed to stop stream',
+        type: 'error'
+      });
     } finally {
       setLoading(false);
     }
@@ -161,7 +171,11 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
       await api.post(`/channels/${channel.id}/start`);
       onUpdate();
     } catch (error) {
-      alert(error.response?.data?.error || error.message || 'Failed to restart stream');
+      await showAlert({
+        title: 'Failed to Restart Stream',
+        message: error.response?.data?.error || error.message || 'Failed to restart stream',
+        type: 'error'
+      });
     } finally {
       setLoading(false);
     }
@@ -175,7 +189,11 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
       await api.delete(`/channels/${channel.id}`);
       onDelete(channel.id);
     } catch (error) {
-      alert(error.response?.data?.error || 'Failed to delete stream');
+      await showAlert({
+        title: 'Failed to Delete Stream',
+        message: error.response?.data?.error || 'Failed to delete stream',
+        type: 'error'
+      });
       setLoading(false);
     }
   };
@@ -514,7 +532,11 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
                     } catch (error) {
                       // Revert on error
                       setWatermarkEnabled(!newValue);
-                      alert(error.response?.data?.error || 'Failed to update watermark setting');
+                      await showAlert({
+                        title: 'Failed to Update Watermark',
+                        message: error.response?.data?.error || 'Failed to update watermark setting',
+                        type: 'error'
+                      });
                     }
                   }}
                   disabled={channel.status === 'running'}

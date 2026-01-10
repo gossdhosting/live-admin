@@ -11,6 +11,7 @@ import MediaManager from './pages/MediaManager';
 import Plans from './pages/Plans';
 import Navbar from './components/Navbar';
 import api from './services/api';
+import { AlertDialogProvider } from './components/ui/alert-dialog-modern';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -48,47 +49,49 @@ function App() {
   }
 
   return (
-    <Router>
-      {user && <Navbar user={user} onLogout={handleLogout} />}
-      <Routes>
-        <Route
-          path="/login"
-          element={user ? <Navigate to="/" /> : <Login onLogin={handleLogin} />}
-        />
-        <Route
-          path="/register"
-          element={user ? <Navigate to="/" /> : <Register />}
-        />
-        <Route
-          path="/forgot-password"
-          element={user ? <Navigate to="/" /> : <ForgotPassword />}
-        />
-        <Route
-          path="/reset-password"
-          element={user ? <Navigate to="/" /> : <ResetPassword />}
-        />
-        <Route
-          path="/"
-          element={user ? <Dashboard user={user} /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/settings"
-          element={user ? <Settings user={user} /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/admin"
-          element={user && user.role === 'admin' ? <AdminSettings user={user} /> : <Navigate to="/" />}
-        />
-        <Route
-          path="/media"
-          element={user ? <MediaManager user={user} /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/plans"
-          element={user ? <Plans user={user} /> : <Navigate to="/login" />}
-        />
-      </Routes>
-    </Router>
+    <AlertDialogProvider>
+      <Router>
+        {user && <Navbar user={user} onLogout={handleLogout} />}
+        <Routes>
+          <Route
+            path="/login"
+            element={user ? <Navigate to="/" /> : <Login onLogin={handleLogin} />}
+          />
+          <Route
+            path="/register"
+            element={user ? <Navigate to="/" /> : <Register />}
+          />
+          <Route
+            path="/forgot-password"
+            element={user ? <Navigate to="/" /> : <ForgotPassword />}
+          />
+          <Route
+            path="/reset-password"
+            element={user ? <Navigate to="/" /> : <ResetPassword />}
+          />
+          <Route
+            path="/"
+            element={user ? <Dashboard user={user} /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/settings"
+            element={user ? <Settings user={user} /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/admin"
+            element={user && user.role === 'admin' ? <AdminSettings user={user} /> : <Navigate to="/" />}
+          />
+          <Route
+            path="/media"
+            element={user ? <MediaManager user={user} /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/plans"
+            element={user ? <Plans user={user} /> : <Navigate to="/login" />}
+          />
+        </Routes>
+      </Router>
+    </AlertDialogProvider>
   );
 }
 
