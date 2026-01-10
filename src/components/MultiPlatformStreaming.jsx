@@ -25,7 +25,7 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
     try {
       const [connectionsRes, templatesRes, destinationsRes, streamsRes, statsRes] = await Promise.all([
         api.get('/platforms/connections'),
-        api.get('/rtmp/templates?enabled=true'),
+        api.get('/rtmp/templates/templates?enabled=true'),
         api.get(`/channels/${channelId}/rtmp`),
         api.get(`/platforms/streams/${channelId}`),
         api.get('/users/stats'),

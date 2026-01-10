@@ -25,7 +25,7 @@ function RtmpTemplatesManager() {
 
   const fetchTemplates = async () => {
     try {
-      const response = await api.get('/rtmp/templates');
+      const response = await api.get('/rtmp/templates/templates');
       setTemplates(response.data.templates);
     } catch (error) {
       console.error('Failed to fetch RTMP templates:', error);
@@ -80,7 +80,7 @@ function RtmpTemplatesManager() {
       if (editingId) {
         await api.put(`/rtmp/templates/${editingId}`, formData);
       } else {
-        await api.post('/rtmp/templates', formData);
+        await api.post('/rtmp/templates/templates', formData);
       }
       fetchTemplates();
       resetForm();

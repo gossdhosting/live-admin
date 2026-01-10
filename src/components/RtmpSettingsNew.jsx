@@ -13,7 +13,7 @@ function RtmpSettingsNew({ channelId, channelName }) {
   const fetchData = async () => {
     try {
       const [templatesRes, destinationsRes] = await Promise.all([
-        api.get('/rtmp/templates'),
+        api.get('/rtmp/templates/templates'),
         api.get(`/channels/${channelId}/rtmp`),
       ]);
       setTemplates(templatesRes.data.templates);
