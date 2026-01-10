@@ -4,6 +4,7 @@ import api from '../services/api';
 import RtmpTemplatesManager from '../components/RtmpTemplatesManager';
 import PlatformConnections from '../components/PlatformConnections';
 import WatermarkSettingsUser from '../components/WatermarkSettingsUser';
+import StreamPreview from '../components/StreamPreview';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Button } from '../components/ui/button';
@@ -641,32 +642,14 @@ function Settings({ user }) {
               </form>
 
               <div className="mt-8 pt-8 border-t border-gray-200">
-                <h3 className="text-lg font-semibold mb-4">Title Overlay Preview</h3>
-                <div
-                  className="relative bg-slate-700 rounded-lg p-8 min-h-52 flex"
-                  style={{
-                    alignItems: userSettings.title_position?.startsWith('top') ? 'flex-start' : 'flex-end',
-                    justifyContent: userSettings.title_position?.includes('center') ? 'center' : userSettings.title_position?.includes('right') ? 'flex-end' : 'flex-start'
-                  }}
-                >
-                  <div
-                    style={{
-                      backgroundColor: userSettings.title_bg_color || '#000000',
-                      opacity: (userSettings.title_opacity || 80) / 100,
-                      padding: '1rem 1.5rem',
-                      borderRadius: '4px',
-                      color: userSettings.title_text_color || '#FFFFFF',
-                      fontSize: `${userSettings.title_font_size || 16}px`,
-                      fontWeight: 'bold',
-                      maxWidth: '80%',
-                      wordWrap: 'break-word'
-                    }}
-                  >
-                    Example News Title Here
-                  </div>
-                </div>
+                <h3 className="text-lg font-semibold mb-4">Stream Preview (Title & Watermark)</h3>
+                <StreamPreview
+                  titleSettings={userSettings}
+                  watermarkSettings={userSettings}
+                  sampleTitle="Example News Title Here"
+                />
                 <p className="text-sm text-gray-500 mt-2">
-                  This is a preview of how the title overlay will appear on your stream. Enable the title overlay when creating/editing a channel.
+                  This preview shows how both the title overlay and watermark will appear on your stream. Enable these features when creating/editing a channel.
                 </p>
               </div>
               </div>

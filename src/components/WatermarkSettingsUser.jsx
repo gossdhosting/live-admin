@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import UpgradePrompt from './UpgradePrompt';
+import StreamPreview from './StreamPreview';
 import { Button } from './ui/button';
 import { Label } from './ui/label';
 import { Alert, AlertDescription } from './ui/alert';
@@ -266,11 +267,19 @@ function WatermarkSettingsUser({ onUpdate }) {
                 </div>
               </div>
 
-              <Alert className="border-blue-200 bg-blue-50 mb-6">
-                <AlertDescription className="text-blue-800 text-sm">
-                  ℹ️ Preview: Watermark will be positioned at <strong>{positions.find(p => p.value === settings.watermark_position)?.label}</strong> with <strong>{Math.round(settings.watermark_opacity * 100)}%</strong> opacity and <strong>{Math.round(settings.watermark_scale * 100)}%</strong> size.
-                </AlertDescription>
-              </Alert>
+              <div className="mb-6">
+                <h4 className="text-md font-semibold mb-3">Watermark Preview</h4>
+                <StreamPreview
+                  titleSettings={{}}
+                  watermarkSettings={{
+                    watermark_path: settings.watermark_path,
+                    watermark_position: settings.watermark_position,
+                    watermark_opacity: settings.watermark_opacity,
+                    watermark_scale: settings.watermark_scale
+                  }}
+                  sampleTitle=""
+                />
+              </div>
 
               <div className="flex justify-end">
                 <Button
