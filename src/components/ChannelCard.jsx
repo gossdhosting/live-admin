@@ -344,11 +344,15 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
                   href={channel.input_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-700 font-medium text-sm break-all hover:underline flex items-center gap-2"
+                  className="text-blue-700 font-medium text-sm break-all hover:underline"
                 >
-                  <ExternalLink className="w-3.5 h-3.5 flex-shrink-0" />
                   {channel.input_url}
                 </a>
+              ) : channel.input_type === 'rtmp' ? (
+                <div className="text-sm text-gray-800 font-medium flex items-center gap-2">
+                  <Video className="w-4 h-4 text-indigo-600" />
+                  <span>RTMP Input (OBS/vMix/etc.)</span>
+                </div>
               ) : (
                 <div className="text-sm text-gray-800 font-medium flex items-center gap-2">
                   <Video className="w-4 h-4 text-indigo-600" />
