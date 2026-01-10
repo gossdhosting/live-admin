@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import Hls from 'hls.js';
 import api from '../services/api';
-import config from '../config';
 import MultiPlatformStreaming from './MultiPlatformStreaming';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader } from './ui/card';
 import { Badge } from './ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import {
-  Play, Square, RotateCw, Pencil, Trash2, Copy, ExternalLink, Eye, EyeOff,
+  Play, Square, RotateCw, Pencil, Trash2,
   CheckCircle, AlertTriangle, XCircle, Loader2, BarChart3, Globe, Image as ImageIcon,
   FileText, Video, Check, X, ChevronDown, ChevronUp
 } from 'lucide-react';
@@ -16,30 +14,17 @@ import {
 function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
   const [loading, setLoading] = useState(false);
   const [logs, setLogs] = useState([]);
-  const [showPreview, setShowPreview] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [userStats, setUserStats] = useState(null);
   const [runtime, setRuntime] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
   const [watermarkEnabled, setWatermarkEnabled] = useState(Boolean(channel.watermark_enabled));
-  const copiedTimeoutRef = useRef(null);
-  const videoRef = useRef(null);
-  const hlsRef = useRef(null);
   const isAdmin = user && user.role === 'admin';
 
   // Update local watermark state when channel prop changes
   useEffect(() => {
     setWatermarkEnabled(Boolean(channel.watermark_enabled));
   }, [channel.watermark_enabled]);
-
-  useEffect(() => {
-    return () => {
-      if (copiedTimeoutRef.current) {
-        clearTimeout(copiedTimeoutRef.current);
-      }
-    };
-  }, []);
 
   useEffect(() => {
     if (activeTab === 'logs') {
@@ -91,67 +76,7 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
     }
   }, [channel.status, channel.last_started_at]);
 
-  // Use stream_key if available, fallback to channel_id for backwards compatibility
-  const streamKey = channel.stream_key || `channel_${channel.id}`;
-  const streamUrl = `${config.hlsBaseUrl}/hls/${streamKey}/index.m3u8`;
-
-  // Initialize HLS.js when preview is shown
-  useEffect(() => {
-    if (showPreview && videoRef.current && channel.status === 'running') {
-      const video = videoRef.current;
-
-      if (Hls.isSupported()) {
-        // Use HLS.js for browsers that don't support HLS natively
-        const hls = new Hls({
-          enableWorker: true,
-          lowLatencyMode: true,
-          backBufferLength: 90
-        });
-
-        hls.loadSource(streamUrl);
-        hls.attachMedia(video);
-
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          video.play().catch(err => console.log('Autoplay prevented:', err));
-        });
-
-        hls.on(Hls.Events.ERROR, (event, data) => {
-          if (data.fatal) {
-            console.error('HLS.js fatal error:', data);
-            switch(data.type) {
-              case Hls.ErrorTypes.NETWORK_ERROR:
-                console.log('Network error, trying to recover...');
-                hls.startLoad();
-                break;
-              case Hls.ErrorTypes.MEDIA_ERROR:
-                console.log('Media error, trying to recover...');
-                hls.recoverMediaError();
-                break;
-              default:
-                console.log('Cannot recover from error, destroying HLS instance');
-                hls.destroy();
-                break;
-            }
-          }
-        });
-
-        hlsRef.current = hls;
-      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        // Native HLS support (Safari)
-        video.src = streamUrl;
-        video.addEventListener('loadedmetadata', () => {
-          video.play().catch(err => console.log('Autoplay prevented:', err));
-        });
-      }
-
-      return () => {
-        if (hlsRef.current) {
-          hlsRef.current.destroy();
-          hlsRef.current = null;
-        }
-      };
-    }
-  }, [showPreview, streamUrl, channel.status]);
+  // HLS preview removed - users can check platform pages for stream preview
 
   const fetchLogs = async () => {
     try {
@@ -219,22 +144,7 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
     }
   };
 
-  const handleCopyUrl = async () => {
-    try {
-      await navigator.clipboard.writeText(streamUrl);
-      setCopied(true);
-      if (copiedTimeoutRef.current) {
-        clearTimeout(copiedTimeoutRef.current);
-      }
-      copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
-      alert('Failed to copy URL');
-    }
-  };
-
-  const handleOpenStream = () => {
-    window.open(streamUrl, '_blank');
-  };
+  // Stream URL functions removed - no HLS output anymore
 
   const getStatusBadge = () => {
     const runtime = channel.runtime_status || {};
@@ -462,68 +372,18 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
               </div>
             )}
 
-            {/* Stream URL Section */}
+            {/* Stream Preview Note */}
             {channel.status === 'running' && (
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300 rounded-lg p-4 shadow-sm">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                    <strong className="text-gray-900 text-sm font-semibold">Live Stream URL</strong>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      onClick={handleCopyUrl}
-                      className={`gap-1.5 shadow-sm ${copied ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'}`}
-                    >
-                      <Copy className="w-3.5 h-3.5" />
-                      {copied ? 'Copied!' : 'Copy'}
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={handleOpenStream}
-                      className="bg-purple-600 hover:bg-purple-700 gap-1.5 shadow-sm"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                      Open
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => setShowPreview(!showPreview)}
-                      className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 gap-1.5 shadow-sm"
-                    >
-                      {showPreview ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                      {showPreview ? 'Hide' : 'Preview'}
-                    </Button>
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-lg p-4 shadow-sm">
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse mt-1.5" />
+                  <div>
+                    <strong className="text-gray-900 text-sm font-semibold block mb-1">Stream is Live</strong>
+                    <p className="text-sm text-gray-700">
+                      Your stream is broadcasting to all connected platforms. Check your platform pages (Facebook, YouTube, Twitch) to view the live stream.
+                    </p>
                   </div>
                 </div>
-                <div className="bg-white border border-green-200 p-3 rounded-md font-mono text-xs break-all text-gray-800 shadow-inner">
-                  {streamUrl}
-                </div>
-              </div>
-            )}
-
-            {/* Video Preview */}
-            {showPreview && channel.status === 'running' && (
-              <div className="space-y-2">
-                <div className="bg-black rounded-xl overflow-hidden relative shadow-2xl border-2 border-gray-800">
-                  <video
-                    ref={videoRef}
-                    controls
-                    muted
-                    playsInline
-                    className="w-full max-h-96"
-                  >
-                    Your browser does not support HLS playback.
-                  </video>
-                  <div className="absolute top-3 right-3 bg-gradient-to-r from-red-600 to-red-700 text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-lg">
-                    <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                    LIVE
-                  </div>
-                </div>
-                <p className="text-xs text-gray-500 text-center italic">
-                  💡 Note: Some browsers may not support HLS natively. Use VLC or a dedicated player for best results.
-                </p>
               </div>
             )}
 
