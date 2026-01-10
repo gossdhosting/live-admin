@@ -84,7 +84,7 @@ function CreateChannelModal({ onClose, onSuccess, isOpen }) {
       onSuccess();
       onClose();
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to create channel');
+      setError(err.response?.data?.error || 'Failed to create stream');
     } finally {
       setLoading(false);
     }
@@ -109,7 +109,10 @@ function CreateChannelModal({ onClose, onSuccess, isOpen }) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create New Channel</DialogTitle>
+          <DialogTitle>Create New Stream</DialogTitle>
+          <DialogDescription>
+            Set up a new streaming channel to broadcast your content
+          </DialogDescription>
         </DialogHeader>
 
         {error && (
@@ -120,7 +123,7 @@ function CreateChannelModal({ onClose, onSuccess, isOpen }) {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Channel Name *</Label>
+            <Label htmlFor="name">Stream Name *</Label>
             <Input
               type="text"
               id="name"
@@ -336,11 +339,11 @@ function CreateChannelModal({ onClose, onSuccess, isOpen }) {
           </div>
 
           <DialogFooter className="flex gap-2 justify-end pt-4">
-            <Button type="button" variant="secondary" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? 'Creating...' : 'Create Channel'}
+            <Button type="submit" disabled={loading} className="bg-primary">
+              {loading ? 'Creating Stream...' : 'Create Stream'}
             </Button>
           </DialogFooter>
         </form>

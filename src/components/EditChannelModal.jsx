@@ -85,7 +85,7 @@ function EditChannelModal({ channel, onClose, onSuccess, isOpen }) {
       onSuccess();
       onClose();
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to update channel');
+      setError(err.response?.data?.error || 'Failed to update stream');
       console.error('Update error:', err);
     } finally {
       setLoading(false);
@@ -111,7 +111,7 @@ function EditChannelModal({ channel, onClose, onSuccess, isOpen }) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Channel</DialogTitle>
+          <DialogTitle>Edit Stream</DialogTitle>
         </DialogHeader>
 
         {error && (
@@ -122,7 +122,7 @@ function EditChannelModal({ channel, onClose, onSuccess, isOpen }) {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Channel Name *</Label>
+            <Label htmlFor="name">Stream Name *</Label>
             <Input
               type="text"
               id="name"
