@@ -578,24 +578,26 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+    <Card className="mb-6 border-2 hover:shadow-lg transition-all duration-200">
       {/* Header */}
-      <div className="px-4 sm:px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-gray-50">
+      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-gradient-to-r from-gray-50 to-gray-100 border-b-2">
         <div className="flex-1 min-w-0 w-full sm:w-auto">
-          <h2 className="m-0 text-lg sm:text-xl text-gray-800 font-semibold break-words">
+          <h2 className="m-0 text-lg sm:text-xl text-gray-900 font-bold break-words flex items-center gap-2">
+            <Video className="w-5 h-5 text-primary flex-shrink-0" />
             {channel.name}
           </h2>
           {channel.description && (
-            <p className="text-gray-600 mt-1 mb-0 text-xs sm:text-sm break-words">
+            <p className="text-gray-600 mt-2 mb-0 text-xs sm:text-sm break-words">
               {channel.description}
             </p>
           )}
         </div>
         <div className="self-start sm:self-auto">{getStatusBadge()}</div>
-      </div>
+      </CardHeader>
 
       {/* Control Buttons */}
-      <div className="px-4 sm:px-6 py-4 border-b border-gray-200 flex gap-2 sm:gap-3 flex-wrap bg-white">
+      <CardContent className="pt-4 pb-4 border-b-2 border-gray-100">
+        <div className="flex gap-2 sm:gap-3 flex-wrap">
         {channel.status !== 'running' ? (
           <Button
             onClick={handleStart}
@@ -650,7 +652,8 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
           <Trash2 className="w-4 h-4" />
           <span className="hidden sm:inline">Delete</span>
         </Button>
-      </div>
+        </div>
+      </CardContent>
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -689,7 +692,7 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
           {renderTabContent()}
         </TabsContent>
       </Tabs>
-    </div>
+    </Card>
   );
 }
 
