@@ -270,7 +270,7 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
                           Remove
                         </Button>
                       </div>
-                    ) : channelStatus === 'stopped' ? (
+                    ) : channelStatus !== 'running' ? (
                       canGoLive ? (
                         <Button
                           onClick={() => handleCreatePlatformStream(conn.platform, conn.id)}
@@ -289,7 +289,7 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
                       )
                     ) : (
                       <span className="text-sm text-gray-500">
-                        Stop stream to enable
+                        Stop this channel's stream to enable
                       </span>
                     )}
                   </div>
@@ -359,7 +359,7 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
                           Disable
                         </Button>
                       </div>
-                    ) : channelStatus === 'stopped' ? (
+                    ) : channelStatus !== 'running' ? (
                       canGoLive ? (
                         <Button
                           onClick={() => handleToggleTemplate(template.id, false)}
@@ -377,7 +377,7 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
                       )
                     ) : (
                       <span className="text-sm text-gray-500">
-                        Stop stream to enable
+                        Stop this channel's stream to enable
                       </span>
                     )}
                   </div>
