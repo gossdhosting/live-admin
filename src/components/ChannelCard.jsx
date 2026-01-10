@@ -353,9 +353,11 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
     switch (activeTab) {
       case 'overview':
         return (
-          <div className="p-5">
-            <div className="mb-4">
-              <div className="text-sm text-gray-600 mb-1 font-medium">
+          <div className="p-6 space-y-4">
+            {/* Input Source Card */}
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+              <div className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <Video className="w-4 h-4 text-blue-600" />
                 Input Source
               </div>
               {channel.input_type === 'youtube' ? (
@@ -363,13 +365,14 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
                   href={channel.input_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 no-underline text-sm break-all hover:underline"
+                  className="text-blue-700 font-medium text-sm break-all hover:underline flex items-center gap-2"
                 >
+                  <ExternalLink className="w-3.5 h-3.5 flex-shrink-0" />
                   {channel.input_url}
                 </a>
               ) : (
-                <div className="text-sm text-gray-700 flex items-center gap-2">
-                  <Video className="w-4 h-4" />
+                <div className="text-sm text-gray-800 font-medium flex items-center gap-2">
+                  <Video className="w-4 h-4 text-indigo-600" />
                   <span>{channel.media_file_name || 'Pre-uploaded Video'}</span>
                 </div>
               )}
@@ -379,33 +382,38 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
             {getHealthInfo()}
             {getRtmpConnectionsInfo()}
 
+            {/* Error Message */}
             {channel.status === 'error' && channel.error_message && (
-              <div className="bg-red-50 border border-red-200 p-3 rounded-md mt-4 text-red-800 text-sm flex items-start gap-2">
-                <XCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                <div><strong>Error:</strong> {channel.error_message}</div>
+              <div className="bg-gradient-to-br from-red-50 to-rose-50 border-2 border-red-300 p-4 rounded-lg text-red-900 text-sm flex items-start gap-3 shadow-sm">
+                <XCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-red-600" />
+                <div>
+                  <div className="font-semibold mb-1">Stream Error</div>
+                  <div className="text-red-800">{channel.error_message}</div>
+                </div>
               </div>
             )}
 
+            {/* Stream URL Section */}
             {channel.status === 'running' && (
-              <div className="bg-green-50 p-4 rounded-lg mt-4 border border-green-200">
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300 rounded-lg p-4 shadow-sm">
                 <div className="flex items-center justify-between mb-3">
-                  <strong className="text-gray-800 text-sm flex items-center gap-2">
-                    <Video className="w-4 h-4" />
-                    Stream URL
-                  </strong>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                    <strong className="text-gray-900 text-sm font-semibold">Live Stream URL</strong>
+                  </div>
                   <div className="flex gap-2">
                     <Button
                       size="sm"
                       onClick={handleCopyUrl}
-                      className={`gap-1.5 ${copied ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'}`}
+                      className={`gap-1.5 shadow-sm ${copied ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'}`}
                     >
                       <Copy className="w-3.5 h-3.5" />
-                      {copied ? 'Copied' : 'Copy'}
+                      {copied ? 'Copied!' : 'Copy'}
                     </Button>
                     <Button
                       size="sm"
                       onClick={handleOpenStream}
-                      className="bg-purple-600 hover:bg-purple-700 gap-1.5"
+                      className="bg-purple-600 hover:bg-purple-700 gap-1.5 shadow-sm"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
                       Open
@@ -413,22 +421,23 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
                     <Button
                       size="sm"
                       onClick={() => setShowPreview(!showPreview)}
-                      className="bg-orange-600 hover:bg-orange-700 gap-1.5"
+                      className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 gap-1.5 shadow-sm"
                     >
                       {showPreview ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                       {showPreview ? 'Hide' : 'Preview'}
                     </Button>
                   </div>
                 </div>
-                <div className="bg-white p-3 rounded font-mono text-xs break-all text-gray-800">
+                <div className="bg-white border border-green-200 p-3 rounded-md font-mono text-xs break-all text-gray-800 shadow-inner">
                   {streamUrl}
                 </div>
               </div>
             )}
 
+            {/* Video Preview */}
             {showPreview && channel.status === 'running' && (
-              <div className="mt-4">
-                <div className="bg-black rounded-lg overflow-hidden relative">
+              <div className="space-y-2">
+                <div className="bg-black rounded-xl overflow-hidden relative shadow-2xl border-2 border-gray-800">
                   <video
                     controls
                     autoPlay
@@ -438,43 +447,44 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
                   >
                     Your browser does not support HLS playback.
                   </video>
-                  <div className="absolute top-2 right-2 bg-red-600/90 text-white px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1.5">
+                  <div className="absolute top-3 right-3 bg-gradient-to-r from-red-600 to-red-700 text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-lg">
                     <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
                     LIVE
                   </div>
                 </div>
-                <p className="text-xs text-gray-500 mt-2 text-center">
-                  Note: Some browsers may not support HLS natively. Use VLC or a dedicated player for best results.
+                <p className="text-xs text-gray-500 text-center italic">
+                  💡 Note: Some browsers may not support HLS natively. Use VLC or a dedicated player for best results.
                 </p>
               </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4 p-4 bg-gray-50 rounded-lg">
-              <div>
-                <div className="text-xs text-gray-500 mb-1">Quality</div>
-                <div className="font-semibold text-gray-800">{channel.quality_preset}</div>
+            {/* Stream Details Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow">
+                <div className="text-xs text-gray-500 mb-1.5 font-medium">Quality Preset</div>
+                <div className="font-bold text-gray-900">{channel.quality_preset}</div>
               </div>
-              <div>
-                <div className="text-xs text-gray-500 mb-1">Input Type</div>
-                <div className="font-semibold text-gray-800 capitalize">{channel.input_type}</div>
+              <div className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow">
+                <div className="text-xs text-gray-500 mb-1.5 font-medium">Input Type</div>
+                <div className="font-bold text-gray-900 capitalize">{channel.input_type}</div>
               </div>
-              <div>
-                <div className="text-xs text-gray-500 mb-1">Auto-restart</div>
-                <div className={`font-semibold flex items-center gap-1 ${channel.auto_restart ? 'text-green-600' : 'text-gray-400'}`}>
+              <div className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow">
+                <div className="text-xs text-gray-500 mb-1.5 font-medium">Auto-restart</div>
+                <div className={`font-bold flex items-center gap-1.5 ${channel.auto_restart ? 'text-green-600' : 'text-gray-400'}`}>
                   {channel.auto_restart ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
                   {channel.auto_restart ? 'Enabled' : 'Disabled'}
                 </div>
               </div>
               {isAdmin && (
-                <div>
-                  <div className="text-xs text-gray-500 mb-1">User ID</div>
-                  <div className="font-semibold text-gray-800 font-mono">#{channel.user_id}</div>
+                <div className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow">
+                  <div className="text-xs text-gray-500 mb-1.5 font-medium">User ID</div>
+                  <div className="font-bold text-gray-900 font-mono">#{channel.user_id}</div>
                 </div>
               )}
               {isAdmin && channel.process_id && (
-                <div>
-                  <div className="text-xs text-gray-500 mb-1">Process ID</div>
-                  <div className="font-semibold text-gray-800 font-mono">{channel.process_id}</div>
+                <div className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow">
+                  <div className="text-xs text-gray-500 mb-1.5 font-medium">Process ID</div>
+                  <div className="font-bold text-gray-900 font-mono">{channel.process_id}</div>
                 </div>
               )}
             </div>
@@ -497,13 +507,7 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
       case 'watermark':
         return (
           <div className="p-6">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-              <p className="text-sm text-blue-800">
-                <strong>ℹ️ Watermark is now managed in User Settings.</strong> Configure your watermark in Settings → Watermark tab. Here you can only enable or disable it for this channel.
-              </p>
-            </div>
-
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
               <div>
                 <h4 className="font-semibold text-gray-900 mb-1">Enable Watermark</h4>
                 <p className="text-sm text-gray-600">
@@ -543,30 +547,48 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
 
       case 'logs':
         return (
-          <div className="p-4">
-            <div className="bg-gray-900 rounded-md p-4 max-h-96 overflow-y-auto font-mono text-sm">
+          <div className="p-6">
+            <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl p-5 max-h-96 overflow-y-auto font-mono text-sm shadow-inner border border-gray-700">
               {logs.length === 0 ? (
-                <div className="text-gray-400 text-center p-8">No logs available</div>
+                <div className="text-gray-400 text-center p-12 flex flex-col items-center gap-3">
+                  <FileText className="w-12 h-12 text-gray-600" />
+                  <div className="text-base font-semibold">No logs available</div>
+                  <div className="text-xs text-gray-500">Stream logs will appear here when available</div>
+                </div>
               ) : (
-                logs.map((log) => {
-                  const borderColor = log.log_type === 'error' ? 'border-red-600' :
-                                     log.log_type === 'warning' ? 'border-yellow-500' :
-                                     log.log_type === 'info' ? 'border-blue-500' : 'border-gray-500';
-                  const textColor = log.log_type === 'error' ? 'text-red-500' :
-                                   log.log_type === 'warning' ? 'text-yellow-500' :
-                                   log.log_type === 'info' ? 'text-blue-400' : 'text-gray-300';
+                <div className="space-y-2">
+                  {logs.map((log) => {
+                    const borderColor = log.log_type === 'error' ? 'border-red-500' :
+                                       log.log_type === 'warning' ? 'border-yellow-400' :
+                                       log.log_type === 'info' ? 'border-blue-400' : 'border-gray-500';
+                    const bgColor = log.log_type === 'error' ? 'bg-red-500/10' :
+                                   log.log_type === 'warning' ? 'bg-yellow-400/10' :
+                                   log.log_type === 'info' ? 'bg-blue-400/10' : 'bg-gray-500/10';
+                    const textColor = log.log_type === 'error' ? 'text-red-400' :
+                                     log.log_type === 'warning' ? 'text-yellow-300' :
+                                     log.log_type === 'info' ? 'text-blue-300' : 'text-gray-300';
+                    const badgeColor = log.log_type === 'error' ? 'bg-red-600 text-white' :
+                                      log.log_type === 'warning' ? 'bg-yellow-500 text-gray-900' :
+                                      log.log_type === 'info' ? 'bg-blue-500 text-white' : 'bg-gray-600 text-white';
 
-                  return (
-                    <div
-                      key={log.id}
-                      className={`p-2 mb-1 border-l-4 ${borderColor} ${textColor}`}
-                    >
-                      <span className="text-gray-500">[{new Date(log.created_at).toLocaleString()}]</span>{' '}
-                      <span className="font-semibold">[{log.log_type.toUpperCase()}]</span>{' '}
-                      {log.message}
-                    </div>
-                  );
-                })
+                    return (
+                      <div
+                        key={log.id}
+                        className={`p-3 border-l-4 ${borderColor} ${bgColor} rounded-r-md`}
+                      >
+                        <div className="flex flex-wrap items-center gap-2 mb-1">
+                          <span className="text-gray-500 text-xs">{new Date(log.created_at).toLocaleString()}</span>
+                          <span className={`px-2 py-0.5 rounded text-xs font-bold ${badgeColor}`}>
+                            {log.log_type.toUpperCase()}
+                          </span>
+                        </div>
+                        <div className={`${textColor} text-sm leading-relaxed`}>
+                          {log.message}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               )}
             </div>
           </div>
@@ -578,117 +600,156 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
   };
 
   return (
-    <Card className="mb-6 border-2 hover:shadow-lg transition-all duration-200">
-      {/* Header */}
-      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-gradient-to-r from-gray-50 to-gray-100 border-b-2">
-        <div className="flex-1 min-w-0 w-full sm:w-auto">
-          <h2 className="m-0 text-lg sm:text-xl text-gray-900 font-bold break-words flex items-center gap-2">
-            <Video className="w-5 h-5 text-primary flex-shrink-0" />
-            {channel.name}
-          </h2>
-          {channel.description && (
-            <p className="text-gray-600 mt-2 mb-0 text-xs sm:text-sm break-words">
-              {channel.description}
-            </p>
-          )}
+    <Card className="mb-6 overflow-hidden border hover:shadow-2xl transition-all duration-300 hover:scale-[1.01] bg-white">
+      {/* Status Strip */}
+      <div className={`h-1.5 w-full ${
+        channel.status === 'running' ? 'bg-gradient-to-r from-green-500 via-emerald-500 to-green-600' :
+        channel.status === 'error' ? 'bg-gradient-to-r from-red-500 via-rose-500 to-red-600' :
+        'bg-gradient-to-r from-gray-400 via-gray-500 to-gray-600'
+      }`} />
+
+      {/* Compact Header */}
+      <CardHeader className="pb-4 pt-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2.5 mb-1.5">
+              <div className={`p-1.5 rounded-lg ${
+                channel.status === 'running' ? 'bg-green-100' :
+                channel.status === 'error' ? 'bg-red-100' :
+                'bg-gray-100'
+              }`}>
+                <Video className={`w-4 h-4 ${
+                  channel.status === 'running' ? 'text-green-600' :
+                  channel.status === 'error' ? 'text-red-600' :
+                  'text-gray-600'
+                }`} />
+              </div>
+              <h2 className="text-xl font-bold text-gray-900 truncate">{channel.name}</h2>
+            </div>
+            {channel.description && (
+              <p className="text-sm text-gray-600 line-clamp-2 ml-10">{channel.description}</p>
+            )}
+          </div>
+          <div className="flex flex-col items-end gap-2">
+            {getStatusBadge()}
+            {channel.status === 'running' && runtime > 0 && (
+              <Badge variant="secondary" className="text-xs font-mono font-semibold">
+                ⏱ {formatRuntime(runtime)}
+              </Badge>
+            )}
+          </div>
         </div>
-        <div className="self-start sm:self-auto">{getStatusBadge()}</div>
       </CardHeader>
 
-      {/* Control Buttons */}
-      <CardContent className="pt-4 pb-4 border-b-2 border-gray-100">
-        <div className="flex gap-2 sm:gap-3 flex-wrap">
-        {channel.status !== 'running' ? (
-          <Button
-            onClick={handleStart}
-            disabled={loading}
-            className="bg-green-600 hover:bg-green-700 text-white flex-1 sm:flex-none gap-1.5"
-            size="sm"
-          >
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
-            <span className="hidden sm:inline">{loading ? 'Starting...' : 'Start Stream'}</span><span className="sm:hidden">Start</span>
-          </Button>
-        ) : (
-          <>
+      {/* Compact Action Buttons */}
+      <CardContent className="pt-0 pb-4 px-6">
+        <div className="flex gap-2 flex-wrap">
+          {channel.status !== 'running' ? (
             <Button
-              variant="destructive"
-              onClick={handleStop}
+              onClick={handleStart}
               disabled={loading}
-              className="flex-1 sm:flex-none gap-1.5"
+              className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold shadow-sm gap-2"
               size="sm"
             >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Square className="w-4 h-4" />}
-              <span className="hidden sm:inline">{loading ? 'Stopping...' : 'Stop Stream'}</span><span className="sm:hidden">Stop</span>
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4 fill-current" />}
+              <span>{loading ? 'Starting...' : 'Start Stream'}</span>
             </Button>
+          ) : (
+            <>
+              <Button
+                variant="destructive"
+                onClick={handleStop}
+                disabled={loading}
+                className="font-semibold shadow-sm gap-2"
+                size="sm"
+              >
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Square className="w-4 h-4 fill-current" />}
+                <span>{loading ? 'Stopping...' : 'Stop'}</span>
+              </Button>
+              <Button
+                onClick={handleRestart}
+                disabled={loading}
+                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold shadow-sm gap-2"
+                size="sm"
+              >
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RotateCw className="w-4 h-4" />}
+                <span>{loading ? 'Restarting...' : 'Restart'}</span>
+              </Button>
+            </>
+          )}
+          {channel.status !== 'running' && (
             <Button
-              onClick={handleRestart}
-              disabled={loading}
-              className="bg-orange-500 hover:bg-orange-600 text-white flex-1 sm:flex-none gap-1.5"
+              variant="outline"
+              onClick={() => onEdit(channel)}
+              className="ml-auto gap-2 font-medium"
               size="sm"
             >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RotateCw className="w-4 h-4" />}
-              <span className="hidden sm:inline">{loading ? 'Restarting...' : 'Restart'}</span><span className="sm:hidden">Restart</span>
+              <Pencil className="w-4 h-4" />
+              <span>Edit</span>
             </Button>
-          </>
-        )}
-        {channel.status !== 'running' && (
+          )}
           <Button
-            variant="secondary"
-            onClick={() => onEdit(channel)}
-            className="ml-auto gap-1.5"
+            variant="outline"
+            onClick={handleDelete}
+            disabled={loading || channel.status === 'running'}
+            className={`gap-2 font-medium text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 ${channel.status === 'running' ? 'ml-auto opacity-50' : ''}`}
             size="sm"
           >
-            <Pencil className="w-4 h-4" />
-            <span className="hidden sm:inline">Edit</span>
+            <Trash2 className="w-4 h-4" />
+            <span>Delete</span>
           </Button>
-        )}
-        <Button
-          variant="destructive"
-          onClick={handleDelete}
-          disabled={loading || channel.status === 'running'}
-          className={`gap-1.5 ${channel.status === 'running' ? 'ml-auto' : ''}`}
-          size="sm"
-        >
-          <Trash2 className="w-4 h-4" />
-          <span className="hidden sm:inline">Delete</span>
-        </Button>
         </div>
       </CardContent>
 
-      {/* Tabs */}
+      {/* Modern Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 bg-gray-50 border-t-2 border-gray-200">
-          <TabsTrigger value="overview" className="text-xs sm:text-sm gap-1.5">
-            <BarChart3 className="w-4 h-4" />
-            <span className="hidden sm:inline">Overview</span>
-          </TabsTrigger>
-          <TabsTrigger value="platforms" className="text-xs sm:text-sm gap-1.5">
-            <Globe className="w-4 h-4" />
-            <span className="hidden sm:inline">Multi-Platform</span>
-          </TabsTrigger>
-          <TabsTrigger value="watermark" className="text-xs sm:text-sm gap-1.5">
-            <ImageIcon className="w-4 h-4" />
-            <span className="hidden sm:inline">Watermark</span>
-          </TabsTrigger>
-          <TabsTrigger value="logs" className="text-xs sm:text-sm gap-1.5">
-            <FileText className="w-4 h-4" />
-            <span className="hidden sm:inline">Logs</span>
-          </TabsTrigger>
-        </TabsList>
+        <div className="border-t border-gray-200">
+          <TabsList className="grid w-full grid-cols-4 bg-gradient-to-b from-gray-50 to-white h-auto p-1">
+            <TabsTrigger
+              value="overview"
+              className="data-[state=active]:bg-white data-[state=active]:shadow-sm flex flex-col sm:flex-row items-center gap-1.5 py-2.5 text-xs sm:text-sm font-medium"
+            >
+              <BarChart3 className="w-4 h-4" />
+              <span>Overview</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="platforms"
+              className="data-[state=active]:bg-white data-[state=active]:shadow-sm flex flex-col sm:flex-row items-center gap-1.5 py-2.5 text-xs sm:text-sm font-medium"
+            >
+              <Globe className="w-4 h-4" />
+              <span className="hidden sm:inline">Platforms</span>
+              <span className="sm:hidden">Multi</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="watermark"
+              className="data-[state=active]:bg-white data-[state=active]:shadow-sm flex flex-col sm:flex-row items-center gap-1.5 py-2.5 text-xs sm:text-sm font-medium"
+            >
+              <ImageIcon className="w-4 h-4" />
+              <span>Watermark</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="logs"
+              className="data-[state=active]:bg-white data-[state=active]:shadow-sm flex flex-col sm:flex-row items-center gap-1.5 py-2.5 text-xs sm:text-sm font-medium"
+            >
+              <FileText className="w-4 h-4" />
+              <span>Logs</span>
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
-        <TabsContent value="overview" className="min-h-[200px] mt-0">
+        <TabsContent value="overview" className="m-0 border-t">
           {renderTabContent()}
         </TabsContent>
 
-        <TabsContent value="platforms" className="min-h-[200px] mt-0">
+        <TabsContent value="platforms" className="m-0 border-t">
           {renderTabContent()}
         </TabsContent>
 
-        <TabsContent value="watermark" className="min-h-[200px] mt-0">
+        <TabsContent value="watermark" className="m-0 border-t">
           {renderTabContent()}
         </TabsContent>
 
-        <TabsContent value="logs" className="min-h-[200px] mt-0">
+        <TabsContent value="logs" className="m-0 border-t">
           {renderTabContent()}
         </TabsContent>
       </Tabs>
