@@ -7,7 +7,7 @@ import { Alert, AlertDescription } from './ui/alert';
 import { Facebook, Youtube, Twitch, Wrench, Radio, Circle, CheckCircle, Lightbulb, AlertTriangle } from 'lucide-react';
 import { useAlertDialog } from './ui/alert-dialog-modern';
 
-function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDescription, channelStatus }) {
+function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDescription, channelStatus, onPlatformsChange }) {
   const [platformConnections, setPlatformConnections] = useState([]);
   const [rtmpTemplates, setRtmpTemplates] = useState([]);
   const [rtmpDestinations, setRtmpDestinations] = useState([]);
@@ -106,6 +106,7 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
           type: 'success'
         });
         fetchAll();
+        onPlatformsChange?.();
       }
     } catch (error) {
       console.error(`Failed to create ${platform} stream:`, error);
@@ -132,6 +133,7 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
     try {
       await api.delete(`/platforms/streams/${streamId}`);
       fetchAll();
+      onPlatformsChange?.();
     } catch (error) {
       await showAlert({
         title: 'Failed to Delete',
@@ -146,6 +148,7 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
       const enabled = !currentlyEnabled;
       await api.post(`/channels/${channelId}/rtmp/template/${templateId}/toggle`, { enabled });
       fetchAll();
+      onPlatformsChange?.();
     } catch (error) {
       console.error('Failed to toggle template:', error);
       await showAlert({
@@ -169,6 +172,7 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
     try {
       await api.delete(`/rtmp/${destinationId}`);
       fetchAll();
+      onPlatformsChange?.();
     } catch (error) {
       await showAlert({
         title: 'Failed to Remove',

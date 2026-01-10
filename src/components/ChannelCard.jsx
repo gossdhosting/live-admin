@@ -49,35 +49,35 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
   }, []);
 
   // Fetch configured platforms
+  const fetchPlatforms = async () => {
+    try {
+      const [streamsRes, destinationsRes] = await Promise.all([
+        api.get(`/platforms/streams/${channel.id}`),
+        api.get(`/channels/${channel.id}/rtmp`)
+      ]);
+
+      const platformStreams = streamsRes.data.streams || [];
+      const rtmpDestinations = destinationsRes.data.destinations || [];
+
+      // Combine both types
+      const allPlatforms = [
+        ...platformStreams.map(s => ({
+          name: s.platform,
+          type: 'oauth'
+        })),
+        ...rtmpDestinations.filter(d => d.enabled === 1).map(d => ({
+          name: d.platform || 'Custom RTMP',
+          type: 'rtmp'
+        }))
+      ];
+
+      setConfiguredPlatforms(allPlatforms);
+    } catch (error) {
+      console.error('Failed to fetch platforms:', error);
+    }
+  };
+
   useEffect(() => {
-    const fetchPlatforms = async () => {
-      try {
-        const [streamsRes, destinationsRes] = await Promise.all([
-          api.get(`/platforms/streams/${channel.id}`),
-          api.get(`/channels/${channel.id}/rtmp`)
-        ]);
-
-        const platformStreams = streamsRes.data.streams || [];
-        const rtmpDestinations = destinationsRes.data.destinations || [];
-
-        // Combine both types
-        const allPlatforms = [
-          ...platformStreams.map(s => ({
-            name: s.platform,
-            type: 'oauth'
-          })),
-          ...rtmpDestinations.filter(d => d.enabled === 1).map(d => ({
-            name: d.platform || 'Custom RTMP',
-            type: 'rtmp'
-          }))
-        ];
-
-        setConfiguredPlatforms(allPlatforms);
-      } catch (error) {
-        console.error('Failed to fetch platforms:', error);
-      }
-    };
-
     if (isExpanded && activeTab === 'overview') {
       fetchPlatforms();
     }
@@ -500,6 +500,7 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
               streamTitle={channel.stream_title}
               streamDescription={channel.description}
               channelStatus={channel.status}
+              onPlatformsChange={fetchPlatforms}
             />
           </div>
         );
