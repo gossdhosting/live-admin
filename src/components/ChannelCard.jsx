@@ -512,13 +512,13 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
               <div>
                 <h4 className="font-semibold text-gray-900 mb-1">Enable Watermark</h4>
                 <p className="text-sm text-gray-600">
-                  {channel.watermark_enabled ? 'Watermark is enabled for this channel' : 'Watermark is disabled for this channel'}
+                  {channel.watermark_enabled ? 'Watermark is enabled for this stream' : 'Watermark is disabled for this stream'}
                 </p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={channel.watermark_enabled || false}
+                  checked={Boolean(channel.watermark_enabled)}
                   onChange={async (e) => {
                     try {
                       await api.put(`/channels/${channel.id}`, {
@@ -532,7 +532,7 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
                   disabled={channel.status === 'running'}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 peer-disabled:opacity-50 peer-disabled:cursor-not-allowed"></div>
               </label>
             </div>
 
@@ -696,7 +696,7 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
       {isExpanded && (
         <>
           {/* Additional Action Buttons */}
-          <CardContent className="pt-0 pb-3 px-6 border-t">
+          <CardContent className="pt-3 pb-3 px-6 border-t">
             <div className="flex gap-2 flex-wrap">
               {channel.status !== 'running' && (
                 <Button
