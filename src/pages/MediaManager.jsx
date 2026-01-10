@@ -288,7 +288,7 @@ function MediaManager({ user }) {
                 autoPlay
                 className="w-full max-h-[500px] bg-black rounded"
               >
-                <source src={`https://panel.zebcast.app/uploads/${previewMedia.filename}`} type="video/mp4" />
+                <source src={`https://panel.zebcast.app/uploads/media/${previewMedia.filename}`} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
 
