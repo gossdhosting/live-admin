@@ -3,13 +3,14 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/api';
 import RtmpTemplatesManager from '../components/RtmpTemplatesManager';
 import PlatformConnections from '../components/PlatformConnections';
+import WatermarkSettingsUser from '../components/WatermarkSettingsUser';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Button } from '../components/ui/button';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { Label } from '../components/ui/label';
 import { Input } from '../components/ui/input';
-import { User, Lock, Radio, FileText, Globe } from 'lucide-react';
+import { User, Lock, Radio, FileText, Globe, Image as ImageIcon } from 'lucide-react';
 
 function Settings({ user }) {
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ function Settings({ user }) {
   const [savingUserSettings, setSavingUserSettings] = useState(false);
   const [message, setMessage] = useState('');
   const [userSettingsMessage, setUserSettingsMessage] = useState('');
-  const [activeTab, setActiveTab] = useState('profile'); // profile, password, rtmp, title, platforms
+  const [activeTab, setActiveTab] = useState('profile'); // profile, password, rtmp, watermark, platforms
 
   // Password change state
   const [passwordData, setPasswordData] = useState({
@@ -288,9 +289,9 @@ function Settings({ user }) {
                 <Radio className="w-4 h-4" />
                 <span className="hidden sm:inline">RTMP</span>
               </TabsTrigger>
-              <TabsTrigger value="title" className="text-xs sm:text-sm gap-1.5 py-2">
-                <FileText className="w-4 h-4" />
-                <span className="hidden sm:inline">Title</span>
+              <TabsTrigger value="watermark" className="text-xs sm:text-sm gap-1.5 py-2">
+                <ImageIcon className="w-4 h-4" />
+                <span className="hidden sm:inline">Watermark</span>
               </TabsTrigger>
               <TabsTrigger value="platforms" className="text-xs sm:text-sm gap-1.5 py-2">
                 <Globe className="w-4 h-4" />
@@ -467,22 +468,27 @@ function Settings({ user }) {
               <RtmpTemplatesManager />
             </TabsContent>
 
-            <TabsContent value="title" className="mt-6">
-              <Alert className="border-green-200 bg-green-50 mb-6">
-                <AlertDescription className="text-green-800">
-                  <strong>ℹ️ Your Title Settings:</strong> Customize how titles appear on your streams.
-                </AlertDescription>
-              </Alert>
+            <TabsContent value="watermark" className="mt-6">
+              {/* Watermark Settings Section */}
+              <WatermarkSettingsUser onUpdate={fetchUserSettings} />
 
-              {userSettingsMessage && (
-                <Alert className={userSettingsMessage.includes('success') ? 'border-green-200 bg-green-50 mb-6' : 'border-red-200 bg-red-50 mb-6'}>
-                  <AlertDescription className={userSettingsMessage.includes('success') ? 'text-green-800' : 'text-red-800'}>
-                    {userSettingsMessage}
+              {/* Title Settings Section */}
+              <div className="mt-12 pt-8 border-t border-gray-200">
+                <Alert className="border-green-200 bg-green-50 mb-6">
+                  <AlertDescription className="text-green-800">
+                    <strong>ℹ️ Title Settings:</strong> Customize how titles appear on your streams.
                   </AlertDescription>
                 </Alert>
-              )}
 
-              <form onSubmit={handleUserSettingsSubmit} className="space-y-6">
+                {userSettingsMessage && (
+                  <Alert className={userSettingsMessage.includes('success') ? 'border-green-200 bg-green-50 mb-6' : 'border-red-200 bg-red-50 mb-6'}>
+                    <AlertDescription className={userSettingsMessage.includes('success') ? 'text-green-800' : 'text-red-800'}>
+                      {userSettingsMessage}
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                <form onSubmit={handleUserSettingsSubmit} className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="title_bg_color">Background Color</Label>
                   <div className="flex gap-4 items-center">
@@ -662,6 +668,7 @@ function Settings({ user }) {
                 <p className="text-sm text-gray-500 mt-2">
                   This is a preview of how the title overlay will appear on your stream. Enable the title overlay when creating/editing a channel.
                 </p>
+              </div>
               </div>
             </TabsContent>
 

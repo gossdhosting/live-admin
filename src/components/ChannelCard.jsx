@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import api from '../services/api';
 import MultiPlatformStreaming from './MultiPlatformStreaming';
-import WatermarkSettings from './WatermarkSettings';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader } from './ui/card';
 import { Badge } from './ui/badge';
@@ -497,8 +496,48 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
 
       case 'watermark':
         return (
-          <div className="p-4">
-            <WatermarkSettings channel={channel} onUpdate={onUpdate} />
+          <div className="p-6">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <p className="text-sm text-blue-800">
+                <strong>ℹ️ Watermark is now managed in User Settings.</strong> Configure your watermark in Settings → Watermark tab. Here you can only enable or disable it for this channel.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">Enable Watermark</h4>
+                <p className="text-sm text-gray-600">
+                  {channel.watermark_enabled ? 'Watermark is enabled for this channel' : 'Watermark is disabled for this channel'}
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={channel.watermark_enabled || false}
+                  onChange={async (e) => {
+                    try {
+                      await api.put(`/channels/${channel.id}`, {
+                        watermark_enabled: e.target.checked ? 1 : 0
+                      });
+                      onUpdate();
+                    } catch (error) {
+                      alert(error.response?.data?.error || 'Failed to update watermark setting');
+                    }
+                  }}
+                  disabled={channel.status === 'running'}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+
+            {channel.status === 'running' && (
+              <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <p className="text-sm text-yellow-800">
+                  ⚠️ Stop the stream to change watermark settings
+                </p>
+              </div>
+            )}
           </div>
         );
 
