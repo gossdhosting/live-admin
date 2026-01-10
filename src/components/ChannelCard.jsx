@@ -20,8 +20,14 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
   const [userStats, setUserStats] = useState(null);
   const [runtime, setRuntime] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [watermarkEnabled, setWatermarkEnabled] = useState(Boolean(channel.watermark_enabled));
   const copiedTimeoutRef = useRef(null);
   const isAdmin = user && user.role === 'admin';
+
+  // Update local watermark state when channel prop changes
+  useEffect(() => {
+    setWatermarkEnabled(Boolean(channel.watermark_enabled));
+  }, [channel.watermark_enabled]);
 
   useEffect(() => {
     return () => {
@@ -512,20 +518,27 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
               <div>
                 <h4 className="font-semibold text-gray-900 mb-1">Enable Watermark</h4>
                 <p className="text-sm text-gray-600">
-                  {channel.watermark_enabled ? 'Watermark is enabled for this stream' : 'Watermark is disabled for this stream'}
+                  {watermarkEnabled ? 'Watermark is enabled for this stream' : 'Watermark is disabled for this stream'}
                 </p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={Boolean(channel.watermark_enabled)}
+                  checked={watermarkEnabled}
                   onChange={async (e) => {
+                    const newValue = e.target.checked;
+                    // Optimistic update
+                    setWatermarkEnabled(newValue);
+
                     try {
                       await api.put(`/channels/${channel.id}`, {
-                        watermark_enabled: e.target.checked ? 1 : 0
+                        watermark_enabled: newValue ? 1 : 0
                       });
+                      // Refresh to ensure we're in sync with server
                       onUpdate();
                     } catch (error) {
+                      // Revert on error
+                      setWatermarkEnabled(!newValue);
                       alert(error.response?.data?.error || 'Failed to update watermark setting');
                     }
                   }}
