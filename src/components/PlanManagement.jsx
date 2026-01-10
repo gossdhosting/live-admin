@@ -107,6 +107,8 @@ function PlanManagement() {
         ...formData,
         custom_watermark: formData.custom_watermark ? 1 : 0,
         is_active: formData.is_active ? 1 : 0,
+        is_hidden: formData.is_hidden ? 1 : 0,
+        youtube_restreaming: formData.youtube_restreaming ? 1 : 0,
         max_stream_duration: formData.max_stream_duration || null
       };
 
