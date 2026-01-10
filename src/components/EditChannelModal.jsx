@@ -77,6 +77,9 @@ function EditChannelModal({ channel, onClose, onSuccess, isOpen }) {
       return;
     }
 
+    // RTMP input type doesn't require input_url or media_file_id
+    // Stream will come from nginx-rtmp server via stream key
+
     setLoading(true);
 
     try {
@@ -148,7 +151,7 @@ function EditChannelModal({ channel, onClose, onSuccess, isOpen }) {
 
           <div className="space-y-2">
             <Label>Input Type *</Label>
-            <div className="flex gap-4 mt-2">
+            <div className="flex flex-col gap-2 mt-2">
               {userStats?.youtube_restreaming && (
                 <label className="flex items-center gap-2 mb-0">
                   <input
@@ -170,6 +173,16 @@ function EditChannelModal({ channel, onClose, onSuccess, isOpen }) {
                   onChange={handleChange}
                 />
                 Pre-recorded Video
+              </label>
+              <label className="flex items-center gap-2 mb-0">
+                <input
+                  type="radio"
+                  name="input_type"
+                  value="rtmp"
+                  checked={formData.input_type === 'rtmp'}
+                  onChange={handleChange}
+                />
+                Custom RTMP Input (OBS/vMix/etc.)
               </label>
             </div>
             {!userStats?.youtube_restreaming && formData.input_type === 'youtube' && (
@@ -240,6 +253,67 @@ function EditChannelModal({ channel, onClose, onSuccess, isOpen }) {
               <p className="text-xs text-slate-500">
                 When enabled, the video will restart automatically when it ends
               </p>
+            </div>
+          )}
+
+          {formData.input_type === 'rtmp' && channel?.stream_key && (
+            <div className="space-y-3 bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-start gap-2">
+                <span className="text-blue-600 text-lg">ℹ️</span>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-blue-900 mb-2">
+                    RTMP Connection Details
+                  </p>
+                  <p className="text-xs text-blue-800 mb-3">
+                    Use these credentials in OBS Studio, vMix, or any RTMP encoder to send your stream to our server.
+                  </p>
+                </div>
+              </div>
+              <div className="bg-white border border-blue-200 rounded p-3 space-y-3">
+                <div>
+                  <p className="font-semibold text-gray-900 text-xs mb-1">RTMP Server URL:</p>
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 bg-gray-50 px-2 py-1.5 rounded text-xs font-mono text-gray-700 border border-gray-200">
+                      rtmp://panel.zebcast.app:1935/live
+                    </code>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        navigator.clipboard.writeText('rtmp://panel.zebcast.app:1935/live');
+                      }}
+                      className="text-xs"
+                    >
+                      Copy
+                    </Button>
+                  </div>
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900 text-xs mb-1">Stream Key:</p>
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 bg-gray-50 px-2 py-1.5 rounded text-xs font-mono text-gray-700 border border-gray-200">
+                      {channel.stream_key}
+                    </code>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        navigator.clipboard.writeText(channel.stream_key);
+                      }}
+                      className="text-xs"
+                    >
+                      Copy
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              <Alert className="bg-amber-50 border-amber-200">
+                <p className="text-xs text-amber-900">
+                  <strong>Important:</strong> Keep your stream key private. Anyone with this key can stream to your channel.
+                </p>
+              </Alert>
             </div>
           )}
 

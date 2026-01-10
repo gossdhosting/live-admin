@@ -77,6 +77,9 @@ function CreateChannelModal({ onClose, onSuccess, isOpen }) {
       return;
     }
 
+    // RTMP input type doesn't require input_url or media_file_id
+    // Stream will come from nginx-rtmp server via stream key
+
     setLoading(true);
 
     try {
@@ -149,7 +152,7 @@ function CreateChannelModal({ onClose, onSuccess, isOpen }) {
 
           <div className="space-y-2">
             <Label>Input Type *</Label>
-            <div className="flex gap-4 mt-2">
+            <div className="flex flex-col gap-2 mt-2">
               {userStats?.youtube_restreaming && (
                 <label className="flex items-center gap-2 mb-0">
                   <input
@@ -171,6 +174,16 @@ function CreateChannelModal({ onClose, onSuccess, isOpen }) {
                   onChange={handleChange}
                 />
                 Pre-recorded Video
+              </label>
+              <label className="flex items-center gap-2 mb-0">
+                <input
+                  type="radio"
+                  name="input_type"
+                  value="rtmp"
+                  checked={formData.input_type === 'rtmp'}
+                  onChange={handleChange}
+                />
+                Custom RTMP Input (OBS/vMix/etc.)
               </label>
             </div>
             {!userStats?.youtube_restreaming && (
@@ -221,6 +234,31 @@ function CreateChannelModal({ onClose, onSuccess, isOpen }) {
                   No videos uploaded yet. Please upload a video in Media Manager first.
                 </p>
               )}
+            </div>
+          )}
+
+          {formData.input_type === 'rtmp' && (
+            <div className="space-y-3 bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-start gap-2">
+                <span className="text-blue-600 text-lg">ℹ️</span>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-blue-900 mb-2">
+                    RTMP Input Instructions
+                  </p>
+                  <ul className="text-xs text-blue-800 space-y-1.5">
+                    <li>• After creating this channel, you'll receive unique RTMP credentials</li>
+                    <li>• Use OBS Studio, vMix, or any RTMP encoder to push your stream to our server</li>
+                    <li>• Your stream will be automatically forwarded to all connected platforms</li>
+                    <li>• The RTMP server URL and stream key will be displayed after channel creation</li>
+                  </ul>
+                </div>
+              </div>
+              <div className="bg-white border border-blue-200 rounded p-3 text-xs font-mono text-gray-700">
+                <p className="font-semibold text-gray-900 mb-1">RTMP Server:</p>
+                <p className="mb-2">rtmp://panel.zebcast.app:1935/live</p>
+                <p className="font-semibold text-gray-900 mb-1">Stream Key:</p>
+                <p className="text-gray-500 italic">Will be generated after creation</p>
+              </div>
             </div>
           )}
 
