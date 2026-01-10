@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import Hls from 'hls.js';
 import api from '../services/api';
 import config from '../config';
 import MultiPlatformStreaming from './MultiPlatformStreaming';
@@ -23,6 +24,8 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [watermarkEnabled, setWatermarkEnabled] = useState(Boolean(channel.watermark_enabled));
   const copiedTimeoutRef = useRef(null);
+  const videoRef = useRef(null);
+  const hlsRef = useRef(null);
   const isAdmin = user && user.role === 'admin';
 
   // Update local watermark state when channel prop changes
@@ -91,6 +94,64 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
   // Use stream_key if available, fallback to channel_id for backwards compatibility
   const streamKey = channel.stream_key || `channel_${channel.id}`;
   const streamUrl = `${config.hlsBaseUrl}/hls/${streamKey}/index.m3u8`;
+
+  // Initialize HLS.js when preview is shown
+  useEffect(() => {
+    if (showPreview && videoRef.current && channel.status === 'running') {
+      const video = videoRef.current;
+
+      if (Hls.isSupported()) {
+        // Use HLS.js for browsers that don't support HLS natively
+        const hls = new Hls({
+          enableWorker: true,
+          lowLatencyMode: true,
+          backBufferLength: 90
+        });
+
+        hls.loadSource(streamUrl);
+        hls.attachMedia(video);
+
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          video.play().catch(err => console.log('Autoplay prevented:', err));
+        });
+
+        hls.on(Hls.Events.ERROR, (event, data) => {
+          if (data.fatal) {
+            console.error('HLS.js fatal error:', data);
+            switch(data.type) {
+              case Hls.ErrorTypes.NETWORK_ERROR:
+                console.log('Network error, trying to recover...');
+                hls.startLoad();
+                break;
+              case Hls.ErrorTypes.MEDIA_ERROR:
+                console.log('Media error, trying to recover...');
+                hls.recoverMediaError();
+                break;
+              default:
+                console.log('Cannot recover from error, destroying HLS instance');
+                hls.destroy();
+                break;
+            }
+          }
+        });
+
+        hlsRef.current = hls;
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        // Native HLS support (Safari)
+        video.src = streamUrl;
+        video.addEventListener('loadedmetadata', () => {
+          video.play().catch(err => console.log('Autoplay prevented:', err));
+        });
+      }
+
+      return () => {
+        if (hlsRef.current) {
+          hlsRef.current.destroy();
+          hlsRef.current = null;
+        }
+      };
+    }
+  }, [showPreview, streamUrl, channel.status]);
 
   const fetchLogs = async () => {
     try {
@@ -447,11 +508,11 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
               <div className="space-y-2">
                 <div className="bg-black rounded-xl overflow-hidden relative shadow-2xl border-2 border-gray-800">
                   <video
+                    ref={videoRef}
                     controls
-                    autoPlay
                     muted
+                    playsInline
                     className="w-full max-h-96"
-                    src={streamUrl}
                   >
                     Your browser does not support HLS playback.
                   </video>
