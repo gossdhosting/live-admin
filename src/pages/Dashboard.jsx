@@ -448,16 +448,18 @@ function Dashboard({ user }) {
         </CardContent>
       </Card>
 
-      {channels.map((channel) => (
-        <ChannelCard
-          key={channel.id}
-          channel={channel}
-          onUpdate={fetchChannels}
-          onDelete={handleChannelDeleted}
-          onEdit={handleEditChannel}
-          user={user}
-        />
-      ))}
+      <div className="mt-6">
+        {channels.map((channel) => (
+          <ChannelCard
+            key={channel.id}
+            channel={channel}
+            onUpdate={fetchChannels}
+            onDelete={handleChannelDeleted}
+            onEdit={handleEditChannel}
+            user={user}
+          />
+        ))}
+      </div>
 
       <CreateChannelModal
         isOpen={showCreateModal}

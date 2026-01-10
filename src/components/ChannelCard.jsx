@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import {
   Play, Square, RotateCw, Pencil, Trash2, Copy, ExternalLink, Eye, EyeOff,
   CheckCircle, AlertTriangle, XCircle, Loader2, BarChart3, Globe, Image as ImageIcon,
-  FileText, Video, Check, X
+  FileText, Video, Check, X, ChevronDown, ChevronUp
 } from 'lucide-react';
 
 function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
@@ -19,6 +19,7 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
   const [activeTab, setActiveTab] = useState('overview');
   const [userStats, setUserStats] = useState(null);
   const [runtime, setRuntime] = useState(0);
+  const [isExpanded, setIsExpanded] = useState(false);
   const copiedTimeoutRef = useRef(null);
   const isAdmin = user && user.role === 'admin';
 
@@ -600,7 +601,7 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
   };
 
   return (
-    <Card className="mb-6 overflow-hidden border hover:shadow-2xl transition-all duration-300 hover:scale-[1.01] bg-white">
+    <Card className="mb-4 overflow-hidden border bg-white">
       {/* Status Strip */}
       <div className={`h-1.5 w-full ${
         channel.status === 'running' ? 'bg-gradient-to-r from-green-500 via-emerald-500 to-green-600' :
@@ -609,10 +610,10 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
       }`} />
 
       {/* Compact Header */}
-      <CardHeader className="pb-4 pt-4">
+      <CardHeader className="pb-3 pt-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2.5 mb-1.5">
+            <div className="flex items-center gap-2.5 mb-1">
               <div className={`p-1.5 rounded-lg ${
                 channel.status === 'running' ? 'bg-green-100' :
                 channel.status === 'error' ? 'bg-red-100' :
@@ -624,13 +625,13 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
                   'text-gray-600'
                 }`} />
               </div>
-              <h2 className="text-xl font-bold text-gray-900 truncate">{channel.name}</h2>
+              <h2 className="text-lg font-bold text-gray-900 truncate">{channel.name}</h2>
             </div>
-            {channel.description && (
-              <p className="text-sm text-gray-600 line-clamp-2 ml-10">{channel.description}</p>
+            {!isExpanded && channel.description && (
+              <p className="text-sm text-gray-600 line-clamp-1 ml-10">{channel.description}</p>
             )}
           </div>
-          <div className="flex flex-col items-end gap-2">
+          <div className="flex items-center gap-2">
             {getStatusBadge()}
             {channel.status === 'running' && runtime > 0 && (
               <Badge variant="secondary" className="text-xs font-mono font-semibold">
@@ -641,9 +642,9 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
         </div>
       </CardHeader>
 
-      {/* Compact Action Buttons */}
-      <CardContent className="pt-0 pb-4 px-6">
-        <div className="flex gap-2 flex-wrap">
+      {/* Action Buttons - Always Visible */}
+      <CardContent className="pt-0 pb-3 px-6">
+        <div className="flex gap-2 flex-wrap items-center">
           {channel.status !== 'running' ? (
             <Button
               onClick={handleStart}
@@ -652,7 +653,7 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
               size="sm"
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4 fill-current" />}
-              <span>{loading ? 'Starting...' : 'Start Stream'}</span>
+              <span>{loading ? 'Starting...' : 'Start'}</span>
             </Button>
           ) : (
             <>
@@ -677,82 +678,104 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
               </Button>
             </>
           )}
-          {channel.status !== 'running' && (
-            <Button
-              variant="outline"
-              onClick={() => onEdit(channel)}
-              className="ml-auto gap-2 font-medium"
-              size="sm"
-            >
-              <Pencil className="w-4 h-4" />
-              <span>Edit</span>
-            </Button>
-          )}
+
+          {/* Toggle Button */}
           <Button
             variant="outline"
-            onClick={handleDelete}
-            disabled={loading || channel.status === 'running'}
-            className={`gap-2 font-medium text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 ${channel.status === 'running' ? 'ml-auto opacity-50' : ''}`}
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="ml-auto gap-2 font-medium"
             size="sm"
           >
-            <Trash2 className="w-4 h-4" />
-            <span>Delete</span>
+            {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            <span>{isExpanded ? 'Less' : 'More'}</span>
           </Button>
         </div>
       </CardContent>
 
-      {/* Modern Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <div className="border-t border-gray-200">
-          <TabsList className="grid w-full grid-cols-4 bg-gradient-to-b from-gray-50 to-white h-auto p-1">
-            <TabsTrigger
-              value="overview"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-sm flex flex-col sm:flex-row items-center gap-1.5 py-2.5 text-xs sm:text-sm font-medium"
-            >
-              <BarChart3 className="w-4 h-4" />
-              <span>Overview</span>
-            </TabsTrigger>
-            <TabsTrigger
-              value="platforms"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-sm flex flex-col sm:flex-row items-center gap-1.5 py-2.5 text-xs sm:text-sm font-medium"
-            >
-              <Globe className="w-4 h-4" />
-              <span className="hidden sm:inline">Platforms</span>
-              <span className="sm:hidden">Multi</span>
-            </TabsTrigger>
-            <TabsTrigger
-              value="watermark"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-sm flex flex-col sm:flex-row items-center gap-1.5 py-2.5 text-xs sm:text-sm font-medium"
-            >
-              <ImageIcon className="w-4 h-4" />
-              <span>Watermark</span>
-            </TabsTrigger>
-            <TabsTrigger
-              value="logs"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-sm flex flex-col sm:flex-row items-center gap-1.5 py-2.5 text-xs sm:text-sm font-medium"
-            >
-              <FileText className="w-4 h-4" />
-              <span>Logs</span>
-            </TabsTrigger>
-          </TabsList>
-        </div>
+      {/* Expandable Section */}
+      {isExpanded && (
+        <>
+          {/* Additional Action Buttons */}
+          <CardContent className="pt-0 pb-3 px-6 border-t">
+            <div className="flex gap-2 flex-wrap">
+              {channel.status !== 'running' && (
+                <Button
+                  variant="outline"
+                  onClick={() => onEdit(channel)}
+                  className="gap-2 font-medium"
+                  size="sm"
+                >
+                  <Pencil className="w-4 h-4" />
+                  <span>Edit Stream</span>
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                onClick={handleDelete}
+                disabled={loading || channel.status === 'running'}
+                className="gap-2 font-medium text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                size="sm"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>Delete Stream</span>
+              </Button>
+            </div>
+          </CardContent>
 
-        <TabsContent value="overview" className="m-0 border-t">
-          {renderTabContent()}
-        </TabsContent>
+          {/* Modern Tabs */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <div className="border-t border-gray-200">
+              <TabsList className="grid w-full grid-cols-4 bg-gradient-to-b from-gray-50 to-white h-auto p-1">
+                <TabsTrigger
+                  value="overview"
+                  className="data-[state=active]:bg-white data-[state=active]:shadow-sm flex flex-col sm:flex-row items-center gap-1.5 py-2.5 text-xs sm:text-sm font-medium"
+                >
+                  <BarChart3 className="w-4 h-4" />
+                  <span>Overview</span>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="platforms"
+                  className="data-[state=active]:bg-white data-[state=active]:shadow-sm flex flex-col sm:flex-row items-center gap-1.5 py-2.5 text-xs sm:text-sm font-medium"
+                >
+                  <Globe className="w-4 h-4" />
+                  <span className="hidden sm:inline">Platforms</span>
+                  <span className="sm:hidden">Multi</span>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="watermark"
+                  className="data-[state=active]:bg-white data-[state=active]:shadow-sm flex flex-col sm:flex-row items-center gap-1.5 py-2.5 text-xs sm:text-sm font-medium"
+                >
+                  <ImageIcon className="w-4 h-4" />
+                  <span>Watermark</span>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="logs"
+                  className="data-[state=active]:bg-white data-[state=active]:shadow-sm flex flex-col sm:flex-row items-center gap-1.5 py-2.5 text-xs sm:text-sm font-medium"
+                >
+                  <FileText className="w-4 h-4" />
+                  <span>Logs</span>
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
-        <TabsContent value="platforms" className="m-0 border-t">
-          {renderTabContent()}
-        </TabsContent>
+            <TabsContent value="overview" className="m-0 border-t">
+              {renderTabContent()}
+            </TabsContent>
 
-        <TabsContent value="watermark" className="m-0 border-t">
-          {renderTabContent()}
-        </TabsContent>
+            <TabsContent value="platforms" className="m-0 border-t">
+              {renderTabContent()}
+            </TabsContent>
 
-        <TabsContent value="logs" className="m-0 border-t">
-          {renderTabContent()}
-        </TabsContent>
-      </Tabs>
+            <TabsContent value="watermark" className="m-0 border-t">
+              {renderTabContent()}
+            </TabsContent>
+
+            <TabsContent value="logs" className="m-0 border-t">
+              {renderTabContent()}
+            </TabsContent>
+          </Tabs>
+        </>
+      )}
     </Card>
   );
 }
