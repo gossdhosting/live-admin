@@ -6,7 +6,7 @@ import EditChannelModal from '../components/EditChannelModal';
 import UpgradePrompt from '../components/UpgradePrompt';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { RefreshCw, Plus, CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
+import { RefreshCw, Plus, CheckCircle, AlertTriangle, XCircle, Radio } from 'lucide-react';
 
 function Dashboard({ user }) {
   const [channels, setChannels] = useState([]);
@@ -32,7 +32,7 @@ function Dashboard({ user }) {
         }
       } catch (error) {
         if (isMounted) {
-          console.error('Failed to fetch channels:', error);
+          console.error('Failed to fetch streams:', error);
         }
       } finally {
         if (isMounted) {
@@ -92,7 +92,7 @@ function Dashboard({ user }) {
       setChannels(response.data.channels);
       setLastUpdate(new Date());
     } catch (error) {
-      console.error('Failed to fetch channels:', error);
+      console.error('Failed to fetch streams:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -133,7 +133,14 @@ function Dashboard({ user }) {
   };
 
   if (loading) {
-    return <div className="loading">Loading channels...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+          <p className="text-gray-600">Loading streams...</p>
+        </div>
+      </div>
+    );
   }
 
   const stats = getStats();
@@ -349,7 +356,11 @@ function Dashboard({ user }) {
       <Card>
         <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4">
           <div>
-            <CardTitle>Live Channels</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Radio className="w-5 h-5 text-primary" />
+              Live Streams
+            </CardTitle>
+            <CardDescription>Manage your streaming channels</CardDescription>
           </div>
           <div className="flex gap-2 w-full sm:w-auto">
             <Button
@@ -364,15 +375,21 @@ function Dashboard({ user }) {
             </Button>
             <Button onClick={() => setShowCreateModal(true)} className="gap-2 flex-1 sm:flex-none" size="sm">
               <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">Create Channel</span><span className="sm:hidden">New</span>
+              <span className="hidden sm:inline">Create Stream</span><span className="sm:hidden">New</span>
             </Button>
           </div>
         </CardHeader>
 
         <CardContent>
           {channels.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <p>No channels yet. Create your first channel to get started.</p>
+            <div className="text-center py-12">
+              <Radio className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No streams yet</h3>
+              <p className="text-gray-500 mb-6">Create your first stream to get started with broadcasting</p>
+              <Button onClick={() => setShowCreateModal(true)} className="gap-2">
+                <Plus className="w-4 h-4" />
+                Create Your First Stream
+              </Button>
             </div>
           ) : (
             <>

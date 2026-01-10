@@ -94,7 +94,7 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
   };
 
   const handleStart = async () => {
-    if (!confirm(`Start streaming for "${channel.name}"?`)) return;
+    if (!confirm(`Start stream "${channel.name}"?`)) return;
 
     setLoading(true);
     try {
@@ -108,7 +108,7 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
   };
 
   const handleStop = async () => {
-    if (!confirm(`Stop streaming for "${channel.name}"?`)) return;
+    if (!confirm(`Stop stream "${channel.name}"?`)) return;
 
     setLoading(true);
     try {
@@ -122,7 +122,7 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
   };
 
   const handleRestart = async () => {
-    if (!confirm(`Restart streaming for "${channel.name}"?`)) return;
+    if (!confirm(`Restart stream "${channel.name}"?`)) return;
 
     setLoading(true);
     try {
@@ -138,14 +138,14 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
   };
 
   const handleDelete = async () => {
-    if (!confirm(`Delete channel "${channel.name}"? This cannot be undone.`)) return;
+    if (!confirm(`Delete stream "${channel.name}"? This cannot be undone.`)) return;
 
     setLoading(true);
     try {
       await api.delete(`/channels/${channel.id}`);
       onDelete(channel.id);
     } catch (error) {
-      alert(error.response?.data?.error || 'Failed to delete channel');
+      alert(error.response?.data?.error || 'Failed to delete stream');
       setLoading(false);
     }
   };
