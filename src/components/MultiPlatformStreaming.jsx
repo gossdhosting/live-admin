@@ -266,6 +266,8 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
                           size="sm"
                           variant="destructive"
                           onClick={() => handleDeletePlatformStream(existingStream.id)}
+                          disabled={channelStatus === 'running'}
+                          title={channelStatus === 'running' ? 'Stop the stream to remove this platform' : 'Remove this platform'}
                         >
                           Remove
                         </Button>
@@ -355,6 +357,8 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
                           size="sm"
                           variant="destructive"
                           onClick={() => handleRemoveDestination(activeDestination.id)}
+                          disabled={channelStatus === 'running'}
+                          title={channelStatus === 'running' ? 'Stop the stream to disable this destination' : 'Disable this destination'}
                         >
                           Disable
                         </Button>

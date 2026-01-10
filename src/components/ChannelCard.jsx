@@ -19,6 +19,7 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
   const [runtime, setRuntime] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
   const [watermarkEnabled, setWatermarkEnabled] = useState(Boolean(channel.watermark_enabled));
+  const [configuredPlatforms, setConfiguredPlatforms] = useState([]);
   const isAdmin = user && user.role === 'admin';
 
   // Update local watermark state when channel prop changes
@@ -44,6 +45,41 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
     };
     fetchUserStats();
   }, []);
+
+  // Fetch configured platforms
+  useEffect(() => {
+    const fetchPlatforms = async () => {
+      try {
+        const [streamsRes, destinationsRes] = await Promise.all([
+          api.get(`/platforms/streams/${channel.id}`),
+          api.get(`/channels/${channel.id}/rtmp`)
+        ]);
+
+        const platformStreams = streamsRes.data.streams || [];
+        const rtmpDestinations = destinationsRes.data.destinations || [];
+
+        // Combine both types
+        const allPlatforms = [
+          ...platformStreams.map(s => ({
+            name: s.platform,
+            type: 'oauth'
+          })),
+          ...rtmpDestinations.filter(d => d.enabled === 1).map(d => ({
+            name: d.platform || 'Custom RTMP',
+            type: 'rtmp'
+          }))
+        ];
+
+        setConfiguredPlatforms(allPlatforms);
+      } catch (error) {
+        console.error('Failed to fetch platforms:', error);
+      }
+    };
+
+    if (isExpanded && activeTab === 'overview') {
+      fetchPlatforms();
+    }
+  }, [channel.id, isExpanded, activeTab]);
 
   // Track runtime when stream is running
   useEffect(() => {
@@ -295,7 +331,7 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
     return (
       <div className="bg-blue-50 p-3 rounded-md mt-3 border border-blue-200">
         <div className="mb-3 font-semibold text-gray-800 text-sm">
-          RTMP Destinations
+          Connection Status
         </div>
         <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
           {rtmpConnections.map((conn) => {
@@ -333,32 +369,57 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
       case 'overview':
         return (
           <div className="p-6 space-y-4">
-            {/* Input Source Card */}
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
-              <div className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                <Video className="w-4 h-4 text-blue-600" />
-                Input Source
+            {/* Input/Output Sources Row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Input Source Card */}
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+                <div className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                  <Video className="w-4 h-4 text-blue-600" />
+                  Input Source
+                </div>
+                {channel.input_type === 'youtube' ? (
+                  <a
+                    href={channel.input_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-700 font-medium text-sm break-all hover:underline"
+                  >
+                    {channel.input_url}
+                  </a>
+                ) : channel.input_type === 'rtmp' ? (
+                  <div className="text-sm text-gray-800 font-medium flex items-center gap-2">
+                    <Video className="w-4 h-4 text-indigo-600" />
+                    <span>RTMP Input (OBS/vMix/etc.)</span>
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-800 font-medium flex items-center gap-2">
+                    <Video className="w-4 h-4 text-indigo-600" />
+                    <span>{channel.media_file_name || 'Pre-uploaded Video'}</span>
+                  </div>
+                )}
               </div>
-              {channel.input_type === 'youtube' ? (
-                <a
-                  href={channel.input_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-700 font-medium text-sm break-all hover:underline"
-                >
-                  {channel.input_url}
-                </a>
-              ) : channel.input_type === 'rtmp' ? (
-                <div className="text-sm text-gray-800 font-medium flex items-center gap-2">
-                  <Video className="w-4 h-4 text-indigo-600" />
-                  <span>RTMP Input (OBS/vMix/etc.)</span>
+
+              {/* Output Destinations Card */}
+              <div className="bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200 rounded-lg p-4">
+                <div className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-purple-600" />
+                  {channel.status === 'running' ? 'Broadcasting To' : 'Will Broadcast To'}
                 </div>
-              ) : (
-                <div className="text-sm text-gray-800 font-medium flex items-center gap-2">
-                  <Video className="w-4 h-4 text-indigo-600" />
-                  <span>{channel.media_file_name || 'Pre-uploaded Video'}</span>
-                </div>
-              )}
+                {configuredPlatforms.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {configuredPlatforms.map((platform, idx) => (
+                      <div key={idx} className="bg-white border border-purple-200 rounded-md px-2 py-1 flex items-center gap-1.5">
+                        <CheckCircle className="w-3.5 h-3.5 text-purple-600 flex-shrink-0" />
+                        <span className="text-sm font-medium text-gray-800 capitalize">{platform.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-500 italic">
+                    No platforms configured. Go to Platforms tab to add destinations.
+                  </div>
+                )}
+              </div>
             </div>
 
             {getRuntimeInfo()}
