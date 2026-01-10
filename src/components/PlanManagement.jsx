@@ -104,12 +104,19 @@ function PlanManagement() {
 
     try {
       const submitData = {
-        ...formData,
+        name: formData.name,
+        description: formData.description,
+        price_monthly: formData.price_monthly,
+        price_yearly: formData.price_yearly,
+        max_concurrent_streams: formData.max_concurrent_streams,
+        max_bitrate: formData.max_bitrate,
+        max_stream_duration: formData.max_stream_duration || null,
+        storage_limit_mb: formData.storage_limit_mb,
         custom_watermark: formData.custom_watermark ? 1 : 0,
+        max_platform_connections: formData.max_platform_connections,
         is_active: formData.is_active ? 1 : 0,
         is_hidden: formData.is_hidden ? 1 : 0,
-        youtube_restreaming: formData.youtube_restreaming ? 1 : 0,
-        max_stream_duration: formData.max_stream_duration || null
+        youtube_restreaming: formData.youtube_restreaming ? 1 : 0
       };
 
       if (modalMode === 'create') {
