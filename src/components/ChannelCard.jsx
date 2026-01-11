@@ -56,8 +56,8 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
         api.get(`/channels/${channel.id}/rtmp`)
       ]);
 
-      const platformStreams = streamsRes.data.streams || [];
-      const rtmpDestinations = destinationsRes.data.destinations || [];
+      const platformStreams = Array.isArray(streamsRes.data?.streams) ? streamsRes.data.streams : [];
+      const rtmpDestinations = Array.isArray(destinationsRes.data?.destinations) ? destinationsRes.data.destinations : [];
 
       // Combine both types
       const allPlatforms = [
@@ -74,6 +74,7 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
       setConfiguredPlatforms(allPlatforms);
     } catch (error) {
       console.error('Failed to fetch platforms:', error);
+      setConfiguredPlatforms([]);
     }
   };
 
