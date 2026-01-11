@@ -90,11 +90,11 @@ function PlanManagement() {
       max_bitrate: plan.max_bitrate,
       max_stream_duration: plan.max_stream_duration,
       storage_limit_mb: plan.storage_limit_mb,
-      custom_watermark: plan.custom_watermark === 1,
+      custom_watermark: plan.custom_watermark === 1 || plan.custom_watermark === true,
       max_platform_connections: plan.max_platform_connections || 1,
-      is_active: plan.is_active === 1,
-      is_hidden: plan.is_hidden === 1,
-      youtube_restreaming: plan.youtube_restreaming === 1
+      is_active: plan.is_active === 1 || plan.is_active === true,
+      is_hidden: plan.is_hidden === 1 || plan.is_hidden === true,
+      youtube_restreaming: plan.youtube_restreaming === 1 || plan.youtube_restreaming === true
     });
     setShowModal(true);
   };
@@ -242,7 +242,7 @@ function PlanManagement() {
                     }}>
                       {plan.is_active ? 'Active' : 'Inactive'}
                     </span>
-                    {plan.is_hidden === 1 && (
+                    {(plan.is_hidden === 1 || plan.is_hidden === true) && (
                       <span style={{
                         padding: '0.25rem 0.5rem',
                         borderRadius: '4px',

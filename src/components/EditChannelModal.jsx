@@ -33,13 +33,13 @@ function EditChannelModal({ channel, onClose, onSuccess, isOpen }) {
         name: channel.name || '',
         description: channel.description || '',
         input_url: channel.input_url || '',
-        auto_restart: channel.auto_restart === 1,
+        auto_restart: channel.auto_restart === 1 || channel.auto_restart === true,
         quality_preset: channel.quality_preset || '720p',
         stream_title: channel.stream_title || '',
         input_type: channel.input_type || 'youtube',
         media_file_id: channel.media_file_id || null,
-        loop_video: channel.loop_video === 1,
-        title_enabled: channel.title_enabled === 1,
+        loop_video: channel.loop_video === 1 || channel.loop_video === true,
+        title_enabled: channel.title_enabled === 1 || channel.title_enabled === true,
       });
     }
   }, [channel]);

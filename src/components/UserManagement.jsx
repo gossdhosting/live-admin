@@ -82,7 +82,7 @@ function UserManagement() {
       plan_id: user.plan_id,
       subscription_type: user.subscription_type || 'monthly',
       status: user.status,
-      youtube_restreaming: user.youtube_restreaming === 1
+      youtube_restreaming: user.youtube_restreaming === 1 || user.youtube_restreaming === true
     });
     setShowModal(true);
   };
@@ -245,7 +245,7 @@ function UserManagement() {
                       }}>
                         {user.auth_provider.charAt(0).toUpperCase() + user.auth_provider.slice(1)}
                       </span>
-                      {user.email_verified === 1 && (
+                      {(user.email_verified === 1 || user.email_verified === true) && (
                         <span style={{ color: '#27ae60', fontSize: '0.8rem' }} title="Email Verified">✓</span>
                       )}
                     </div>
@@ -571,7 +571,7 @@ function UserManagement() {
                     </div>
                     <div>
                       <strong>Email Verified:</strong>{' '}
-                      {userDetails.user.email_verified === 1 ? (
+                      {(userDetails.user.email_verified === 1 || userDetails.user.email_verified === true) ? (
                         <span style={{ color: '#27ae60', fontWeight: '600' }}>✓ Yes</span>
                       ) : (
                         <span style={{ color: '#e74c3c' }}>✗ No</span>
