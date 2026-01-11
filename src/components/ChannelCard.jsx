@@ -65,7 +65,7 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
           name: s.platform,
           type: 'oauth'
         })),
-        ...rtmpDestinations.filter(d => d.enabled === 1).map(d => ({
+        ...rtmpDestinations.filter(d => d.enabled === 1 || d.enabled === true).map(d => ({
           name: d.platform || 'Custom RTMP',
           type: 'rtmp'
         }))

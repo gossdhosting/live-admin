@@ -234,7 +234,7 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
             Connected Platforms (OAuth)
           </h4>
           {userStats && (() => {
-            const enabledRtmpCount = rtmpDestinations.filter(d => d.enabled === 1).length;
+            const enabledRtmpCount = rtmpDestinations.filter(d => d.enabled === 1 || d.enabled === true).length;
             const totalStreams = platformStreams.length + enabledRtmpCount;
             return (
               <Badge variant={totalStreams >= userStats.limits.max_platform_connections ? 'destructive' : 'secondary'}>
@@ -246,7 +246,7 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
 
         {/* Platform Streaming Limit Warning */}
         {userStats && (() => {
-          const enabledRtmpCount = rtmpDestinations.filter(d => d.enabled === 1).length;
+          const enabledRtmpCount = rtmpDestinations.filter(d => d.enabled === 1 || d.enabled === true).length;
           const totalStreams = platformStreams.length + enabledRtmpCount;
           return totalStreams >= userStats.limits.max_platform_connections && (
             <Alert className="mb-4 bg-yellow-50 border-yellow-300">
@@ -277,7 +277,7 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
               // Check if limit is reached - count both platform streams and enabled RTMP destinations
               // If this platform already has a stream, always allow showing it
               // Otherwise, check if we've reached the limit for new streams
-              const enabledRtmpCount = rtmpDestinations.filter(d => d.enabled === 1).length;
+              const enabledRtmpCount = rtmpDestinations.filter(d => d.enabled === 1 || d.enabled === true).length;
               const totalStreams = platformStreams.length + enabledRtmpCount;
               const canGoLive = existingStream || !userStats || totalStreams < userStats.limits.max_platform_connections;
 
@@ -369,11 +369,11 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
           <div className="grid gap-3">
             {rtmpTemplates.map((template) => {
               const activeDestination = rtmpDestinations.find(
-                (dest) => dest.template_id === template.id && dest.enabled === 1
+                (dest) => dest.template_id === template.id && (dest.enabled === 1 || dest.enabled === true)
               );
 
               // Check if limit is reached - count both platform streams and enabled RTMP destinations
-              const enabledRtmpCount = rtmpDestinations.filter(d => d.enabled === 1).length;
+              const enabledRtmpCount = rtmpDestinations.filter(d => d.enabled === 1 || d.enabled === true).length;
               const totalStreams = platformStreams.length + enabledRtmpCount;
               const canGoLive = activeDestination || !userStats || totalStreams < userStats.limits.max_platform_connections;
 

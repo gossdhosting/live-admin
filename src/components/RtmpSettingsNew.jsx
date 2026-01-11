@@ -26,7 +26,7 @@ function RtmpSettingsNew({ channelId, channelName }) {
   };
 
   const isTemplateEnabled = (templateId) => {
-    return destinations.some(dest => dest.template_id === templateId && dest.enabled === 1);
+    return destinations.some(dest => dest.template_id === templateId && (dest.enabled === 1 || dest.enabled === true));
   };
 
   const toggleTemplate = async (template, enabled) => {

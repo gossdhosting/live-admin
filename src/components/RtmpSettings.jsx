@@ -93,7 +93,7 @@ function RtmpSettings({ channelId, channelName }) {
       platform: destination.platform,
       rtmp_url: destination.rtmp_url,
       stream_key: destination.stream_key,
-      enabled: destination.enabled === 1,
+      enabled: destination.enabled === 1 || destination.enabled === true,
     });
     setEditingId(destination.id);
     setShowAddForm(true);
@@ -116,7 +116,7 @@ function RtmpSettings({ channelId, channelName }) {
   const toggleEnabled = async (destination) => {
     try {
       await api.put(`/rtmp/${destination.id}`, {
-        enabled: destination.enabled === 1 ? 0 : 1,
+        enabled: (destination.enabled === 1 || destination.enabled === true) ? 0 : 1,
       });
       fetchDestinations();
     } catch (error) {
