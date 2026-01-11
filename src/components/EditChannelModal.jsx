@@ -152,7 +152,7 @@ function EditChannelModal({ channel, onClose, onSuccess, isOpen }) {
           <div className="space-y-2">
             <Label>Input Type *</Label>
             <div className="flex flex-col gap-2 mt-2">
-              {userStats?.youtube_restreaming && (
+              {(userStats?.youtube_restreaming === true || userStats?.youtube_restreaming === 1) && (
                 <label className="flex items-center gap-2 mb-0">
                   <input
                     type="radio"
@@ -185,7 +185,7 @@ function EditChannelModal({ channel, onClose, onSuccess, isOpen }) {
                 Custom RTMP Input (OBS/vMix/etc.)
               </label>
             </div>
-            {!userStats?.youtube_restreaming && formData.input_type === 'youtube' && (
+            {!(userStats?.youtube_restreaming === true || userStats?.youtube_restreaming === 1) && formData.input_type === 'youtube' && (
               <p className="text-xs text-amber-600 mt-1">
                 This channel uses YouTube, but your account no longer has YouTube restreaming access. Switch to pre-recorded video or contact admin.
               </p>

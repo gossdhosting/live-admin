@@ -39,7 +39,7 @@ function CreateChannelModal({ onClose, onSuccess, isOpen }) {
 
   // Update default input_type when userStats is loaded
   useEffect(() => {
-    if (userStats && userStats.youtube_restreaming) {
+    if (userStats && (userStats.youtube_restreaming === true || userStats.youtube_restreaming === 1)) {
       setFormData(prev => ({ ...prev, input_type: 'youtube' }));
     }
   }, [userStats]);
@@ -153,7 +153,7 @@ function CreateChannelModal({ onClose, onSuccess, isOpen }) {
           <div className="space-y-2">
             <Label>Input Type *</Label>
             <div className="flex flex-col gap-2 mt-2">
-              {userStats?.youtube_restreaming && (
+              {(userStats?.youtube_restreaming === true || userStats?.youtube_restreaming === 1) && (
                 <label className="flex items-center gap-2 mb-0">
                   <input
                     type="radio"
@@ -186,7 +186,7 @@ function CreateChannelModal({ onClose, onSuccess, isOpen }) {
                 Custom RTMP Input (OBS/vMix/etc.)
               </label>
             </div>
-            {!userStats?.youtube_restreaming && (
+            {!(userStats?.youtube_restreaming === true || userStats?.youtube_restreaming === 1) && (
               <p className="text-xs text-slate-500 mt-1">
                 YouTube restreaming is not available on your plan. Contact admin for access.
               </p>
