@@ -31,13 +31,18 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
         api.get('/users/stats'),
       ]);
 
-      setPlatformConnections(connectionsRes.data.connections || []);
-      setRtmpTemplates(templatesRes.data.templates || []);
-      setRtmpDestinations(destinationsRes.data.destinations || []);
-      setPlatformStreams(streamsRes.data.streams || []);
+      setPlatformConnections(Array.isArray(connectionsRes.data.connections) ? connectionsRes.data.connections : []);
+      setRtmpTemplates(Array.isArray(templatesRes.data.templates) ? templatesRes.data.templates : []);
+      setRtmpDestinations(Array.isArray(destinationsRes.data.destinations) ? destinationsRes.data.destinations : []);
+      setPlatformStreams(Array.isArray(streamsRes.data.streams) ? streamsRes.data.streams : []);
       setUserStats(statsRes.data);
     } catch (error) {
       console.error('Failed to fetch multi-platform data:', error);
+      // Ensure state is set to empty arrays on error
+      setPlatformConnections([]);
+      setRtmpTemplates([]);
+      setRtmpDestinations([]);
+      setPlatformStreams([]);
     } finally {
       setLoading(false);
     }
