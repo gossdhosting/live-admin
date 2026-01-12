@@ -47,7 +47,7 @@ function Navbar({ user, onLogout }) {
           {/* Logo/Brand */}
           <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
             <Video className="w-7 h-7 sm:w-8 sm:h-8" />
-            <span className="text-lg sm:text-xl font-bold tracking-tight">ZebCast</span>
+            <span className="text-lg sm:text-xl font-bold tracking-tight">RexStream</span>
           </Link>
 
           {/* Desktop Navigation Links */}

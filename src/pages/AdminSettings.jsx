@@ -579,7 +579,7 @@ function AdminSettings({ user }) {
                     <Input
                       type="email"
                       id="smtp_from_email"
-                      placeholder="noreply@zebcast.app"
+                      placeholder="noreply@rexstream.net"
                       value={settings.smtp_from_email || ''}
                       onChange={(e) => handleChange('smtp_from_email', e.target.value)}
                     />
@@ -593,7 +593,7 @@ function AdminSettings({ user }) {
                     <Input
                       type="text"
                       id="smtp_from_name"
-                      placeholder="ZebCast"
+                      placeholder="RexStream"
                       value={settings.smtp_from_name || ''}
                       onChange={(e) => handleChange('smtp_from_name', e.target.value)}
                     />
@@ -684,7 +684,7 @@ function AdminSettings({ user }) {
                     className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     value={settings.email_footer || ''}
                     onChange={(e) => handleChange('email_footer', e.target.value)}
-                    placeholder='</div><p style="text-align: center; color: #666; font-size: 12px; margin-top: 20px;">© 2026 ZebCast. All rights reserved.</p></div>'
+                    placeholder='</div><p style="text-align: center; color: #666; font-size: 12px; margin-top: 20px;">© 2026 RexStream. All rights reserved.</p></div>'
                   />
                   <p className="text-sm text-gray-500">
                     HTML footer added to all emails (copyright, unsubscribe, etc.)
@@ -698,7 +698,7 @@ function AdminSettings({ user }) {
                     className="flex min-h-[150px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     value={settings.email_template_registration || ''}
                     onChange={(e) => handleChange('email_template_registration', e.target.value)}
-                    placeholder={'<h2>Welcome to ZebCast!</h2><p>Hi ${name},</p><p>Thank you for registering...</p>'}
+                    placeholder={'<h2>Welcome to RexStream!</h2><p>Hi ${name},</p><p>Thank you for registering...</p>'}
                   />
                   <p className="text-sm text-gray-500">
                     Variables: {'${name}'}, {'${email}'}
