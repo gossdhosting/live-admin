@@ -973,9 +973,9 @@ function AdminSettings({ user }) {
                     </a>
                   </p>
 
-                  <div className="space-y-4">
+                  <div className="space-y-6">
                     <div>
-                      <Label htmlFor="mode">Mode</Label>
+                      <Label htmlFor="mode">Active Mode</Label>
                       <select
                         id="mode"
                         value={paymentSettings.mode || 'sandbox'}
@@ -986,49 +986,107 @@ function AdminSettings({ user }) {
                         <option value="live">Live (Production)</option>
                       </select>
                       <p className="text-sm text-gray-500 mt-1">
-                        Use sandbox mode for testing. Switch to live mode when ready for production.
+                        Switch between sandbox and live keys. Configure both sets of keys below.
                       </p>
                     </div>
 
-                    <div>
-                      <Label htmlFor="stripe_publishable_key">Publishable Key</Label>
-                      <Input
-                        id="stripe_publishable_key"
-                        type="text"
-                        value={paymentSettings.stripe_publishable_key || ''}
-                        onChange={(e) => handlePaymentChange('stripe_publishable_key', e.target.value)}
-                        placeholder="pk_test_... or pk_live_..."
-                      />
-                      <p className="text-sm text-gray-500 mt-1">
-                        This key is safe to share and will be used on the frontend.
-                      </p>
+                    {/* Sandbox Keys Section */}
+                    <div className="border border-blue-300 bg-blue-50 rounded-lg p-4">
+                      <h4 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
+                        <span>🧪</span> Sandbox Keys (Test Mode)
+                      </h4>
+                      <div className="space-y-3">
+                        <div>
+                          <Label htmlFor="stripe_publishable_key_sandbox">Sandbox Publishable Key</Label>
+                          <Input
+                            id="stripe_publishable_key_sandbox"
+                            type="text"
+                            value={paymentSettings.stripe_publishable_key_sandbox || ''}
+                            onChange={(e) => handlePaymentChange('stripe_publishable_key_sandbox', e.target.value)}
+                            placeholder="pk_test_..."
+                            className="bg-white"
+                          />
+                        </div>
+
+                        <div>
+                          <Label htmlFor="stripe_secret_key_sandbox">Sandbox Secret Key</Label>
+                          <Input
+                            id="stripe_secret_key_sandbox"
+                            type="password"
+                            value={paymentSettings.stripe_secret_key_sandbox || ''}
+                            onChange={(e) => handlePaymentChange('stripe_secret_key_sandbox', e.target.value)}
+                            placeholder="sk_test_..."
+                            className="bg-white"
+                          />
+                        </div>
+
+                        <div>
+                          <Label htmlFor="stripe_webhook_secret_sandbox">Sandbox Webhook Secret</Label>
+                          <Input
+                            id="stripe_webhook_secret_sandbox"
+                            type="password"
+                            value={paymentSettings.stripe_webhook_secret_sandbox || ''}
+                            onChange={(e) => handlePaymentChange('stripe_webhook_secret_sandbox', e.target.value)}
+                            placeholder="whsec_..."
+                            className="bg-white"
+                          />
+                        </div>
+                      </div>
                     </div>
 
-                    <div>
-                      <Label htmlFor="stripe_secret_key">Secret Key</Label>
-                      <Input
-                        id="stripe_secret_key"
-                        type="password"
-                        value={paymentSettings.stripe_secret_key || ''}
-                        onChange={(e) => handlePaymentChange('stripe_secret_key', e.target.value)}
-                        placeholder="sk_test_... or sk_live_..."
-                      />
-                      <p className="text-sm text-gray-500 mt-1">
-                        Keep this secret! Never share or expose this key.
-                      </p>
+                    {/* Live Keys Section */}
+                    <div className="border border-red-300 bg-red-50 rounded-lg p-4">
+                      <h4 className="font-semibold text-red-900 mb-3 flex items-center gap-2">
+                        <span>🔴</span> Live Keys (Production Mode)
+                      </h4>
+                      <div className="space-y-3">
+                        <div>
+                          <Label htmlFor="stripe_publishable_key_live">Live Publishable Key</Label>
+                          <Input
+                            id="stripe_publishable_key_live"
+                            type="text"
+                            value={paymentSettings.stripe_publishable_key_live || ''}
+                            onChange={(e) => handlePaymentChange('stripe_publishable_key_live', e.target.value)}
+                            placeholder="pk_live_..."
+                            className="bg-white"
+                          />
+                        </div>
+
+                        <div>
+                          <Label htmlFor="stripe_secret_key_live">Live Secret Key</Label>
+                          <Input
+                            id="stripe_secret_key_live"
+                            type="password"
+                            value={paymentSettings.stripe_secret_key_live || ''}
+                            onChange={(e) => handlePaymentChange('stripe_secret_key_live', e.target.value)}
+                            placeholder="sk_live_..."
+                            className="bg-white"
+                          />
+                          <p className="text-sm text-red-600 mt-1">
+                            ⚠️ Keep this secret! Never share or expose this key.
+                          </p>
+                        </div>
+
+                        <div>
+                          <Label htmlFor="stripe_webhook_secret_live">Live Webhook Secret</Label>
+                          <Input
+                            id="stripe_webhook_secret_live"
+                            type="password"
+                            value={paymentSettings.stripe_webhook_secret_live || ''}
+                            onChange={(e) => handlePaymentChange('stripe_webhook_secret_live', e.target.value)}
+                            placeholder="whsec_..."
+                            className="bg-white"
+                          />
+                        </div>
+                      </div>
                     </div>
 
-                    <div>
-                      <Label htmlFor="stripe_webhook_secret">Webhook Secret</Label>
-                      <Input
-                        id="stripe_webhook_secret"
-                        type="password"
-                        value={paymentSettings.stripe_webhook_secret || ''}
-                        onChange={(e) => handlePaymentChange('stripe_webhook_secret', e.target.value)}
-                        placeholder="whsec_..."
-                      />
-                      <p className="text-sm text-gray-500 mt-1">
-                        Webhook endpoint: <code className="bg-gray-100 px-2 py-1 rounded">{window.location.origin.replace('panel', 'panel')}/api/webhooks/stripe</code>
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                      <p className="text-sm text-gray-700">
+                        <strong>Webhook endpoint:</strong>{' '}
+                        <code className="bg-gray-100 px-2 py-1 rounded text-xs">
+                          {window.location.origin.replace('panel', 'api')}/webhooks/stripe
+                        </code>
                       </p>
                     </div>
 
