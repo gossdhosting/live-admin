@@ -1101,7 +1101,7 @@ function AdminSettings({ user }) {
                       <p className="text-sm text-gray-700">
                         <strong>Webhook endpoint:</strong>{' '}
                         <code className="bg-gray-100 px-2 py-1 rounded text-xs">
-                          {window.location.origin.replace('panel', 'api')}/webhooks/stripe
+                          {window.location.origin}/api/webhooks/stripe
                         </code>
                       </p>
                     </div>
