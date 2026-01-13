@@ -385,13 +385,25 @@ function Plans() {
                   const isUpgrade = newPrice > currentPrice;
                   const isDowngrade = currentPrice > 0 && newPrice < currentPrice;
 
+                  // Disable downgrades to prevent credit balance issues
+                  if (isDowngrade) {
+                    return (
+                      <Button
+                        variant="outline"
+                        disabled
+                        className="w-full"
+                        title="Downgrades are not available. Please contact support."
+                      >
+                        Contact Support
+                      </Button>
+                    );
+                  }
+
                   let buttonText = 'Select Plan';
                   if (processingPlan === plan.id) {
                     buttonText = 'Processing...';
                   } else if (isUpgrade) {
                     buttonText = 'Upgrade';
-                  } else if (isDowngrade) {
-                    buttonText = 'Downgrade';
                   }
 
                   return (
