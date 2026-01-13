@@ -62,13 +62,17 @@ function Plans() {
     try {
       setProcessingPlan(plan.id);
 
-      // Check if this is an upgrade/downgrade (user has active subscription)
-      const hasActiveSubscription = userStats?.plan?.id;
+      // Check if user has an active PAID Stripe subscription
+      // Free plan users (plan.id = 1 or no subscription) should go through checkout
       const currentPlanId = userStats?.plan?.id;
-      const isUpgradeOrDowngrade = hasActiveSubscription && currentPlanId !== plan.id;
+      const currentPlanPrice = userStats?.plan?.price_monthly || 0;
+
+      // User has active PAID subscription if they have a plan with price > 0
+      const hasActivePaidSubscription = currentPlanId && currentPlanPrice > 0;
+      const isUpgradeOrDowngrade = hasActivePaidSubscription && currentPlanId !== plan.id;
 
       if (isUpgradeOrDowngrade) {
-        // Call upgrade endpoint for existing subscribers
+        // Call upgrade endpoint for existing PAID subscribers
         const response = await api.post('/billing/upgrade-plan', {
           newPlanId: plan.id,
           billingCycle,
@@ -83,7 +87,7 @@ function Plans() {
           window.location.href = response.data.invoice.url;
         }
       } else {
-        // Create Stripe checkout session for new subscribers
+        // Create Stripe checkout session for new subscribers or free plan users
         const response = await api.post('/billing/create-checkout-session', {
           planId: plan.id,
           billingCycle,
