@@ -9,6 +9,7 @@ function Plans() {
   const [plans, setPlans] = useState([]);
   const [userStats, setUserStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [processingPlan, setProcessingPlan] = useState(null);
 
   useEffect(() => {
     fetchPlans();
@@ -54,6 +55,27 @@ function Plans() {
     if (kbps >= 6000) return '1080p Full HD';
     if (kbps >= 4000) return '720p HD';
     return '480p SD';
+  };
+
+  const handleSelectPlan = async (plan, billingCycle = 'monthly') => {
+    try {
+      setProcessingPlan(plan.id);
+
+      // Create Stripe checkout session
+      const response = await api.post('/billing/create-checkout-session', {
+        planId: plan.id,
+        billingCycle,
+      });
+
+      // Redirect to Stripe Checkout
+      if (response.data.url) {
+        window.location.href = response.data.url;
+      }
+    } catch (error) {
+      console.error('Failed to create checkout session:', error);
+      alert(error.response?.data?.error || 'Failed to start checkout. Please try again.');
+      setProcessingPlan(null);
+    }
   };
 
   const planColors = {
@@ -210,12 +232,21 @@ function Plans() {
                   <Button variant="outline" disabled className="w-full">
                     Current Plan
                   </Button>
+                ) : plan.price_monthly === 0 ? (
+                  <Button
+                    variant="outline"
+                    disabled
+                    className="w-full"
+                  >
+                    Free Plan
+                  </Button>
                 ) : (
                   <Button
-                    onClick={() => alert('Payment integration coming soon!')}
+                    onClick={() => handleSelectPlan(plan, 'monthly')}
+                    disabled={processingPlan === plan.id}
                     className={`w-full ${colorClass} hover:opacity-90`}
                   >
-                    {userStats && userStats.plan.price_monthly < plan.price_monthly ? 'Upgrade' : 'Select'} Plan
+                    {processingPlan === plan.id ? 'Processing...' : (userStats && userStats.plan.price_monthly < plan.price_monthly ? 'Upgrade' : 'Select')} Plan
                   </Button>
                 )}
               </CardFooter>
@@ -227,7 +258,7 @@ function Plans() {
       {/* Payment Note */}
       <Alert className="border-blue-200 bg-blue-50">
         <AlertDescription className="text-blue-900 text-center">
-          Payment integration coming soon. Contact administrator for plan upgrades.
+          💳 Secure payments powered by Stripe. Your subscription will auto-renew each month.
         </AlertDescription>
       </Alert>
     </div>
