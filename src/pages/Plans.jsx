@@ -144,17 +144,27 @@ function Plans() {
         billingCycle: selectedPlan.billingCycle,
       });
 
+      // Check payment status
       if (response.data.paymentStatus === 'paid' || response.data.paymentStatus === 'success') {
-        alert(response.data.message || 'Plan upgraded successfully!');
-        window.location.reload();
+        alert('Plan upgraded successfully! Payment has been processed.');
+        // Reload page to refresh user data and plan info
+        setTimeout(() => window.location.reload(), 1000);
+      } else if (response.data.invoice?.status === 'paid') {
+        alert('Plan upgraded successfully! Payment has been processed.');
+        setTimeout(() => window.location.reload(), 1000);
       } else if (response.data.invoice?.client_secret) {
         alert('Additional authentication required. Please complete payment verification.');
         window.location.href = response.data.invoice.url;
+      } else {
+        // Upgrade initiated but payment pending
+        alert('Plan upgrade initiated. Processing payment...');
+        setTimeout(() => window.location.reload(), 2000);
       }
     } catch (error) {
       console.error('Failed to upgrade plan:', error);
       alert(error.response?.data?.error || 'Failed to upgrade plan. Please try again.');
       setProcessingPlan(null);
+      setShowConfirmModal(true); // Show modal again
     }
   };
 
