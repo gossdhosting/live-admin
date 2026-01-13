@@ -11,6 +11,10 @@ function Plans() {
   const [loading, setLoading] = useState(true);
   const [processingPlan, setProcessingPlan] = useState(null);
   const [billingCycle, setBillingCycle] = useState('monthly'); // 'monthly' or 'yearly'
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [upgradePreview, setUpgradePreview] = useState(null);
+  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState(null);
 
   useEffect(() => {
     fetchPlans();
@@ -37,6 +41,35 @@ function Plans() {
     }
   };
 
+  const fetchUpgradePreview = async (planId, cycle) => {
+    try {
+      const response = await api.get('/billing/preview-upgrade', {
+        params: { newPlanId: planId, billingCycle: cycle }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch upgrade preview:', error);
+      return null;
+    }
+  };
+
+  const fetchPaymentMethod = async () => {
+    try {
+      const response = await api.get('/billing/subscription');
+      if (response.data.subscription?.default_payment_method) {
+        setPaymentMethod(response.data.subscription.default_payment_method);
+      }
+    } catch (error) {
+      console.error('Failed to fetch payment method:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (userStats?.plan?.price_monthly > 0) {
+      fetchPaymentMethod();
+    }
+  }, [userStats]);
+
   const formatStorage = (mb) => {
     if (mb >= 1024) {
       return `${(mb / 1024).toFixed(1)} GB`;
@@ -58,49 +91,69 @@ function Plans() {
     return '480p SD';
   };
 
-  const handleSelectPlan = async (plan, billingCycle = 'monthly') => {
+  const handleSelectPlan = async (plan, cycle = 'monthly') => {
+    const currentPlanId = userStats?.plan?.id;
+    const currentPlanPrice = userStats?.plan?.price_monthly || 0;
+
+    // User has active PAID subscription if they have a plan with price > 0
+    const hasActivePaidSubscription = currentPlanId && currentPlanPrice > 0;
+    const isUpgradeOrDowngrade = hasActivePaidSubscription && currentPlanId !== plan.id;
+
+    if (isUpgradeOrDowngrade) {
+      // Show confirmation modal for upgrades/downgrades
+      const preview = await fetchUpgradePreview(plan.id, cycle);
+      if (preview) {
+        setUpgradePreview(preview);
+        setSelectedPlan({ ...plan, billingCycle: cycle });
+        setShowConfirmModal(true);
+      } else {
+        alert('Failed to calculate upgrade cost. Please try again.');
+      }
+    } else {
+      // Direct checkout for new subscribers or free plan users
+      await proceedWithCheckout(plan, cycle);
+    }
+  };
+
+  const proceedWithCheckout = async (plan, cycle) => {
     try {
       setProcessingPlan(plan.id);
 
-      // Check if user has an active PAID Stripe subscription
-      // Free plan users (plan.id = 1 or no subscription) should go through checkout
-      const currentPlanId = userStats?.plan?.id;
-      const currentPlanPrice = userStats?.plan?.price_monthly || 0;
+      const response = await api.post('/billing/create-checkout-session', {
+        planId: plan.id,
+        billingCycle: cycle,
+      });
 
-      // User has active PAID subscription if they have a plan with price > 0
-      const hasActivePaidSubscription = currentPlanId && currentPlanPrice > 0;
-      const isUpgradeOrDowngrade = hasActivePaidSubscription && currentPlanId !== plan.id;
-
-      if (isUpgradeOrDowngrade) {
-        // Call upgrade endpoint for existing PAID subscribers
-        const response = await api.post('/billing/upgrade-plan', {
-          newPlanId: plan.id,
-          billingCycle,
-        });
-
-        if (response.data.paymentStatus === 'paid' || response.data.paymentStatus === 'success') {
-          alert(response.data.message || 'Plan upgraded successfully!');
-          window.location.reload(); // Refresh to show new plan
-        } else if (response.data.invoice?.client_secret) {
-          // Handle 3DS authentication if needed
-          alert('Additional authentication required. Please complete payment verification.');
-          window.location.href = response.data.invoice.url;
-        }
-      } else {
-        // Create Stripe checkout session for new subscribers or free plan users
-        const response = await api.post('/billing/create-checkout-session', {
-          planId: plan.id,
-          billingCycle,
-        });
-
-        // Redirect to Stripe Checkout
-        if (response.data.url) {
-          window.location.href = response.data.url;
-        }
+      if (response.data.url) {
+        window.location.href = response.data.url;
       }
     } catch (error) {
-      console.error('Failed to process plan selection:', error);
-      alert(error.response?.data?.error || 'Failed to process request. Please try again.');
+      console.error('Failed to create checkout session:', error);
+      alert(error.response?.data?.error || 'Failed to start checkout. Please try again.');
+      setProcessingPlan(null);
+    }
+  };
+
+  const confirmUpgrade = async () => {
+    try {
+      setProcessingPlan(selectedPlan.id);
+      setShowConfirmModal(false);
+
+      const response = await api.post('/billing/upgrade-plan', {
+        newPlanId: selectedPlan.id,
+        billingCycle: selectedPlan.billingCycle,
+      });
+
+      if (response.data.paymentStatus === 'paid' || response.data.paymentStatus === 'success') {
+        alert(response.data.message || 'Plan upgraded successfully!');
+        window.location.reload();
+      } else if (response.data.invoice?.client_secret) {
+        alert('Additional authentication required. Please complete payment verification.');
+        window.location.href = response.data.invoice.url;
+      }
+    } catch (error) {
+      console.error('Failed to upgrade plan:', error);
+      alert(error.response?.data?.error || 'Failed to upgrade plan. Please try again.');
       setProcessingPlan(null);
     }
   };
@@ -351,8 +404,90 @@ function Plans() {
       <Alert className="border-blue-200 bg-blue-50">
         <AlertDescription className="text-blue-900 text-center">
           💳 Secure payments powered by Stripe. Your subscription will auto-renew each month.
+          {paymentMethod && (
+            <span className="block mt-2">
+              Card on file: •••• {paymentMethod.card?.last4} ({paymentMethod.card?.brand})
+            </span>
+          )}
         </AlertDescription>
       </Alert>
+
+      {/* Upgrade Confirmation Modal */}
+      {showConfirmModal && upgradePreview && selectedPlan && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
+            <h2 className="text-2xl font-bold mb-4">Confirm Plan {upgradePreview.currentPlan.price < upgradePreview.newPlan.price ? 'Upgrade' : 'Downgrade'}</h2>
+
+            <div className="space-y-4 mb-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-gray-600">Current Plan:</span>
+                  <span className="font-semibold">{upgradePreview.currentPlan.billingCycle === 'monthly' ? 'Monthly' : 'Yearly'}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">New Plan:</span>
+                  <span className="font-semibold">{selectedPlan.name} (${selectedPlan.billingCycle === 'monthly' ? selectedPlan.price_monthly : selectedPlan.price_yearly}/{selectedPlan.billingCycle === 'monthly' ? 'mo' : 'yr'})</span>
+                </div>
+              </div>
+
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <div className="text-sm text-gray-600 mb-2">Charge Breakdown:</div>
+                <div className="space-y-1">
+                  <div className="flex justify-between text-sm">
+                    <span>New plan charge:</span>
+                    <span>${upgradePreview.proration.newPlanCharge?.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm text-green-600">
+                    <span>Credit for unused time:</span>
+                    <span>-${upgradePreview.proration.credit?.toFixed(2)}</span>
+                  </div>
+                  <div className="border-t pt-2 mt-2 flex justify-between font-bold text-lg">
+                    <span>Amount to charge today:</span>
+                    <span className="text-blue-600">${upgradePreview.proration.dueNow?.toFixed(2)}</span>
+                  </div>
+                </div>
+                <div className="text-xs text-gray-500 mt-2">
+                  Remaining days in billing period: {upgradePreview.proration.remainingDays}
+                </div>
+              </div>
+
+              {paymentMethod && (
+                <div className="flex items-center text-sm text-gray-600 bg-gray-50 p-3 rounded">
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
+                  <span>Will be charged to card ending in {paymentMethod.card?.last4}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                onClick={() => {
+                  setShowConfirmModal(false);
+                  setSelectedPlan(null);
+                  setUpgradePreview(null);
+                }}
+                variant="outline"
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={confirmUpgrade}
+                disabled={processingPlan === selectedPlan.id}
+                className="flex-1 bg-blue-500 hover:bg-blue-600"
+              >
+                {processingPlan === selectedPlan.id ? 'Processing...' : 'Confirm & Pay'}
+              </Button>
+            </div>
+
+            <p className="text-xs text-gray-500 text-center mt-4">
+              Your card will be charged immediately. You'll receive a receipt via email.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
