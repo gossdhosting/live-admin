@@ -62,19 +62,41 @@ function Plans() {
     try {
       setProcessingPlan(plan.id);
 
-      // Create Stripe checkout session
-      const response = await api.post('/billing/create-checkout-session', {
-        planId: plan.id,
-        billingCycle,
-      });
+      // Check if this is an upgrade/downgrade (user has active subscription)
+      const hasActiveSubscription = userStats?.plan?.id;
+      const currentPlanId = userStats?.plan?.id;
+      const isUpgradeOrDowngrade = hasActiveSubscription && currentPlanId !== plan.id;
 
-      // Redirect to Stripe Checkout
-      if (response.data.url) {
-        window.location.href = response.data.url;
+      if (isUpgradeOrDowngrade) {
+        // Call upgrade endpoint for existing subscribers
+        const response = await api.post('/billing/upgrade-plan', {
+          newPlanId: plan.id,
+          billingCycle,
+        });
+
+        if (response.data.paymentStatus === 'paid' || response.data.paymentStatus === 'success') {
+          alert(response.data.message || 'Plan upgraded successfully!');
+          window.location.reload(); // Refresh to show new plan
+        } else if (response.data.invoice?.client_secret) {
+          // Handle 3DS authentication if needed
+          alert('Additional authentication required. Please complete payment verification.');
+          window.location.href = response.data.invoice.url;
+        }
+      } else {
+        // Create Stripe checkout session for new subscribers
+        const response = await api.post('/billing/create-checkout-session', {
+          planId: plan.id,
+          billingCycle,
+        });
+
+        // Redirect to Stripe Checkout
+        if (response.data.url) {
+          window.location.href = response.data.url;
+        }
       }
     } catch (error) {
-      console.error('Failed to create checkout session:', error);
-      alert(error.response?.data?.error || 'Failed to start checkout. Please try again.');
+      console.error('Failed to process plan selection:', error);
+      alert(error.response?.data?.error || 'Failed to process request. Please try again.');
       setProcessingPlan(null);
     }
   };
