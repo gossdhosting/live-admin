@@ -70,7 +70,22 @@ function AdminSettings({ user }) {
     setSavingPayment(true);
 
     try {
-      await api.put('/billing/admin/settings', paymentSettings);
+      // Prepare data, excluding masked values (don't send them at all)
+      const dataToSend = {};
+
+      Object.keys(paymentSettings).forEach(key => {
+        const value = paymentSettings[key];
+        // Only include non-masked values or mode
+        if (key === 'mode' || (value && !value.includes('••••'))) {
+          dataToSend[key] = value;
+        }
+      });
+
+      await api.put('/billing/admin/settings', dataToSend);
+
+      // Refresh settings to get the latest masked values
+      await fetchPaymentSettings();
+
       setPaymentMessage('Payment settings saved successfully');
       setTimeout(() => setPaymentMessage(''), 3000);
     } catch (error) {
