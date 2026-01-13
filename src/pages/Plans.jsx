@@ -267,27 +267,54 @@ function Plans() {
               </CardContent>
 
               <CardFooter>
-                {isCurrentPlan ? (
-                  <Button variant="outline" disabled className="w-full">
-                    Current Plan
-                  </Button>
-                ) : plan.price_monthly === 0 ? (
-                  <Button
-                    variant="outline"
-                    disabled
-                    className="w-full"
-                  >
-                    Free Plan
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={() => handleSelectPlan(plan, billingCycle)}
-                    disabled={processingPlan === plan.id || (billingCycle === 'yearly' && (!plan.price_yearly || plan.price_yearly === 0))}
-                    className={`w-full ${colorClass} hover:opacity-90`}
-                  >
-                    {processingPlan === plan.id ? 'Processing...' : (userStats && userStats.plan.price_monthly < plan.price_monthly ? 'Upgrade' : 'Select')} Plan
-                  </Button>
-                )}
+                {(() => {
+                  // Free plan button
+                  if (plan.price_monthly === 0) {
+                    return (
+                      <Button
+                        variant="outline"
+                        disabled
+                        className="w-full"
+                      >
+                        Free Plan
+                      </Button>
+                    );
+                  }
+
+                  // Current plan button
+                  if (isCurrentPlan) {
+                    return (
+                      <Button variant="outline" disabled className="w-full">
+                        Subscribed
+                      </Button>
+                    );
+                  }
+
+                  // Determine if upgrade or downgrade
+                  const currentPrice = userStats?.plan?.price_monthly || 0;
+                  const newPrice = plan.price_monthly;
+                  const isUpgrade = newPrice > currentPrice;
+                  const isDowngrade = currentPrice > 0 && newPrice < currentPrice;
+
+                  let buttonText = 'Select Plan';
+                  if (processingPlan === plan.id) {
+                    buttonText = 'Processing...';
+                  } else if (isUpgrade) {
+                    buttonText = 'Upgrade';
+                  } else if (isDowngrade) {
+                    buttonText = 'Downgrade';
+                  }
+
+                  return (
+                    <Button
+                      onClick={() => handleSelectPlan(plan, billingCycle)}
+                      disabled={processingPlan === plan.id || (billingCycle === 'yearly' && (!plan.price_yearly || plan.price_yearly === 0))}
+                      className={`w-full ${colorClass} hover:opacity-90`}
+                    >
+                      {buttonText}
+                    </Button>
+                  );
+                })()}
               </CardFooter>
             </Card>
           );
