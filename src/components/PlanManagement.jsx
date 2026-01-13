@@ -14,6 +14,9 @@ function PlanManagement() {
     description: '',
     price_monthly: 0,
     price_yearly: 0,
+    stripe_price_id_monthly: '',
+    stripe_price_id_yearly: '',
+    stripe_product_id: '',
     max_concurrent_streams: 1,
     max_bitrate: 2500,
     max_stream_duration: null,
@@ -65,6 +68,9 @@ function PlanManagement() {
       description: '',
       price_monthly: 0,
       price_yearly: 0,
+      stripe_price_id_monthly: '',
+      stripe_price_id_yearly: '',
+      stripe_product_id: '',
       max_concurrent_streams: 1,
       max_bitrate: 2500,
       max_stream_duration: null,
@@ -86,6 +92,9 @@ function PlanManagement() {
       description: plan.description,
       price_monthly: plan.price_monthly,
       price_yearly: plan.price_yearly,
+      stripe_price_id_monthly: plan.stripe_price_id_monthly || '',
+      stripe_price_id_yearly: plan.stripe_price_id_yearly || '',
+      stripe_product_id: plan.stripe_product_id || '',
       max_concurrent_streams: plan.max_concurrent_streams,
       max_bitrate: plan.max_bitrate,
       max_stream_duration: plan.max_stream_duration,
@@ -108,6 +117,9 @@ function PlanManagement() {
         description: formData.description,
         price_monthly: formData.price_monthly,
         price_yearly: formData.price_yearly,
+        stripe_price_id_monthly: formData.stripe_price_id_monthly || null,
+        stripe_price_id_yearly: formData.stripe_price_id_yearly || null,
+        stripe_product_id: formData.stripe_product_id || null,
         max_concurrent_streams: formData.max_concurrent_streams,
         max_bitrate: formData.max_bitrate,
         max_stream_duration: formData.max_stream_duration || null,
@@ -350,6 +362,50 @@ function PlanManagement() {
                     required
                   />
                 </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className="form-group">
+                  <label htmlFor="stripe_price_id_monthly">Stripe Monthly Price ID</label>
+                  <input
+                    type="text"
+                    id="stripe_price_id_monthly"
+                    name="stripe_price_id_monthly"
+                    className="form-control"
+                    value={formData.stripe_price_id_monthly}
+                    onChange={handleInputChange}
+                    placeholder="price_1ABC..."
+                  />
+                  <small style={{ color: '#666' }}>From Stripe Dashboard</small>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="stripe_price_id_yearly">Stripe Yearly Price ID</label>
+                  <input
+                    type="text"
+                    id="stripe_price_id_yearly"
+                    name="stripe_price_id_yearly"
+                    className="form-control"
+                    value={formData.stripe_price_id_yearly}
+                    onChange={handleInputChange}
+                    placeholder="price_1ABC..."
+                  />
+                  <small style={{ color: '#666' }}>From Stripe Dashboard</small>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="stripe_product_id">Stripe Product ID (Optional)</label>
+                <input
+                  type="text"
+                  id="stripe_product_id"
+                  name="stripe_product_id"
+                  className="form-control"
+                  value={formData.stripe_product_id}
+                  onChange={handleInputChange}
+                  placeholder="prod_ABC..."
+                />
+                <small style={{ color: '#666' }}>From Stripe Dashboard - links monthly and yearly prices</small>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
