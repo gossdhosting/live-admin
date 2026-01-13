@@ -9,6 +9,7 @@ import Settings from './pages/Settings';
 import AdminSettings from './pages/AdminSettings';
 import MediaManager from './pages/MediaManager';
 import Plans from './pages/Plans';
+import Subscriptions from './pages/Subscriptions';
 import Navbar from './components/Navbar';
 import api from './services/api';
 import { AlertDialogProvider } from './components/ui/alert-dialog-modern';
@@ -88,6 +89,10 @@ function App() {
           <Route
             path="/plans"
             element={user ? <Plans user={user} /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/subscriptions"
+            element={user && user.role === 'admin' ? <Subscriptions user={user} /> : <Navigate to="/" />}
           />
         </Routes>
       </Router>

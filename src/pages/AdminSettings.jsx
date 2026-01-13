@@ -9,7 +9,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Alert, AlertDescription } from '../components/ui/alert';
-import { Settings as SettingsIcon, Users, Gem, Mail, FileText, Bell } from 'lucide-react';
+import { Settings as SettingsIcon, Users, Gem, Mail, FileText, Bell, CreditCard, Ticket } from 'lucide-react';
 
 function AdminSettings({ user }) {
   const navigate = useNavigate();
@@ -26,6 +26,23 @@ function AdminSettings({ user }) {
   const [smtpMessage, setSmtpMessage] = useState('');
   const [testingPushover, setTestingPushover] = useState(false);
   const [pushoverMessage, setPushoverMessage] = useState('');
+  const [paymentSettings, setPaymentSettings] = useState({});
+  const [savingPayment, setSavingPayment] = useState(false);
+  const [paymentMessage, setPaymentMessage] = useState('');
+  const [coupons, setCoupons] = useState([]);
+  const [loadingCoupons, setLoadingCoupons] = useState(false);
+  const [couponFormData, setCouponFormData] = useState({
+    code: '',
+    discountType: 'percentage',
+    discountValue: '',
+    duration: 'once',
+    durationMonths: '',
+    maxRedemptions: '',
+    validFrom: '',
+    validUntil: '',
+  });
+  const [creatingCoupon, setCreatingCoupon] = useState(false);
+  const [couponMessage, setCouponMessage] = useState('');
 
   useEffect(() => {
     // Redirect if not admin
@@ -35,7 +52,103 @@ function AdminSettings({ user }) {
     }
 
     fetchSettings();
+    fetchPaymentSettings();
   }, [user, navigate]);
+
+  const fetchPaymentSettings = async () => {
+    try {
+      const response = await api.get('/billing/admin/settings');
+      setPaymentSettings(response.data.settings || {});
+    } catch (error) {
+      console.error('Failed to fetch payment settings:', error);
+    }
+  };
+
+  const handlePaymentSubmit = async (e) => {
+    e.preventDefault();
+    setPaymentMessage('');
+    setSavingPayment(true);
+
+    try {
+      await api.put('/billing/admin/settings', paymentSettings);
+      setPaymentMessage('Payment settings saved successfully');
+      setTimeout(() => setPaymentMessage(''), 3000);
+    } catch (error) {
+      setPaymentMessage('Failed to save payment settings: ' + (error.response?.data?.error || error.message));
+    } finally {
+      setSavingPayment(false);
+    }
+  };
+
+  const handlePaymentChange = (key, value) => {
+    setPaymentSettings((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
+  const fetchCoupons = async () => {
+    try {
+      setLoadingCoupons(true);
+      const response = await api.get('/billing/admin/coupons');
+      setCoupons(response.data.coupons || []);
+    } catch (error) {
+      console.error('Failed to fetch coupons:', error);
+    } finally {
+      setLoadingCoupons(false);
+    }
+  };
+
+  const handleCreateCoupon = async (e) => {
+    e.preventDefault();
+    setCouponMessage('');
+    setCreatingCoupon(true);
+
+    try {
+      await api.post('/billing/admin/coupons', couponFormData);
+      setCouponMessage('Coupon created successfully');
+      setCouponFormData({
+        code: '',
+        discountType: 'percentage',
+        discountValue: '',
+        duration: 'once',
+        durationMonths: '',
+        maxRedemptions: '',
+        validFrom: '',
+        validUntil: '',
+      });
+      await fetchCoupons();
+      setTimeout(() => setCouponMessage(''), 3000);
+    } catch (error) {
+      setCouponMessage('Failed to create coupon: ' + (error.response?.data?.error || error.message));
+    } finally {
+      setCreatingCoupon(false);
+    }
+  };
+
+  const handleDeleteCoupon = async (id) => {
+    if (!confirm('Are you sure you want to delete this coupon?')) {
+      return;
+    }
+
+    try {
+      await api.delete(`/billing/admin/coupons/${id}`);
+      await fetchCoupons();
+    } catch (error) {
+      alert('Failed to delete coupon: ' + (error.response?.data?.error || error.message));
+    }
+  };
+
+  const handleToggleCoupon = async (id, currentStatus) => {
+    try {
+      await api.put(`/billing/admin/coupons/${id}`, {
+        isActive: !currentStatus,
+      });
+      await fetchCoupons();
+    } catch (error) {
+      alert('Failed to update coupon: ' + (error.response?.data?.error || error.message));
+    }
+  };
 
   const fetchSettings = async () => {
     try {
@@ -212,7 +325,7 @@ function AdminSettings({ user }) {
 
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 h-auto gap-1">
+            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-8 h-auto gap-1">
               <TabsTrigger value="system" className="text-xs sm:text-sm gap-1.5 py-2">
                 <SettingsIcon className="w-4 h-4" />
                 <span className="hidden sm:inline">System</span>
@@ -228,6 +341,14 @@ function AdminSettings({ user }) {
               <TabsTrigger value="notifications" className="text-xs sm:text-sm gap-1.5 py-2">
                 <Bell className="w-4 h-4" />
                 <span>Notify</span>
+              </TabsTrigger>
+              <TabsTrigger value="payment" className="text-xs sm:text-sm gap-1.5 py-2">
+                <CreditCard className="w-4 h-4" />
+                <span>Payment</span>
+              </TabsTrigger>
+              <TabsTrigger value="coupons" className="text-xs sm:text-sm gap-1.5 py-2" onClick={fetchCoupons}>
+                <Ticket className="w-4 h-4" />
+                <span>Coupons</span>
               </TabsTrigger>
               <TabsTrigger value="users" className="text-xs sm:text-sm gap-1.5 py-2">
                 <Users className="w-4 h-4" />
@@ -832,12 +953,327 @@ function AdminSettings({ user }) {
               </form>
             </TabsContent>
 
+            {/* Payment Settings Tab */}
+            <TabsContent value="payment" className="mt-6">
+              <form onSubmit={handlePaymentSubmit} className="space-y-6">
+                {paymentMessage && (
+                  <Alert className={paymentMessage.includes('success') ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
+                    <AlertDescription className={paymentMessage.includes('success') ? 'text-green-800' : 'text-red-800'}>
+                      {paymentMessage}
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Stripe Configuration</h3>
+                  <p className="text-sm text-gray-600">
+                    Configure Stripe payment gateway for subscription billing. Get your API keys from{' '}
+                    <a href="https://dashboard.stripe.com/apikeys" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                      Stripe Dashboard
+                    </a>
+                  </p>
+
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="mode">Mode</Label>
+                      <select
+                        id="mode"
+                        value={paymentSettings.mode || 'sandbox'}
+                        onChange={(e) => handlePaymentChange('mode', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="sandbox">Sandbox (Test Mode)</option>
+                        <option value="live">Live (Production)</option>
+                      </select>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Use sandbox mode for testing. Switch to live mode when ready for production.
+                      </p>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="stripe_publishable_key">Publishable Key</Label>
+                      <Input
+                        id="stripe_publishable_key"
+                        type="text"
+                        value={paymentSettings.stripe_publishable_key || ''}
+                        onChange={(e) => handlePaymentChange('stripe_publishable_key', e.target.value)}
+                        placeholder="pk_test_... or pk_live_..."
+                      />
+                      <p className="text-sm text-gray-500 mt-1">
+                        This key is safe to share and will be used on the frontend.
+                      </p>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="stripe_secret_key">Secret Key</Label>
+                      <Input
+                        id="stripe_secret_key"
+                        type="password"
+                        value={paymentSettings.stripe_secret_key || ''}
+                        onChange={(e) => handlePaymentChange('stripe_secret_key', e.target.value)}
+                        placeholder="sk_test_... or sk_live_..."
+                      />
+                      <p className="text-sm text-gray-500 mt-1">
+                        Keep this secret! Never share or expose this key.
+                      </p>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="stripe_webhook_secret">Webhook Secret</Label>
+                      <Input
+                        id="stripe_webhook_secret"
+                        type="password"
+                        value={paymentSettings.stripe_webhook_secret || ''}
+                        onChange={(e) => handlePaymentChange('stripe_webhook_secret', e.target.value)}
+                        placeholder="whsec_..."
+                      />
+                      <p className="text-sm text-gray-500 mt-1">
+                        Webhook endpoint: <code className="bg-gray-100 px-2 py-1 rounded">{window.location.origin.replace('panel', 'panel')}/api/webhooks/stripe</code>
+                      </p>
+                    </div>
+
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <h4 className="font-semibold text-blue-900 mb-2">Setup Instructions:</h4>
+                      <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
+                        <li>Create a Stripe account at <a href="https://dashboard.stripe.com/register" target="_blank" rel="noopener noreferrer" className="underline">stripe.com</a></li>
+                        <li>Get your API keys from the Developers section</li>
+                        <li>Create products and prices for your plans in Stripe</li>
+                        <li>Add the Stripe Price IDs to your plans in the Plans tab</li>
+                        <li>Configure webhooks to receive real-time updates</li>
+                      </ol>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-3 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={fetchPaymentSettings}
+                    disabled={savingPayment}
+                  >
+                    Reset
+                  </Button>
+                  <Button type="submit" disabled={savingPayment}>
+                    {savingPayment ? 'Saving...' : 'Save Payment Settings'}
+                  </Button>
+                </div>
+              </form>
+            </TabsContent>
+
             {/* Users Tab */}
             <TabsContent value="users" className="mt-6">
               <UserManagement />
             </TabsContent>
 
             {/* Plans Tab */}
+            {/* Coupons Tab */}
+            <TabsContent value="coupons" className="mt-6">
+              <div className="space-y-6">
+                {couponMessage && (
+                  <Alert className={couponMessage.includes('success') ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
+                    <AlertDescription className={couponMessage.includes('success') ? 'text-green-800' : 'text-red-800'}>
+                      {couponMessage}
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                {/* Create Coupon Form */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Create New Coupon</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <form onSubmit={handleCreateCoupon} className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="coupon_code">Coupon Code *</Label>
+                          <Input
+                            id="coupon_code"
+                            type="text"
+                            value={couponFormData.code}
+                            onChange={(e) => setCouponFormData({ ...couponFormData, code: e.target.value.toUpperCase() })}
+                            placeholder="SUMMER2024"
+                            required
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="discount_type">Discount Type *</Label>
+                          <select
+                            id="discount_type"
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                            value={couponFormData.discountType}
+                            onChange={(e) => setCouponFormData({ ...couponFormData, discountType: e.target.value })}
+                          >
+                            <option value="percentage">Percentage Off</option>
+                            <option value="fixed">Fixed Amount Off</option>
+                          </select>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="discount_value">
+                            Discount Value * {couponFormData.discountType === 'percentage' ? '(%)' : '($)'}
+                          </Label>
+                          <Input
+                            id="discount_value"
+                            type="number"
+                            step={couponFormData.discountType === 'percentage' ? '1' : '0.01'}
+                            min="0"
+                            max={couponFormData.discountType === 'percentage' ? '100' : undefined}
+                            value={couponFormData.discountValue}
+                            onChange={(e) => setCouponFormData({ ...couponFormData, discountValue: e.target.value })}
+                            required
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="duration">Duration *</Label>
+                          <select
+                            id="duration"
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                            value={couponFormData.duration}
+                            onChange={(e) => setCouponFormData({ ...couponFormData, duration: e.target.value })}
+                          >
+                            <option value="once">Once</option>
+                            <option value="repeating">Repeating</option>
+                            <option value="forever">Forever</option>
+                          </select>
+                        </div>
+
+                        {couponFormData.duration === 'repeating' && (
+                          <div className="space-y-2">
+                            <Label htmlFor="duration_months">Duration (Months)</Label>
+                            <Input
+                              id="duration_months"
+                              type="number"
+                              min="1"
+                              value={couponFormData.durationMonths}
+                              onChange={(e) => setCouponFormData({ ...couponFormData, durationMonths: e.target.value })}
+                            />
+                          </div>
+                        )}
+
+                        <div className="space-y-2">
+                          <Label htmlFor="max_redemptions">Max Redemptions</Label>
+                          <Input
+                            id="max_redemptions"
+                            type="number"
+                            min="1"
+                            value={couponFormData.maxRedemptions}
+                            onChange={(e) => setCouponFormData({ ...couponFormData, maxRedemptions: e.target.value })}
+                            placeholder="Unlimited"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="valid_from">Valid From</Label>
+                          <Input
+                            id="valid_from"
+                            type="datetime-local"
+                            value={couponFormData.validFrom}
+                            onChange={(e) => setCouponFormData({ ...couponFormData, validFrom: e.target.value })}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="valid_until">Valid Until</Label>
+                          <Input
+                            id="valid_until"
+                            type="datetime-local"
+                            value={couponFormData.validUntil}
+                            onChange={(e) => setCouponFormData({ ...couponFormData, validUntil: e.target.value })}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end">
+                        <Button type="submit" disabled={creatingCoupon}>
+                          {creatingCoupon ? 'Creating...' : 'Create Coupon'}
+                        </Button>
+                      </div>
+                    </form>
+                  </CardContent>
+                </Card>
+
+                {/* Coupons List */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Existing Coupons</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {loadingCoupons ? (
+                      <div className="text-center py-8">Loading coupons...</div>
+                    ) : coupons.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">No coupons created yet</div>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full">
+                          <thead>
+                            <tr className="border-b">
+                              <th className="text-left py-3 px-4">Code</th>
+                              <th className="text-left py-3 px-4">Discount</th>
+                              <th className="text-left py-3 px-4">Duration</th>
+                              <th className="text-left py-3 px-4">Redeemed</th>
+                              <th className="text-left py-3 px-4">Status</th>
+                              <th className="text-left py-3 px-4">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {coupons.map((coupon) => (
+                              <tr key={coupon.id} className="border-b hover:bg-gray-50">
+                                <td className="py-3 px-4">
+                                  <span className="font-mono font-semibold">{coupon.code}</span>
+                                </td>
+                                <td className="py-3 px-4">
+                                  {coupon.discount_type === 'percentage'
+                                    ? `${coupon.discount_value}%`
+                                    : `$${coupon.discount_value}`}
+                                </td>
+                                <td className="py-3 px-4 capitalize">
+                                  {coupon.duration}
+                                  {coupon.duration === 'repeating' && coupon.duration_months ? ` (${coupon.duration_months}m)` : ''}
+                                </td>
+                                <td className="py-3 px-4">
+                                  {coupon.total_redemptions || 0}
+                                  {coupon.max_redemptions ? ` / ${coupon.max_redemptions}` : ' / ∞'}
+                                </td>
+                                <td className="py-3 px-4">
+                                  <span className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${
+                                    coupon.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                  }`}>
+                                    {coupon.is_active ? 'Active' : 'Inactive'}
+                                  </span>
+                                </td>
+                                <td className="py-3 px-4">
+                                  <div className="flex gap-2">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => handleToggleCoupon(coupon.id, coupon.is_active)}
+                                    >
+                                      {coupon.is_active ? 'Disable' : 'Enable'}
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="destructive"
+                                      onClick={() => handleDeleteCoupon(coupon.id)}
+                                    >
+                                      Delete
+                                    </Button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
             <TabsContent value="plans" className="mt-6">
               <PlanManagement />
             </TabsContent>

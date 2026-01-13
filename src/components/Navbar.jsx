@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { LayoutDashboard, Clapperboard, Gem, Settings, Crown, Video, LogOut, ArrowUpCircle } from 'lucide-react';
+import { LayoutDashboard, Clapperboard, Gem, Settings, Crown, Video, LogOut, ArrowUpCircle, CreditCard } from 'lucide-react';
 
 function Navbar({ user, onLogout }) {
   const navigate = useNavigate();
@@ -37,7 +37,10 @@ function Navbar({ user, onLogout }) {
     { path: '/media', label: 'Media', icon: Clapperboard },
     { path: '/plans', label: 'Plans', icon: Gem },
     { path: '/settings', label: 'Settings', icon: Settings },
-    ...(user && user.role === 'admin' ? [{ path: '/admin', label: 'Admin', icon: Crown }] : [])
+    ...(user && user.role === 'admin' ? [
+      { path: '/admin', label: 'Admin', icon: Crown },
+      { path: '/subscriptions', label: 'Subscriptions', icon: CreditCard }
+    ] : [])
   ];
 
   return (
