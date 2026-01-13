@@ -76,7 +76,8 @@ function AdminSettings({ user }) {
       Object.keys(paymentSettings).forEach(key => {
         const value = paymentSettings[key];
         // Only include non-masked values or mode
-        if (key === 'mode' || (value && !value.includes('••••'))) {
+        // Check if value is a string before calling includes()
+        if (key === 'mode' || (value && typeof value === 'string' && !value.includes('••••'))) {
           dataToSend[key] = value;
         }
       });
