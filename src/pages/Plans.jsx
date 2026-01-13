@@ -10,6 +10,7 @@ function Plans() {
   const [userStats, setUserStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [processingPlan, setProcessingPlan] = useState(null);
+  const [billingCycle, setBillingCycle] = useState('monthly'); // 'monthly' or 'yearly'
 
   useEffect(() => {
     fetchPlans();
@@ -105,6 +106,35 @@ function Plans() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Subscription Plans</h1>
         <p className="text-gray-600">Choose the plan that fits your streaming needs</p>
+
+        {/* Billing Cycle Toggle */}
+        <div className="mt-6 flex justify-center">
+          <div className="inline-flex rounded-lg border border-gray-300 bg-white p-1">
+            <button
+              onClick={() => setBillingCycle('monthly')}
+              className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${
+                billingCycle === 'monthly'
+                  ? 'bg-blue-500 text-white shadow-sm'
+                  : 'text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              Monthly
+            </button>
+            <button
+              onClick={() => setBillingCycle('yearly')}
+              className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${
+                billingCycle === 'yearly'
+                  ? 'bg-blue-500 text-white shadow-sm'
+                  : 'text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              Yearly
+              <span className="ml-2 text-xs bg-green-500 text-white px-2 py-0.5 rounded-full">
+                Save up to 17%
+              </span>
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Current Plan Card */}
@@ -173,14 +203,23 @@ function Plans() {
               <CardContent className="space-y-4">
                 {/* Pricing */}
                 <div>
-                  <div className="text-4xl font-bold text-gray-900">
-                    ${plan.price_monthly}
-                    <span className="text-base text-gray-600 font-normal">/month</span>
-                  </div>
-                  {plan.price_yearly > 0 && (
-                    <p className="text-sm text-green-600 mt-1">
-                      or ${plan.price_yearly}/year (Save ${((plan.price_monthly * 12) - plan.price_yearly).toFixed(0)})
-                    </p>
+                  {billingCycle === 'monthly' ? (
+                    <div className="text-4xl font-bold text-gray-900">
+                      ${plan.price_monthly}
+                      <span className="text-base text-gray-600 font-normal">/month</span>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="text-4xl font-bold text-gray-900">
+                        ${plan.price_yearly}
+                        <span className="text-base text-gray-600 font-normal">/year</span>
+                      </div>
+                      {plan.price_yearly > 0 && plan.price_monthly > 0 && (
+                        <p className="text-sm text-green-600 mt-1">
+                          Save ${((plan.price_monthly * 12) - plan.price_yearly).toFixed(0)}/year
+                        </p>
+                      )}
+                    </div>
                   )}
                 </div>
 
@@ -242,8 +281,8 @@ function Plans() {
                   </Button>
                 ) : (
                   <Button
-                    onClick={() => handleSelectPlan(plan, 'monthly')}
-                    disabled={processingPlan === plan.id}
+                    onClick={() => handleSelectPlan(plan, billingCycle)}
+                    disabled={processingPlan === plan.id || (billingCycle === 'yearly' && (!plan.price_yearly || plan.price_yearly === 0))}
                     className={`w-full ${colorClass} hover:opacity-90`}
                   >
                     {processingPlan === plan.id ? 'Processing...' : (userStats && userStats.plan.price_monthly < plan.price_monthly ? 'Upgrade' : 'Select')} Plan
