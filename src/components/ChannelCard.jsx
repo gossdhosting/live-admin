@@ -12,6 +12,13 @@ import {
 } from 'lucide-react';
 import { useAlertDialog } from './ui/alert-dialog-modern';
 
+// Quality preset labels mapping
+const QUALITY_PRESET_LABELS = {
+  'low': '480p (1.5 Mbps)',
+  'medium': '720p (2.5 Mbps)',
+  'high': '1080p (4.5 Mbps)',
+};
+
 function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
   const [loading, setLoading] = useState(false);
   const [logs, setLogs] = useState([]);
@@ -524,7 +531,7 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               <div className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow">
                 <div className="text-xs text-gray-500 mb-1.5 font-medium">Quality Preset</div>
-                <div className="font-bold text-gray-900">{channel.quality_preset}</div>
+                <div className="font-bold text-gray-900">{QUALITY_PRESET_LABELS[channel.quality_preset] || channel.quality_preset}</div>
               </div>
               <div className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow">
                 <div className="text-xs text-gray-500 mb-1.5 font-medium">Input Type</div>
