@@ -50,7 +50,7 @@ function Navbar({ user, onLogout }) {
         <div className="flex justify-between items-center h-16">
           {/* Logo/Brand */}
           <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
-            <img src={logoSvg} alt="RexStream" className="h-8 sm:h-10" />
+            <img src={logoSvg} alt="RexStream" style={{ height: '1.8rem' }} />
           </Link>
 
           {/* Desktop Navigation Links */}

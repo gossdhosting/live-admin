@@ -63,18 +63,18 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
 
         if (pages.length === 0) {
           await showAlert({
-            title: 'No Facebook Destination',
-            message: 'No Facebook destination found. Please reconnect your Facebook account.',
+            title: 'No Facebook Pages',
+            message: 'No Facebook pages found. Please connect a Facebook account with page access.',
             type: 'warning'
           });
           setCreating(null);
           return;
         }
 
-        // Use the selected page/profile from settings, or fall back to first option
-        const destination = pages.find(p => p.id === selectedPageId) || pages[0];
+        // Use the selected page from settings, or fall back to first page
+        const page = pages.find(p => p.id === selectedPageId) || pages[0];
 
-        if (!destination || !destination.access_token) {
+        if (!page || !page.access_token) {
           await showAlert({
             title: 'Facebook Access Error',
             message: 'Facebook access token not found. Please reconnect your Facebook account.',
@@ -86,11 +86,10 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
 
         response = await api.post('/platforms/facebook/create-stream', {
           channelId,
-          pageId: destination.id,
-          pageAccessToken: destination.access_token,
+          pageId: page.id,
+          pageAccessToken: page.access_token,
           title,
           description,
-          isProfile: destination.isProfile === true,
         });
       } else if (platform === 'youtube') {
         response = await api.post('/platforms/youtube/create-broadcast', {
