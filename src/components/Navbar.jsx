@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { LayoutDashboard, Clapperboard, Gem, Settings, Crown, Video, LogOut, ArrowUpCircle, CreditCard } from 'lucide-react';
+import { LayoutDashboard, Clapperboard, Gem, Settings, Crown, LogOut, ArrowUpCircle, CreditCard } from 'lucide-react';
+import logoSvg from '/logo.svg';
 
 function Navbar({ user, onLogout }) {
   const navigate = useNavigate();
@@ -49,8 +50,7 @@ function Navbar({ user, onLogout }) {
         <div className="flex justify-between items-center h-16">
           {/* Logo/Brand */}
           <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
-            <Video className="w-7 h-7 sm:w-8 sm:h-8" />
-            <span className="text-lg sm:text-xl font-bold tracking-tight">RexStream</span>
+            <img src={logoSvg} alt="RexStream" className="h-8 sm:h-10" />
           </Link>
 
           {/* Desktop Navigation Links */}

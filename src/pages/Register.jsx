@@ -124,7 +124,7 @@ function Register() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#212836] to-black p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle className="text-2xl font-bold text-center">Registration Successful!</CardTitle>
@@ -142,7 +142,7 @@ function Register() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#212836] to-black p-4">
       <Card className="w-full max-w-2xl">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">Create Account</CardTitle>

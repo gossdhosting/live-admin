@@ -67,10 +67,10 @@ function Login({ onLogin }) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#212836] to-black p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Admin Login</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">Rexstream Login</CardTitle>
           <CardDescription className="text-center">
             Enter your credentials to access your account
           </CardDescription>
