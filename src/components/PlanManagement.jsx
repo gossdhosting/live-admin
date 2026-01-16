@@ -23,7 +23,11 @@ function PlanManagement() {
     max_platform_connections: 1,
     is_active: true,
     is_hidden: false,
-    youtube_restreaming: false
+    youtube_restreaming: false,
+    android_product_id_monthly: '',
+    android_product_id_yearly: '',
+    ios_product_id_monthly: '',
+    ios_product_id_yearly: ''
   });
 
   useEffect(() => {
@@ -79,7 +83,11 @@ function PlanManagement() {
       max_platform_connections: 1,
       is_active: true,
       is_hidden: false,
-      youtube_restreaming: false
+      youtube_restreaming: false,
+      android_product_id_monthly: '',
+      android_product_id_yearly: '',
+      ios_product_id_monthly: '',
+      ios_product_id_yearly: ''
     });
     setShowModal(true);
   };
@@ -101,7 +109,11 @@ function PlanManagement() {
       max_platform_connections: plan.max_platform_connections || 1,
       is_active: plan.is_active === 1 || plan.is_active === true,
       is_hidden: plan.is_hidden === 1 || plan.is_hidden === true,
-      youtube_restreaming: plan.youtube_restreaming === 1 || plan.youtube_restreaming === true
+      youtube_restreaming: plan.youtube_restreaming === 1 || plan.youtube_restreaming === true,
+      android_product_id_monthly: plan.android_product_id_monthly || '',
+      android_product_id_yearly: plan.android_product_id_yearly || '',
+      ios_product_id_monthly: plan.ios_product_id_monthly || '',
+      ios_product_id_yearly: plan.ios_product_id_yearly || ''
     });
     setShowModal(true);
   };
@@ -124,7 +136,11 @@ function PlanManagement() {
         max_platform_connections: formData.max_platform_connections,
         is_active: formData.is_active ? 1 : 0,
         is_hidden: formData.is_hidden ? 1 : 0,
-        youtube_restreaming: formData.youtube_restreaming ? 1 : 0
+        youtube_restreaming: formData.youtube_restreaming ? 1 : 0,
+        android_product_id_monthly: formData.android_product_id_monthly || null,
+        android_product_id_yearly: formData.android_product_id_yearly || null,
+        ios_product_id_monthly: formData.ios_product_id_monthly || null,
+        ios_product_id_yearly: formData.ios_product_id_yearly || null
       };
 
       if (modalMode === 'create') {
@@ -389,55 +405,87 @@ function PlanManagement() {
                 <small style={{ color: '#666' }}>From Stripe Dashboard - links monthly and yearly prices</small>
               </div>
 
-              {/* IAP Product IDs - Auto-generated from plan name */}
-              {formData.name && (
-                <div style={{
-                  backgroundColor: '#f8f9fa',
-                  padding: '1rem',
-                  borderRadius: '8px',
-                  marginBottom: '1rem',
-                  border: '1px solid #e9ecef'
-                }}>
-                  <label style={{ fontWeight: '600', marginBottom: '0.5rem', display: 'block' }}>
-                    Google Play / App Store Product IDs
+              {/* IAP Product IDs - Manual entry for Android and iOS */}
+              <div style={{
+                backgroundColor: '#f8f9fa',
+                padding: '1rem',
+                borderRadius: '8px',
+                marginBottom: '1rem',
+                border: '1px solid #e9ecef'
+              }}>
+                <label style={{ fontWeight: '600', marginBottom: '0.5rem', display: 'block' }}>
+                  In-App Purchase Product IDs
+                </label>
+                <small style={{ color: '#666', display: 'block', marginBottom: '0.75rem' }}>
+                  Enter the exact product IDs from Google Play Console and App Store Connect. These must match the subscription product IDs you created in each platform.
+                </small>
+
+                {/* Android Product IDs */}
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{ fontSize: '0.9rem', fontWeight: '500', color: '#333', display: 'block', marginBottom: '0.5rem' }}>
+                    Google Play Product IDs
                   </label>
-                  <small style={{ color: '#666', display: 'block', marginBottom: '0.75rem' }}>
-                    These IDs are auto-generated from the plan name. Create products with these exact IDs in Google Play Console and App Store Connect.
-                  </small>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                     <div>
                       <label style={{ fontSize: '0.8rem', color: '#666' }}>Monthly</label>
                       <input
                         type="text"
+                        name="android_product_id_monthly"
                         className="form-control"
-                        value={`rexstream-${formData.name.toLowerCase().replace(/\s+/g, '-')}-monthly`}
-                        readOnly
-                        style={{ backgroundColor: '#fff', cursor: 'text', fontSize: '0.85rem' }}
-                        onClick={(e) => {
-                          e.target.select();
-                          navigator.clipboard.writeText(e.target.value);
-                        }}
-                        title="Click to copy"
+                        value={formData.android_product_id_monthly}
+                        onChange={handleInputChange}
+                        placeholder="e.g., rexstream-basic-monthly"
+                        style={{ fontSize: '0.85rem' }}
                       />
                     </div>
                     <div>
                       <label style={{ fontSize: '0.8rem', color: '#666' }}>Yearly</label>
                       <input
                         type="text"
+                        name="android_product_id_yearly"
                         className="form-control"
-                        value={`rexstream-${formData.name.toLowerCase().replace(/\s+/g, '-')}-yearly`}
-                        readOnly
-                        style={{ backgroundColor: '#fff', cursor: 'text', fontSize: '0.85rem' }}
-                        onClick={(e) => {
-                          e.target.select();
-                          navigator.clipboard.writeText(e.target.value);
-                        }}
-                        title="Click to copy"
+                        value={formData.android_product_id_yearly}
+                        onChange={handleInputChange}
+                        placeholder="e.g., rexstream-basic-yearly"
+                        style={{ fontSize: '0.85rem' }}
                       />
                     </div>
                   </div>
                 </div>
-              )}
+
+                {/* iOS Product IDs */}
+                <div>
+                  <label style={{ fontSize: '0.9rem', fontWeight: '500', color: '#333', display: 'block', marginBottom: '0.5rem' }}>
+                    App Store Product IDs
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', color: '#666' }}>Monthly</label>
+                      <input
+                        type="text"
+                        name="ios_product_id_monthly"
+                        className="form-control"
+                        value={formData.ios_product_id_monthly}
+                        onChange={handleInputChange}
+                        placeholder="e.g., rexstream_basic_month"
+                        style={{ fontSize: '0.85rem' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', color: '#666' }}>Yearly</label>
+                      <input
+                        type="text"
+                        name="ios_product_id_yearly"
+                        className="form-control"
+                        value={formData.ios_product_id_yearly}
+                        onChange={handleInputChange}
+                        placeholder="e.g., rexstream_basic_year"
+                        style={{ fontSize: '0.85rem' }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div className="form-group">
