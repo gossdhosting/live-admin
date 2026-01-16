@@ -35,7 +35,11 @@ function PlanManagement() {
     try {
       // Use admin endpoint to get all plans including hidden
       const response = await api.get('/plans/admin/all');
-      setPlans(response.data.plans);
+      // Sort plans by monthly price (ascending)
+      const sortedPlans = [...response.data.plans].sort((a, b) =>
+        parseFloat(a.price_monthly) - parseFloat(b.price_monthly)
+      );
+      setPlans(sortedPlans);
     } catch (error) {
       console.error('Failed to fetch plans:', error);
       showMessage('Failed to load plans', 'error');
@@ -289,13 +293,28 @@ function PlanManagement() {
 
       {/* Create/Edit Modal */}
       {showModal && (
-        <div className="modal-overlay" onClick={(e) => {
-          if (e.target === e.currentTarget) {
-            setShowModal(false);
-          }
-        }}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', background: '#fff' }}>
-            <h3>{modalMode === 'create' ? 'Create New Plan' : 'Edit Plan'}</h3>
+        <div className="modal-overlay">
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', background: '#fff', position: 'relative' }}>
+            <button
+              type="button"
+              onClick={() => setShowModal(false)}
+              style={{
+                position: 'absolute',
+                top: '1rem',
+                right: '1rem',
+                background: 'none',
+                border: 'none',
+                fontSize: '1.5rem',
+                cursor: 'pointer',
+                color: '#666',
+                padding: '0.25rem 0.5rem',
+                lineHeight: 1
+              }}
+              aria-label="Close"
+            >
+              ×
+            </button>
+            <h3 style={{ marginRight: '2rem' }}>{modalMode === 'create' ? 'Create New Plan' : 'Edit Plan'}</h3>
 
             <form onSubmit={handleSubmit}>
               <div className="form-group">
