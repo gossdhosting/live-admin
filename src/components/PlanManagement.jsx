@@ -389,6 +389,56 @@ function PlanManagement() {
                 <small style={{ color: '#666' }}>From Stripe Dashboard - links monthly and yearly prices</small>
               </div>
 
+              {/* IAP Product IDs - Auto-generated from plan name */}
+              {formData.name && (
+                <div style={{
+                  backgroundColor: '#f8f9fa',
+                  padding: '1rem',
+                  borderRadius: '8px',
+                  marginBottom: '1rem',
+                  border: '1px solid #e9ecef'
+                }}>
+                  <label style={{ fontWeight: '600', marginBottom: '0.5rem', display: 'block' }}>
+                    Google Play / App Store Product IDs
+                  </label>
+                  <small style={{ color: '#666', display: 'block', marginBottom: '0.75rem' }}>
+                    These IDs are auto-generated from the plan name. Create products with these exact IDs in Google Play Console and App Store Connect.
+                  </small>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', color: '#666' }}>Monthly</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={`rexstream-${formData.name.toLowerCase().replace(/\s+/g, '-')}-monthly`}
+                        readOnly
+                        style={{ backgroundColor: '#fff', cursor: 'text', fontSize: '0.85rem' }}
+                        onClick={(e) => {
+                          e.target.select();
+                          navigator.clipboard.writeText(e.target.value);
+                        }}
+                        title="Click to copy"
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', color: '#666' }}>Yearly</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={`rexstream-${formData.name.toLowerCase().replace(/\s+/g, '-')}-yearly`}
+                        readOnly
+                        style={{ backgroundColor: '#fff', cursor: 'text', fontSize: '0.85rem' }}
+                        onClick={(e) => {
+                          e.target.select();
+                          navigator.clipboard.writeText(e.target.value);
+                        }}
+                        title="Click to copy"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div className="form-group">
                   <label htmlFor="max_concurrent_streams">Max Concurrent Streams *</label>
