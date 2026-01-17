@@ -68,27 +68,51 @@ function ScheduleStreamDialog({ channel, onClose, onScheduled }) {
     setError('');
 
     try {
-      // Create date string in user's timezone format
-      const dateTimeStr = `${formData.date}T${formData.time}:00`;
+      // The user enters date/time in their local timezone
+      // We need to interpret this as being in their configured timezone and convert to UTC
 
-      // Parse as local date in the user's timezone
-      // We need to convert from user's timezone to UTC
-      const localDate = new Date(dateTimeStr);
+      const [year, month, day] = formData.date.split('-').map(Number);
+      const [hour, minute] = formData.time.split(':').map(Number);
 
-      // Get timezone offset for user's timezone at this date
-      const userTzDate = new Date(localDate.toLocaleString('en-US', { timeZone: userTimezone }));
-      const utcDate = new Date(localDate.toLocaleString('en-US', { timeZone: 'UTC' }));
-      const offset = utcDate.getTime() - userTzDate.getTime();
+      // Create a date string in ISO format (YYYY-MM-DDTHH:mm:ss)
+      const localDateStr = `${formData.date}T${formData.time}:00`;
 
-      // Apply offset to get correct UTC time
-      const scheduledDate = new Date(localDate.getTime() + offset);
+      // To properly convert, we create the date as if it's in UTC, then adjust
+      // Get the offset for the user's timezone at this date
+      const tempDate = new Date(localDateStr + 'Z'); // Parse as UTC
 
-      // Validate future time (compare in user's timezone)
+      // Format this date in the user's timezone to get what it would look like there
+      const userTzFormatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: userTimezone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
+
+      // Get current time for validation
       const now = new Date();
-      const nowInUserTz = new Date(now.toLocaleString('en-US', { timeZone: userTimezone }));
-      const selectedInUserTz = new Date(dateTimeStr);
 
-      if (selectedInUserTz <= nowInUserTz) {
+      // Parse the user's input as a date in their timezone by using toLocaleString in reverse
+      // This is tricky: we need to find what UTC time would display as the entered time in user's TZ
+
+      // Simpler approach: Use the date constructor with timezone offset
+      // Create date in user's timezone by getting the ISO string for that exact moment
+      const utcDate = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
+
+      // Get what this UTC time looks like in user's timezone
+      const utcInUserTz = new Date(utcDate.toLocaleString('en-US', { timeZone: userTimezone }));
+
+      // Calculate the offset
+      const offset = utcDate.getTime() - utcInUserTz.getTime();
+
+      // The actual UTC time we want is: user's local time minus the offset
+      const correctUtcTime = new Date(utcDate.getTime() - offset * 2);
+
+      // Validate future time
+      if (correctUtcTime <= now) {
         setError('Scheduled time must be in the future');
         setLoading(false);
         return;
@@ -96,14 +120,14 @@ function ScheduleStreamDialog({ channel, onClose, onScheduled }) {
 
       const payload = {
         channel_id: channel.id,
-        scheduled_start_time: scheduledDate.toISOString(),
+        scheduled_start_time: correctUtcTime.toISOString(),
         timezone: userTimezone,
       };
 
       if (scheduledStream) {
         // Update existing schedule
         await api.put(`/scheduled-streams/${scheduledStream.id}`, {
-          scheduled_start_time: scheduledDate.toISOString(),
+          scheduled_start_time: correctUtcTime.toISOString(),
           timezone: userTimezone,
         });
       } else {
