@@ -175,7 +175,7 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
     if (!confirmed) return;
 
     try {
-      await api.delete(`/rtmp/${destinationId}`);
+      await api.delete(`/channels/${channelId}/rtmp/${destinationId}`);
       fetchAll();
       onPlatformsChange?.();
     } catch (error) {
