@@ -1119,6 +1119,74 @@ function AdminSettings({ user }) {
                   </div>
                 </div>
 
+                <hr className="my-8" />
+
+                {/* In-App Purchase (IAP) Settings */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">In-App Purchase (IAP) Configuration</h3>
+                  <p className="text-sm text-gray-600">
+                    Configure product IDs for mobile app purchases (Google Play & App Store)
+                  </p>
+
+                  <div className="space-y-6">
+                    {/* Android Product ID */}
+                    <div className="border border-green-300 bg-green-50 rounded-lg p-4">
+                      <h4 className="font-semibold text-green-900 mb-3 flex items-center gap-2">
+                        <span>🤖</span> Google Play Configuration
+                      </h4>
+                      <div className="space-y-3">
+                        <div>
+                          <Label htmlFor="android_product_id">Android Product ID</Label>
+                          <Input
+                            id="android_product_id"
+                            type="text"
+                            value={settings.android_product_id || ''}
+                            onChange={(e) => handleChange('android_product_id', e.target.value)}
+                            placeholder="rexstream_plan"
+                            className="bg-white"
+                          />
+                          <p className="text-sm text-gray-600 mt-1">
+                            The parent subscription product ID in Google Play Console (e.g., "rexstream_plan")
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* iOS Subscription Group ID */}
+                    <div className="border border-blue-300 bg-blue-50 rounded-lg p-4">
+                      <h4 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
+                        <span>🍎</span> App Store Configuration
+                      </h4>
+                      <div className="space-y-3">
+                        <div>
+                          <Label htmlFor="ios_subscription_group_id">iOS Subscription Group ID</Label>
+                          <Input
+                            id="ios_subscription_group_id"
+                            type="text"
+                            value={settings.ios_subscription_group_id || ''}
+                            onChange={(e) => handleChange('ios_subscription_group_id', e.target.value)}
+                            placeholder="21894749"
+                            className="bg-white"
+                          />
+                          <p className="text-sm text-gray-600 mt-1">
+                            The subscription group ID from App Store Connect
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                      <h4 className="font-semibold text-yellow-900 mb-2">Important Notes:</h4>
+                      <ul className="text-sm text-yellow-800 space-y-1 list-disc list-inside">
+                        <li>For Android, set individual Base Plan IDs in each plan (e.g., "basic_monthly", "pro_yearly")</li>
+                        <li>For iOS, set individual Product IDs in each plan (e.g., "com.rexstream.basic.monthly")</li>
+                        <li>These settings apply globally across all plans in your mobile app</li>
+                        <li>Make sure to configure corresponding products in Google Play and App Store Connect</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="flex justify-end gap-3 pt-4">
                   <Button
                     type="button"
