@@ -68,50 +68,62 @@ function ScheduleStreamDialog({ channel, onClose, onScheduled }) {
     setError('');
 
     try {
-      // The user enters date/time in their local timezone
-      // We need to interpret this as being in their configured timezone and convert to UTC
+      // User enters date/time in their timezone (e.g., 2026-01-19 03:47 in Asia/Kolkata)
+      // We need to convert this to UTC for storage
 
+      // Create a date string that represents the exact moment in the user's timezone
+      const dateTimeString = `${formData.date}T${formData.time}:00`;
+
+      // Use Intl.DateTimeFormat to parse the date in the user's timezone
+      // This gives us the components in the user's timezone
       const [year, month, day] = formData.date.split('-').map(Number);
       const [hour, minute] = formData.time.split(':').map(Number);
 
-      // Create a date string in ISO format (YYYY-MM-DDTHH:mm:ss)
-      const localDateStr = `${formData.date}T${formData.time}:00`;
+      // To convert to UTC: create a formatter that will format a UTC date AS IF it were in the user's TZ
+      // Then we find which UTC timestamp would show the desired time in that timezone
 
-      // To properly convert, we create the date as if it's in UTC, then adjust
-      // Get the offset for the user's timezone at this date
-      const tempDate = new Date(localDateStr + 'Z'); // Parse as UTC
+      // Method: Use the inverse - format current UTC time in user's TZ, then adjust
+      // Start with a UTC date matching the input
+      let testDate = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
 
-      // Format this date in the user's timezone to get what it would look like there
-      const userTzFormatter = new Intl.DateTimeFormat('en-US', {
+      // Get how this UTC time appears in user's timezone
+      const formatter = new Intl.DateTimeFormat('en-US', {
         timeZone: userTimezone,
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
         hour: '2-digit',
         minute: '2-digit',
+        second: '2-digit',
         hour12: false
       });
 
-      // Get current time for validation
+      const parts = formatter.formatToParts(testDate);
+      const displayedYear = parseInt(parts.find(p => p.type === 'year').value);
+      const displayedMonth = parseInt(parts.find(p => p.type === 'month').value);
+      const displayedDay = parseInt(parts.find(p => p.type === 'day').value);
+      const displayedHour = parseInt(parts.find(p => p.type === 'hour').value);
+      const displayedMinute = parseInt(parts.find(p => p.type === 'minute').value);
+
+      // Calculate the difference
+      const yearDiff = year - displayedYear;
+      const monthDiff = month - displayedMonth;
+      const dayDiff = day - displayedDay;
+      const hourDiff = hour - displayedHour;
+      const minuteDiff = minute - displayedMinute;
+
+      // Adjust the UTC time by the difference
+      const correctUtcTime = new Date(Date.UTC(
+        year + yearDiff,
+        (month - 1) + monthDiff,
+        day + dayDiff,
+        hour + hourDiff,
+        minute + minuteDiff,
+        0
+      ));
+
+      // Validate future time (check against current time)
       const now = new Date();
-
-      // Parse the user's input as a date in their timezone by using toLocaleString in reverse
-      // This is tricky: we need to find what UTC time would display as the entered time in user's TZ
-
-      // Simpler approach: Use the date constructor with timezone offset
-      // Create date in user's timezone by getting the ISO string for that exact moment
-      const utcDate = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
-
-      // Get what this UTC time looks like in user's timezone
-      const utcInUserTz = new Date(utcDate.toLocaleString('en-US', { timeZone: userTimezone }));
-
-      // Calculate the offset
-      const offset = utcDate.getTime() - utcInUserTz.getTime();
-
-      // The actual UTC time we want is: user's local time minus the offset
-      const correctUtcTime = new Date(utcDate.getTime() - offset * 2);
-
-      // Validate future time
       if (correctUtcTime <= now) {
         setError('Scheduled time must be in the future');
         setLoading(false);
