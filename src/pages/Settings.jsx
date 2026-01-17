@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from '../components/ui/alert';
 import { Label } from '../components/ui/label';
 import { Input } from '../components/ui/input';
 import { User, Lock, Radio, FileText, Globe, Image as ImageIcon } from 'lucide-react';
+import { TIMEZONES } from '../constants/timezones';
 
 function Settings({ user }) {
   const navigate = useNavigate();
@@ -41,6 +42,8 @@ function Settings({ user }) {
   const [profileMessage, setProfileMessage] = useState('');
   const [updatingProfile, setUpdatingProfile] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [savingTimezone, setSavingTimezone] = useState(false);
+  const [timezoneMessage, setTimezoneMessage] = useState('');
 
   // Refs for cleanup
   const messageTimeoutRef = useRef(null);
@@ -211,6 +214,21 @@ function Settings({ user }) {
     }));
   };
 
+  const handleSaveTimezone = async () => {
+    setTimezoneMessage('');
+    setSavingTimezone(true);
+
+    try {
+      await api.put('/user-settings', { settings: { timezone: userSettings.timezone } });
+      setTimezoneMessage('Timezone saved successfully');
+      setTimeout(() => setTimezoneMessage(''), 3000);
+    } catch (error) {
+      setTimezoneMessage(error.response?.data?.error || 'Failed to save timezone');
+    } finally {
+      setSavingTimezone(false);
+    }
+  };
+
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
     setPasswordMessage('');
@@ -336,6 +354,40 @@ function Settings({ user }) {
                     onChange={handleProfileChange}
                     autoComplete="name"
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="timezone">Timezone</Label>
+                  <div className="flex gap-2">
+                    <select
+                      id="timezone"
+                      value={userSettings.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'}
+                      onChange={(e) => handleUserSettingsChange('timezone', e.target.value)}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      {TIMEZONES.map((tz) => (
+                        <option key={tz.value} value={tz.value}>
+                          {tz.label}
+                        </option>
+                      ))}
+                    </select>
+                    <Button
+                      type="button"
+                      onClick={handleSaveTimezone}
+                      disabled={savingTimezone}
+                      variant="outline"
+                    >
+                      {savingTimezone ? 'Saving...' : 'Save'}
+                    </Button>
+                  </div>
+                  {timezoneMessage && (
+                    <p className={`text-sm ${timezoneMessage.includes('success') ? 'text-green-600' : 'text-red-600'}`}>
+                      {timezoneMessage}
+                    </p>
+                  )}
+                  <p className="text-sm text-gray-500">
+                    Your timezone for scheduling streams and displaying times
+                  </p>
                 </div>
 
                 <div className="space-y-2">
