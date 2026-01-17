@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import api from '../services/api';
 import MultiPlatformStreaming from './MultiPlatformStreaming';
+import ScheduleStreamDialog from './ScheduleStreamDialog';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader } from './ui/card';
 import { Badge } from './ui/badge';
@@ -8,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import {
   Play, Square, RotateCw, Pencil, Trash2,
   CheckCircle, AlertTriangle, XCircle, Loader2, BarChart3, Globe, Image as ImageIcon,
-  FileText, Video, Check, X, ChevronDown, ChevronUp, Server, Key, Copy
+  FileText, Video, Check, X, ChevronDown, ChevronUp, Server, Key, Copy, Calendar
 } from 'lucide-react';
 import { useAlertDialog } from './ui/alert-dialog-modern';
 
@@ -28,8 +29,13 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [watermarkEnabled, setWatermarkEnabled] = useState(Boolean(channel.watermark_enabled));
   const [configuredPlatforms, setConfiguredPlatforms] = useState([]);
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false);
   const isAdmin = user && user.role === 'admin';
   const { showAlert } = useAlertDialog();
+
+  // Check if channel has scheduled stream
+  const hasSchedule = channel.scheduled_stream && channel.scheduled_stream.status === 'pending';
+  const canSchedule = userStats?.limits?.schedule_enabled === true;
 
   // Update local watermark state when channel prop changes
   useEffect(() => {
@@ -714,15 +720,38 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
       <CardContent className="pt-0 pb-3 px-6">
         <div className="flex gap-2 flex-wrap items-center">
           {channel.status !== 'running' ? (
-            <Button
-              onClick={handleStart}
-              disabled={loading}
-              className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold shadow-sm gap-2"
-              size="sm"
-            >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4 fill-current" />}
-              <span>{loading ? 'Starting...' : 'Start'}</span>
-            </Button>
+            <>
+              <Button
+                onClick={handleStart}
+                disabled={loading || hasSchedule}
+                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold shadow-sm gap-2"
+                size="sm"
+                title={hasSchedule ? 'Cannot start manually - stream is scheduled' : 'Start stream'}
+              >
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4 fill-current" />}
+                <span>{loading ? 'Starting...' : 'Start'}</span>
+              </Button>
+              {canSchedule && (
+                <Button
+                  onClick={() => setShowScheduleDialog(true)}
+                  variant="outline"
+                  disabled={loading}
+                  className="font-semibold gap-2"
+                  size="sm"
+                >
+                  <Calendar className="w-4 h-4" />
+                  <span>{hasSchedule ? 'Update Schedule' : 'Schedule'}</span>
+                </Button>
+              )}
+              {hasSchedule && (
+                <Badge variant="secondary" className="text-xs font-medium">
+                  📅 Scheduled: {new Date(channel.scheduled_stream.scheduled_start_time).toLocaleString('en-US', {
+                    dateStyle: 'short',
+                    timeStyle: 'short'
+                  })}
+                </Badge>
+              )}
+            </>
           ) : (
             <>
               <Button
@@ -843,6 +872,17 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
             </TabsContent>
           </Tabs>
         </>
+      )}
+
+      {/* Schedule Stream Dialog */}
+      {showScheduleDialog && (
+        <ScheduleStreamDialog
+          channel={channel}
+          onClose={() => setShowScheduleDialog(false)}
+          onScheduled={() => {
+            onUpdate && onUpdate();
+          }}
+        />
       )}
     </Card>
   );

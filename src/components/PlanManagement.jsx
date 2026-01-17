@@ -24,6 +24,7 @@ function PlanManagement() {
     is_active: true,
     is_hidden: false,
     youtube_restreaming: false,
+    schedule_enabled: false,
     android_product_id_monthly: '',
     android_product_id_yearly: '',
     ios_product_id_monthly: '',
@@ -84,6 +85,7 @@ function PlanManagement() {
       is_active: true,
       is_hidden: false,
       youtube_restreaming: false,
+      schedule_enabled: false,
       android_product_id_monthly: '',
       android_product_id_yearly: '',
       ios_product_id_monthly: '',
@@ -110,6 +112,7 @@ function PlanManagement() {
       is_active: plan.is_active === 1 || plan.is_active === true,
       is_hidden: plan.is_hidden === 1 || plan.is_hidden === true,
       youtube_restreaming: plan.youtube_restreaming === 1 || plan.youtube_restreaming === true,
+      schedule_enabled: plan.schedule_enabled === 1 || plan.schedule_enabled === true,
       android_product_id_monthly: plan.android_product_id_monthly || '',
       android_product_id_yearly: plan.android_product_id_yearly || '',
       ios_product_id_monthly: plan.ios_product_id_monthly || '',
@@ -137,6 +140,7 @@ function PlanManagement() {
         is_active: formData.is_active ? 1 : 0,
         is_hidden: formData.is_hidden ? 1 : 0,
         youtube_restreaming: formData.youtube_restreaming ? 1 : 0,
+        schedule_enabled: formData.schedule_enabled ? 1 : 0,
         android_product_id_monthly: formData.android_product_id_monthly || null,
         android_product_id_yearly: formData.android_product_id_yearly || null,
         ios_product_id_monthly: formData.ios_product_id_monthly || null,
@@ -275,6 +279,17 @@ function PlanManagement() {
                         color: '#fff'
                       }}>
                         Hidden
+                      </span>
+                    )}
+                    {(plan.schedule_enabled === 1 || plan.schedule_enabled === true) && (
+                      <span style={{
+                        padding: '0.25rem 0.5rem',
+                        borderRadius: '4px',
+                        fontSize: '0.8rem',
+                        backgroundColor: '#3498db',
+                        color: '#fff'
+                      }} title="Scheduled streaming enabled">
+                        📅 Schedule
                       </span>
                     )}
                   </div>
@@ -613,6 +628,24 @@ function PlanManagement() {
                   </label>
                   <small style={{ color: '#666', display: 'block', marginLeft: '1.5rem' }}>
                     Allow users on this plan to restream from YouTube live URLs
+                  </small>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <div className="checkbox-group">
+                  <input
+                    type="checkbox"
+                    id="schedule_enabled"
+                    name="schedule_enabled"
+                    checked={formData.schedule_enabled}
+                    onChange={handleInputChange}
+                  />
+                  <label htmlFor="schedule_enabled" style={{ marginBottom: 0 }}>
+                    Scheduled Streaming
+                  </label>
+                  <small style={{ color: '#666', display: 'block', marginLeft: '1.5rem' }}>
+                    Allow users on this plan to schedule streams to start automatically
                   </small>
                 </div>
               </div>
