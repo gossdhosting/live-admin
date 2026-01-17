@@ -78,7 +78,7 @@ function RtmpTemplatesManager() {
 
     try {
       if (editingId) {
-        await api.put(`/rtmp/templates/${editingId}`, formData);
+        await api.put(`/rtmp/templates/templates/${editingId}`, formData);
       } else {
         await api.post('/rtmp/templates/templates', formData);
       }
@@ -106,7 +106,7 @@ function RtmpTemplatesManager() {
   const handleToggleEnabled = async (id, currentEnabled) => {
     try {
       console.log('Toggling template:', id, 'from', currentEnabled, 'to', currentEnabled ? 0 : 1);
-      const response = await api.put(`/rtmp/templates/${id}`, { enabled: currentEnabled ? 0 : 1 });
+      const response = await api.put(`/rtmp/templates/templates/${id}`, { enabled: currentEnabled ? 0 : 1 });
       console.log('Toggle response:', response.data);
       await fetchTemplates();
     } catch (error) {
@@ -120,7 +120,7 @@ function RtmpTemplatesManager() {
 
     setLoading(true);
     try {
-      await api.delete(`/rtmp/templates/${id}`);
+      await api.delete(`/rtmp/templates/templates/${id}`);
       fetchTemplates();
       alert('Template deleted successfully');
     } catch (error) {
