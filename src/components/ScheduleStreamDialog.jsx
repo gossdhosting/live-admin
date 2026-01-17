@@ -6,29 +6,50 @@ function ScheduleStreamDialog({ channel, onClose, onScheduled }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [scheduledStream, setScheduledStream] = useState(null);
+  const [userTimezone, setUserTimezone] = useState('UTC');
   const [formData, setFormData] = useState({
     date: '',
     time: '',
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
   });
 
   useEffect(() => {
+    fetchUserTimezone();
     fetchScheduledStream();
   }, [channel.id]);
+
+  const fetchUserTimezone = async () => {
+    try {
+      const response = await api.get('/user-settings');
+      const timezone = response.data.settings?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+      setUserTimezone(timezone);
+    } catch (error) {
+      console.error('Failed to fetch user timezone:', error);
+      // Fallback to browser timezone
+      setUserTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC');
+    }
+  };
 
   const fetchScheduledStream = async () => {
     try {
       const response = await api.get(`/scheduled-streams/channel/${channel.id}/active`);
       if (response.data.schedule) {
         setScheduledStream(response.data.schedule);
-        // Parse scheduled time to local date/time
+        // Parse scheduled time in the user's timezone
         const scheduledTime = new Date(response.data.schedule.scheduled_start_time);
-        const dateStr = scheduledTime.toISOString().split('T')[0];
-        const timeStr = scheduledTime.toTimeString().split(' ')[0].substring(0, 5);
+        // Convert to user's timezone for display
+        const tzTime = scheduledTime.toLocaleString('en-CA', {
+          timeZone: response.data.schedule.timezone,
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        });
+        const [dateStr, timeStr] = tzTime.split(', ');
         setFormData({
           date: dateStr,
           time: timeStr,
-          timezone: response.data.schedule.timezone,
         });
       }
     } catch (error) {
@@ -47,12 +68,27 @@ function ScheduleStreamDialog({ channel, onClose, onScheduled }) {
     setError('');
 
     try {
-      // Combine date and time into ISO string
-      const scheduledDateTime = `${formData.date}T${formData.time}:00`;
-      const scheduledDate = new Date(scheduledDateTime);
+      // Create date string in user's timezone format
+      const dateTimeStr = `${formData.date}T${formData.time}:00`;
 
-      // Validate future time
-      if (scheduledDate <= new Date()) {
+      // Parse as local date in the user's timezone
+      // We need to convert from user's timezone to UTC
+      const localDate = new Date(dateTimeStr);
+
+      // Get timezone offset for user's timezone at this date
+      const userTzDate = new Date(localDate.toLocaleString('en-US', { timeZone: userTimezone }));
+      const utcDate = new Date(localDate.toLocaleString('en-US', { timeZone: 'UTC' }));
+      const offset = utcDate.getTime() - userTzDate.getTime();
+
+      // Apply offset to get correct UTC time
+      const scheduledDate = new Date(localDate.getTime() + offset);
+
+      // Validate future time (compare in user's timezone)
+      const now = new Date();
+      const nowInUserTz = new Date(now.toLocaleString('en-US', { timeZone: userTimezone }));
+      const selectedInUserTz = new Date(dateTimeStr);
+
+      if (selectedInUserTz <= nowInUserTz) {
         setError('Scheduled time must be in the future');
         setLoading(false);
         return;
@@ -61,14 +97,14 @@ function ScheduleStreamDialog({ channel, onClose, onScheduled }) {
       const payload = {
         channel_id: channel.id,
         scheduled_start_time: scheduledDate.toISOString(),
-        timezone: formData.timezone,
+        timezone: userTimezone,
       };
 
       if (scheduledStream) {
         // Update existing schedule
         await api.put(`/scheduled-streams/${scheduledStream.id}`, {
           scheduled_start_time: scheduledDate.toISOString(),
-          timezone: formData.timezone,
+          timezone: userTimezone,
         });
       } else {
         // Create new schedule
@@ -167,26 +203,24 @@ function ScheduleStreamDialog({ channel, onClose, onScheduled }) {
               required
             />
             <small style={{ color: '#666' }}>
-              Minimum: {minDateTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+              Time is in your timezone ({userTimezone})
             </small>
           </div>
 
           <div className="form-group">
-            <label htmlFor="timezone">Timezone *</label>
-            <select
-              id="timezone"
-              name="timezone"
-              className="form-control"
-              value={formData.timezone}
-              onChange={handleInputChange}
-              required
-            >
-              {TIMEZONES.map(tz => (
-                <option key={tz.value} value={tz.value}>
-                  {tz.label}
-                </option>
-              ))}
-            </select>
+            <label htmlFor="timezone">Timezone</label>
+            <div style={{
+              padding: '0.5rem 0.75rem',
+              backgroundColor: '#f5f5f5',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+              color: '#666'
+            }}>
+              {TIMEZONES.find(tz => tz.value === userTimezone)?.label || userTimezone}
+            </div>
+            <small style={{ color: '#666' }}>
+              To change timezone, update it in your profile settings
+            </small>
           </div>
 
           <div className="modal-actions">
