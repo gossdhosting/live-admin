@@ -1119,9 +1119,33 @@ function AdminSettings({ user }) {
                   </div>
                 </div>
 
-                <hr className="my-8" />
+                <div className="flex justify-end gap-3 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={fetchPaymentSettings}
+                    disabled={savingPayment}
+                  >
+                    Reset
+                  </Button>
+                  <Button type="submit" disabled={savingPayment}>
+                    {savingPayment ? 'Saving...' : 'Save Stripe Settings'}
+                  </Button>
+                </div>
+              </form>
 
-                {/* In-App Purchase (IAP) Settings */}
+              <hr className="my-8" />
+
+              {/* In-App Purchase (IAP) Settings - Separate Form */}
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {message && (
+                  <Alert className={message.includes('success') ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
+                    <AlertDescription className={message.includes('success') ? 'text-green-800' : 'text-red-800'}>
+                      {message}
+                    </AlertDescription>
+                  </Alert>
+                )}
+
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">In-App Purchase (IAP) Configuration</h3>
                   <p className="text-sm text-gray-600">
@@ -1187,17 +1211,9 @@ function AdminSettings({ user }) {
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-3 pt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={fetchPaymentSettings}
-                    disabled={savingPayment}
-                  >
-                    Reset
-                  </Button>
-                  <Button type="submit" disabled={savingPayment}>
-                    {savingPayment ? 'Saving...' : 'Save Payment Settings'}
+                <div className="flex justify-end">
+                  <Button type="submit" disabled={saving}>
+                    {saving ? 'Saving...' : 'Save IAP Settings'}
                   </Button>
                 </div>
               </form>
