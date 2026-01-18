@@ -68,51 +68,52 @@ function ScheduleStreamDialog({ channel, onClose, onScheduled }) {
     setError('');
 
     try {
-      // User enters date/time in their timezone (e.g., 2026-01-19 03:47 in Asia/Kolkata)
+      // User enters date/time in their timezone (e.g., 2026-01-19 13:57 in Asia/Kolkata)
       // We need to convert this to UTC for storage
 
       const [year, month, day] = formData.date.split('-').map(Number);
       const [hour, minute] = formData.time.split(':').map(Number);
 
-      // Create a date string in ISO format (without timezone)
-      const dateTimeString = `${formData.date}T${formData.time}:00`;
+      // Method: Find what UTC time would display as the desired local time
+      // We iterate to find the correct UTC timestamp
 
-      // Use toLocaleString to interpret this datetime AS IF it's already in the user's timezone
-      // Then convert it to UTC
+      // Start with an initial guess - assume the input is UTC
+      let testUtcTime = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
 
-      // Step 1: Create an arbitrary date (we'll use UTC midnight of the target date)
-      const utcDate = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
-
-      // Step 2: Get what time this UTC datetime appears in the user's timezone
-      const localTimeString = utcDate.toLocaleString('en-CA', {
+      // Format this UTC time in the user's timezone to see what it displays
+      const formatter = new Intl.DateTimeFormat('en-US', {
         timeZone: userTimezone,
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
         hour: '2-digit',
         minute: '2-digit',
-        second: '2-digit',
         hour12: false
       });
 
-      // Step 3: Parse the local time string to get the offset
-      const [localDatePart, localTimePart] = localTimeString.split(', ');
-      const [localYear, localMonth, localDay] = localDatePart.split('-').map(Number);
-      const [localHour, localMinute] = localTimePart.split(':').map(Number);
+      // Get what this UTC displays as in user's timezone
+      let formattedInTz = formatter.format(testUtcTime);
+      let [displayedDate, displayedTime] = formattedInTz.split(', ');
+      let [displayedMonth, displayedDay, displayedYear] = displayedDate.split('/').map(Number);
+      let [displayedHour, displayedMinute] = displayedTime.split(':').map(Number);
 
-      // Step 4: Calculate the difference in milliseconds
-      const utcTimestamp = Date.UTC(year, month - 1, day, hour, minute, 0);
-      const localTimestamp = Date.UTC(localYear, localMonth - 1, localDay, localHour, localMinute, 0);
-      const offsetMs = utcTimestamp - localTimestamp;
+      // Calculate how far off we are
+      let hourDiff = hour - displayedHour;
+      let minuteDiff = minute - displayedMinute;
+      let dayDiff = day - displayedDay;
 
-      // Step 5: Apply the offset to get the correct UTC time
-      const correctUtcTime = new Date(utcTimestamp + offsetMs);
+      // Adjust UTC by the difference (in milliseconds)
+      const adjustmentMs = (dayDiff * 24 * 60 * 60 * 1000) + (hourDiff * 60 * 60 * 1000) + (minuteDiff * 60 * 1000);
+      const correctUtcTime = new Date(testUtcTime.getTime() + adjustmentMs);
 
+      // Verify it's correct
+      const verifyFormatted = formatter.format(correctUtcTime);
       console.log('Timezone conversion:', {
         input: `${formData.date} ${formData.time}`,
         timezone: userTimezone,
         utcOutput: correctUtcTime.toISOString(),
-        verifyLocal: correctUtcTime.toLocaleString('en-US', { timeZone: userTimezone })
+        verifyDisplay: verifyFormatted,
+        adjustment: { dayDiff, hourDiff, minuteDiff, adjustmentMs }
       });
 
       // Validate future time (check against current time)
