@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
-import { Wrench, CheckCircle, XCircle, Pencil, Trash2, Plus, Lightbulb } from 'lucide-react';
+import { Wrench, CheckCircle, XCircle, Pencil, Trash2, Plus, Lightbulb, Monitor, Smartphone } from 'lucide-react';
 
 function RtmpTemplatesManager() {
   const [templates, setTemplates] = useState([]);
@@ -11,6 +11,7 @@ function RtmpTemplatesManager() {
     platform: 'custom',
     rtmp_url: '',
     stream_key: '',
+    video_orientation: '16:9', // Default to landscape
     video_bitrate: '',
     audio_bitrate: '',
     profile: '',
@@ -98,6 +99,7 @@ function RtmpTemplatesManager() {
       platform: template.platform,
       rtmp_url: template.rtmp_url,
       stream_key: template.stream_key,
+      video_orientation: template.video_orientation || '16:9',
     });
     setEditingId(template.id);
     setShowAddForm(true);
@@ -136,6 +138,7 @@ function RtmpTemplatesManager() {
       platform: 'custom',
       rtmp_url: '',
       stream_key: '',
+      video_orientation: '16:9',
       video_bitrate: '',
       audio_bitrate: '',
       profile: '',
@@ -248,6 +251,66 @@ function RtmpTemplatesManager() {
               placeholder="Your stream key"
               required
             />
+          </div>
+
+          <div className="form-group">
+            <label>Video Orientation</label>
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <button
+                type="button"
+                onClick={() => setFormData(prev => ({ ...prev, video_orientation: '16:9' }))}
+                style={{
+                  flex: 1,
+                  padding: '1rem',
+                  border: formData.video_orientation === '16:9' ? '2px solid #3498db' : '1px solid #ddd',
+                  backgroundColor: formData.video_orientation === '16:9' ? '#ebf5fb' : '#fff',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  transition: 'all 0.2s',
+                }}
+              >
+                <Monitor className="w-8 h-8" style={{ color: formData.video_orientation === '16:9' ? '#3498db' : '#7f8c8d' }} />
+                <span style={{ fontWeight: formData.video_orientation === '16:9' ? '600' : '400', color: formData.video_orientation === '16:9' ? '#3498db' : '#2c3e50' }}>
+                  Landscape (16:9)
+                </span>
+                <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
+                  YouTube, Twitch, Facebook
+                </small>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFormData(prev => ({ ...prev, video_orientation: '9:16' }))}
+                style={{
+                  flex: 1,
+                  padding: '1rem',
+                  border: formData.video_orientation === '9:16' ? '2px solid #3498db' : '1px solid #ddd',
+                  backgroundColor: formData.video_orientation === '9:16' ? '#ebf5fb' : '#fff',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  transition: 'all 0.2s',
+                }}
+              >
+                <Smartphone className="w-8 h-8" style={{ color: formData.video_orientation === '9:16' ? '#3498db' : '#7f8c8d' }} />
+                <span style={{ fontWeight: formData.video_orientation === '9:16' ? '600' : '400', color: formData.video_orientation === '9:16' ? '#3498db' : '#2c3e50' }}>
+                  Portrait (9:16)
+                </span>
+                <small style={{ color: '#7f8c8d', fontSize: '0.85rem' }}>
+                  Instagram, TikTok, Stories
+                </small>
+              </button>
+            </div>
+            <small style={{ color: '#7f8c8d', fontSize: '0.85rem', display: 'block', marginTop: '0.5rem' }}>
+              Choose the aspect ratio for your target platform. Portrait mode (9:16) is optimized for mobile-first platforms like Instagram and TikTok.
+            </small>
           </div>
 
           <div style={{ marginTop: '1.5rem', display: 'flex', gap: '0.75rem' }}>
