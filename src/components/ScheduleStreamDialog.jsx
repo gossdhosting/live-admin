@@ -114,7 +114,7 @@ function ScheduleStreamDialog({ channel, onClose, onScheduled }) {
       // Convert local time to UTC using the robust method
       const correctUtcTime = localToUtc(formData.date, formData.time, tz);
 
-      // Debug logging
+      // Debug logging - verify the conversion worked correctly
       const verifyInTz = correctUtcTime.toLocaleString('en-US', {
         timeZone: tz,
         year: 'numeric',
@@ -126,13 +126,12 @@ function ScheduleStreamDialog({ channel, onClose, onScheduled }) {
         hour12: false
       });
 
-      console.log('Timezone conversion:', {
-        inputDate: formData.date,
-        inputTime: formData.time,
+      console.log('✅ Timezone conversion:', {
+        input: `${formData.date} ${formData.time}`,
         timezone: tz,
-        utcIsoString: correctUtcTime.toISOString(),
-        verifyBackInTz: verifyInTz,
-        shouldMatch: `${formData.date} ${formData.time}`
+        utcResult: correctUtcTime.toISOString(),
+        verifyBackToTz: verifyInTz,
+        conversionCorrect: verifyInTz.includes(formData.time)
       });
 
       // Validate future time (check against current time)
