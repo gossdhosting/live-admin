@@ -90,8 +90,10 @@ function ScheduleStreamDialog({ channel, onClose, onScheduled }) {
       p[type] = parseInt(value, 10);
     });
 
+    // IMPORTANT: formatToParts returns month as 1-12, but Date.UTC expects 0-11
+    // So we need to subtract 1 from the month when creating the Date
     // 3. Create a Date object from the Timezone parts, treating them as UTC
-    const tzAsUtc = new Date(Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second));
+    const tzAsUtc = new Date(Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second || 0));
 
     // 4. Calculate the offset (difference) between the TZ Wall Clock time and Naive UTC
     const diff = tzAsUtc.getTime() - naiveUtc.getTime();
@@ -114,11 +116,25 @@ function ScheduleStreamDialog({ channel, onClose, onScheduled }) {
       // Convert local time to UTC using the robust method
       const correctUtcTime = localToUtc(formData.date, formData.time, tz);
 
+      // Debug logging
+      const verifyInTz = correctUtcTime.toLocaleString('en-US', {
+        timeZone: tz,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      });
+
       console.log('Timezone conversion:', {
-        input: `${formData.date} ${formData.time}`,
+        inputDate: formData.date,
+        inputTime: formData.time,
         timezone: tz,
-        utcOutput: correctUtcTime.toISOString(),
-        verifyDisplay: correctUtcTime.toLocaleString('en-US', { timeZone: tz })
+        utcIsoString: correctUtcTime.toISOString(),
+        verifyBackInTz: verifyInTz,
+        shouldMatch: `${formData.date} ${formData.time}`
       });
 
       // Validate future time (check against current time)
