@@ -62,58 +62,63 @@ function ScheduleStreamDialog({ channel, onClose, onScheduled }) {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  // Convert local date/time in a specific timezone to UTC
+  const localToUtc = (dateStr, timeStr, timezone) => {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const [hour, minute] = timeStr.split(':').map(Number);
+
+    // 1. Create a "Naive" UTC date - treat user's input as if it were UTC
+    const naiveUtc = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
+
+    // 2. Format this Naive UTC date into the Target Timezone using formatToParts
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: timezone,
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+      hour12: false
+    });
+
+    const parts = formatter.formatToParts(naiveUtc);
+
+    // Extract the parts into a key-value object
+    const p = {};
+    parts.forEach(({ type, value }) => {
+      p[type] = parseInt(value, 10);
+    });
+
+    // 3. Create a Date object from the Timezone parts, treating them as UTC
+    const tzAsUtc = new Date(Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second));
+
+    // 4. Calculate the offset (difference) between the TZ Wall Clock time and Naive UTC
+    const diff = tzAsUtc.getTime() - naiveUtc.getTime();
+
+    // 5. Apply the inverse of that offset to get the true UTC
+    const correctUtcTime = new Date(naiveUtc.getTime() - diff);
+
+    return correctUtcTime;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
-      // User enters date/time in their timezone (e.g., 2026-01-19 13:57 in Asia/Kolkata)
-      // We need to convert this to UTC for storage
+      // Ensure timezone is valid, fallback to UTC if missing
+      const tz = userTimezone || 'UTC';
 
-      const [year, month, day] = formData.date.split('-').map(Number);
-      const [hour, minute] = formData.time.split(':').map(Number);
+      // Convert local time to UTC using the robust method
+      const correctUtcTime = localToUtc(formData.date, formData.time, tz);
 
-      // Method: Find what UTC time would display as the desired local time
-      // We iterate to find the correct UTC timestamp
-
-      // Start with an initial guess - assume the input is UTC
-      let testUtcTime = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
-
-      // Format this UTC time in the user's timezone to see what it displays
-      const formatter = new Intl.DateTimeFormat('en-US', {
-        timeZone: userTimezone,
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-      });
-
-      // Get what this UTC displays as in user's timezone
-      let formattedInTz = formatter.format(testUtcTime);
-      let [displayedDate, displayedTime] = formattedInTz.split(', ');
-      let [displayedMonth, displayedDay, displayedYear] = displayedDate.split('/').map(Number);
-      let [displayedHour, displayedMinute] = displayedTime.split(':').map(Number);
-
-      // Calculate how far off we are
-      let hourDiff = hour - displayedHour;
-      let minuteDiff = minute - displayedMinute;
-      let dayDiff = day - displayedDay;
-
-      // Adjust UTC by the difference (in milliseconds)
-      const adjustmentMs = (dayDiff * 24 * 60 * 60 * 1000) + (hourDiff * 60 * 60 * 1000) + (minuteDiff * 60 * 1000);
-      const correctUtcTime = new Date(testUtcTime.getTime() + adjustmentMs);
-
-      // Verify it's correct
-      const verifyFormatted = formatter.format(correctUtcTime);
       console.log('Timezone conversion:', {
         input: `${formData.date} ${formData.time}`,
-        timezone: userTimezone,
+        timezone: tz,
         utcOutput: correctUtcTime.toISOString(),
-        verifyDisplay: verifyFormatted,
-        adjustment: { dayDiff, hourDiff, minuteDiff, adjustmentMs }
+        verifyDisplay: correctUtcTime.toLocaleString('en-US', { timeZone: tz })
       });
 
       // Validate future time (check against current time)
@@ -127,14 +132,14 @@ function ScheduleStreamDialog({ channel, onClose, onScheduled }) {
       const payload = {
         channel_id: channel.id,
         scheduled_start_time: correctUtcTime.toISOString(),
-        timezone: userTimezone,
+        timezone: tz,
       };
 
       if (scheduledStream) {
         // Update existing schedule
         await api.put(`/scheduled-streams/${scheduledStream.id}`, {
           scheduled_start_time: correctUtcTime.toISOString(),
-          timezone: userTimezone,
+          timezone: tz,
         });
       } else {
         // Create new schedule
@@ -144,6 +149,7 @@ function ScheduleStreamDialog({ channel, onClose, onScheduled }) {
       onScheduled && onScheduled();
       onClose();
     } catch (error) {
+      console.error('Schedule stream error:', error);
       setError(error.response?.data?.error || 'Failed to schedule stream');
       setLoading(false);
     }
