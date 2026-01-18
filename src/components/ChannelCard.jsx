@@ -746,6 +746,7 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
               {hasSchedule && (
                 <Badge variant="secondary" className="text-xs font-medium">
                   📅 Scheduled: {new Date(channel.scheduled_stream.scheduled_start_time).toLocaleString('en-US', {
+                    timeZone: channel.scheduled_stream.timezone || 'UTC',
                     dateStyle: 'short',
                     timeStyle: 'short'
                   })}
