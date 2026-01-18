@@ -11,7 +11,18 @@ import { Button } from '../components/ui/button';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { Label } from '../components/ui/label';
 import { Input } from '../components/ui/input';
-import { User, Lock, Radio, FileText, Globe, Image as ImageIcon } from 'lucide-react';
+import { User, Lock, Radio, FileText, Globe, Image as ImageIcon, Trash2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '../components/ui/alert-dialog';
 import { TIMEZONES } from '../constants/timezones';
 
 function Settings({ user }) {
@@ -44,6 +55,11 @@ function Settings({ user }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [savingTimezone, setSavingTimezone] = useState(false);
   const [timezoneMessage, setTimezoneMessage] = useState('');
+
+  // Delete account state
+  const [deletingAccount, setDeletingAccount] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   // Refs for cleanup
   const messageTimeoutRef = useRef(null);
@@ -279,6 +295,27 @@ function Settings({ user }) {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText !== 'DELETE') {
+      return;
+    }
+
+    setDeletingAccount(true);
+
+    try {
+      await api.delete('/users/me');
+
+      // Clear local storage and redirect to login
+      localStorage.removeItem('token');
+      window.location.href = '/login?message=account_deleted';
+    } catch (error) {
+      setProfileMessage(error.response?.data?.error || 'Failed to delete account');
+      setDeletingAccount(false);
+      setDeleteDialogOpen(false);
+      setDeleteConfirmText('');
+    }
+  };
+
   if (loading) {
     return <div className="flex items-center justify-center p-8">Loading settings...</div>;
   }
@@ -418,6 +455,70 @@ function Settings({ user }) {
                   </AlertDescription>
                 </Alert>
               </form>
+
+              {/* Delete Account Section */}
+              <div className="mt-12 pt-8 border-t border-red-200">
+                <h3 className="text-lg font-semibold text-red-600 flex items-center gap-2 mb-4">
+                  <Trash2 className="w-5 h-5" />
+                  Delete Account
+                </h3>
+                <Alert className="border-red-200 bg-red-50 mb-4">
+                  <AlertDescription className="text-red-800">
+                    <strong>Warning:</strong> Deleting your account is permanent and cannot be undone. This will:
+                    <ul className="list-disc list-inside mt-2 space-y-1">
+                      <li>Stop all running streams immediately</li>
+                      <li>Delete all your channels and their configurations</li>
+                      <li>Delete all your uploaded media files</li>
+                      <li>Delete your watermarks and settings</li>
+                      <li>Remove all platform connections</li>
+                    </ul>
+                  </AlertDescription>
+                </Alert>
+
+                <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" className="gap-2">
+                      <Trash2 className="w-4 h-4" />
+                      Delete My Account
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="text-red-600">Delete Account Permanently?</AlertDialogTitle>
+                      <AlertDialogDescription className="space-y-4">
+                        <p>
+                          This action cannot be undone. All your data, including channels, media files,
+                          and settings will be permanently deleted.
+                        </p>
+                        <div className="space-y-2">
+                          <Label htmlFor="deleteConfirm">
+                            Type <strong>DELETE</strong> to confirm:
+                          </Label>
+                          <Input
+                            id="deleteConfirm"
+                            value={deleteConfirmText}
+                            onChange={(e) => setDeleteConfirmText(e.target.value)}
+                            placeholder="Type DELETE to confirm"
+                            className="border-red-300 focus:border-red-500"
+                          />
+                        </div>
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel onClick={() => setDeleteConfirmText('')}>
+                        Cancel
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDeleteAccount}
+                        disabled={deleteConfirmText !== 'DELETE' || deletingAccount}
+                        className="bg-red-600 hover:bg-red-700"
+                      >
+                        {deletingAccount ? 'Deleting...' : 'Delete Account Forever'}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
             </TabsContent>
 
             <TabsContent value="password" className="mt-6">
