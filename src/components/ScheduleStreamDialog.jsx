@@ -64,17 +64,20 @@ function ScheduleStreamDialog({ channel, onClose, onScheduled }) {
 
   // Convert local date/time in a specific timezone to UTC
   const localToUtc = (dateStr, timeStr, timezone) => {
-    // Strategy: Use toLocaleString to find what UTC time corresponds to the desired local time
-
-    // Step 1: Start with the user's input as a naive date
+    // Parse the user's input
     const [year, month, day] = dateStr.split('-').map(Number);
     const [hour, minute] = timeStr.split(':').map(Number);
 
-    // Step 2: Create a date object representing this time in UTC
-    let utcGuess = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
+    // Create an ISO string representing the local time
+    const isoString = `${dateStr}T${timeStr}:00`;
 
-    // Step 3: See what this UTC time shows as in the target timezone
-    const formatter = new Intl.DateTimeFormat('en-CA', {
+    // Get the offset for this timezone at this date/time
+    // We'll use a two-step process:
+    // 1. Create a date assuming UTC
+    const testDate = new Date(`${isoString}Z`);
+
+    // 2. Format it in the target timezone and parse it back
+    const formatter = new Intl.DateTimeFormat('sv-SE', {
       timeZone: timezone,
       year: 'numeric',
       month: '2-digit',
@@ -85,18 +88,16 @@ function ScheduleStreamDialog({ channel, onClose, onScheduled }) {
       hour12: false
     });
 
-    const displayedInTz = formatter.format(utcGuess);
-    const [displayedDate, displayedTime] = displayedInTz.split(', ');
-    const [dy, dm, dd] = displayedDate.split('-').map(Number);
-    const [dh, dmin] = displayedTime.split(':').map(Number);
+    // Get how this UTC time displays in the target timezone
+    const formattedInTz = formatter.format(testDate).replace(' ', 'T') + 'Z';
+    const parsedBack = new Date(formattedInTz);
 
-    // Step 4: Calculate the difference
-    const displayedUtc = Date.UTC(dy, dm - 1, dd, dh, dmin, 0);
-    const targetUtc = Date.UTC(year, month - 1, day, hour, minute, 0);
-    const diff = displayedUtc - targetUtc;
+    // Calculate the offset
+    const offset = testDate.getTime() - parsedBack.getTime();
 
-    // Step 5: Adjust our guess
-    const correctUtc = new Date(utcGuess.getTime() - diff);
+    // Now apply this offset to get the correct UTC time
+    const localAsUtc = new Date(`${isoString}Z`);
+    const correctUtc = new Date(localAsUtc.getTime() - offset);
 
     return correctUtc;
   };
