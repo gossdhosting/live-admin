@@ -64,40 +64,35 @@ function ScheduleStreamDialog({ channel, onClose, onScheduled }) {
 
   // Convert local date/time in a specific timezone to UTC
   const localToUtc = (dateStr, timeStr, timezone) => {
-    // Parse the user's input
+    // Parse user input
     const [year, month, day] = dateStr.split('-').map(Number);
     const [hour, minute] = timeStr.split(':').map(Number);
 
-    // Create an ISO string representing the local time
-    const isoString = `${dateStr}T${timeStr}:00`;
+    // Create a reference UTC date
+    const referenceUtc = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
 
-    // Get the offset for this timezone at this date/time
-    // We'll use a two-step process:
-    // 1. Create a date assuming UTC
-    const testDate = new Date(`${isoString}Z`);
-
-    // 2. Format it in the target timezone and parse it back
-    const formatter = new Intl.DateTimeFormat('sv-SE', {
+    // See what 12:00 UTC shows as in the target timezone
+    const formatter = new Intl.DateTimeFormat('en-US', {
       timeZone: timezone,
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
       hour: '2-digit',
       minute: '2-digit',
-      second: '2-digit',
       hour12: false
     });
 
-    // Get how this UTC time displays in the target timezone
-    const formattedInTz = formatter.format(testDate).replace(' ', 'T') + 'Z';
-    const parsedBack = new Date(formattedInTz);
+    const timeInTz = formatter.format(referenceUtc);
+    const [tzHour, tzMinute] = timeInTz.split(':').map(s => parseInt(s.replace(/\D/g, '')));
 
-    // Calculate the offset
-    const offset = testDate.getTime() - parsedBack.getTime();
+    // Calculate timezone offset in minutes
+    // If 12:00 UTC shows as 17:30 in TZ, offset is +330 minutes (5.5 hours)
+    const offsetMinutes = (tzHour * 60 + tzMinute) - (12 * 60);
 
-    // Now apply this offset to get the correct UTC time
-    const localAsUtc = new Date(`${isoString}Z`);
-    const correctUtc = new Date(localAsUtc.getTime() - offset);
+    // User wants ${hour}:${minute} in their timezone
+    // To get UTC, subtract the offset
+    const utcHour = hour - Math.floor(offsetMinutes / 60);
+    const utcMinute = minute - (offsetMinutes % 60);
+
+    // Create the correct UTC date
+    const correctUtc = new Date(Date.UTC(year, month - 1, day, utcHour, utcMinute, 0));
 
     return correctUtc;
   };
