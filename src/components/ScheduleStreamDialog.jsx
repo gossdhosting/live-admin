@@ -34,19 +34,38 @@ function ScheduleStreamDialog({ channel, onClose, onScheduled }) {
       const response = await api.get(`/scheduled-streams/channel/${channel.id}/active`);
       if (response.data.schedule) {
         setScheduledStream(response.data.schedule);
-        // Parse scheduled time in the user's timezone
-        const scheduledTime = new Date(response.data.schedule.scheduled_start_time);
-        // Convert to user's timezone for display
-        const tzTime = scheduledTime.toLocaleString('en-CA', {
-          timeZone: response.data.schedule.timezone,
+
+        // Parse scheduled time (stored as UTC in database)
+        const scheduledTimeUtc = new Date(response.data.schedule.scheduled_start_time);
+        const tz = response.data.schedule.timezone;
+
+        console.log('📥 Loading scheduled stream:', {
+          utcTime: scheduledTimeUtc.toISOString(),
+          timezone: tz
+        });
+
+        // Convert UTC to the user's timezone using Intl API
+        const formatter = new Intl.DateTimeFormat('en-CA', {
+          timeZone: tz,
           year: 'numeric',
           month: '2-digit',
           day: '2-digit',
           hour: '2-digit',
           minute: '2-digit',
+          second: '2-digit',
           hour12: false
         });
-        const [dateStr, timeStr] = tzTime.split(', ');
+
+        const tzTime = formatter.format(scheduledTimeUtc); // e.g., "2026-01-19, 02:18:00"
+        const [dateStr, fullTimeStr] = tzTime.split(', ');
+        const timeStr = fullTimeStr.substring(0, 5); // Get just HH:MM from HH:MM:SS
+
+        console.log('📥 Converted to timezone:', {
+          dateStr,
+          timeStr,
+          fullDisplay: `${dateStr} ${timeStr}`
+        });
+
         setFormData({
           date: dateStr,
           time: timeStr,
