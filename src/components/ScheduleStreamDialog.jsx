@@ -64,44 +64,41 @@ function ScheduleStreamDialog({ channel, onClose, onScheduled }) {
 
   // Convert local date/time in a specific timezone to UTC
   const localToUtc = (dateStr, timeStr, timezone) => {
+    // Strategy: Use toLocaleString to find what UTC time corresponds to the desired local time
+
+    // Step 1: Start with the user's input as a naive date
     const [year, month, day] = dateStr.split('-').map(Number);
     const [hour, minute] = timeStr.split(':').map(Number);
 
-    // 1. Create a "Naive" UTC date - treat user's input as if it were UTC
-    const naiveUtc = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
+    // Step 2: Create a date object representing this time in UTC
+    let utcGuess = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
 
-    // 2. Format this Naive UTC date into the Target Timezone using formatToParts
-    const formatter = new Intl.DateTimeFormat('en-US', {
+    // Step 3: See what this UTC time shows as in the target timezone
+    const formatter = new Intl.DateTimeFormat('en-CA', {
       timeZone: timezone,
       year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-      second: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
       hour12: false
     });
 
-    const parts = formatter.formatToParts(naiveUtc);
+    const displayedInTz = formatter.format(utcGuess);
+    const [displayedDate, displayedTime] = displayedInTz.split(', ');
+    const [dy, dm, dd] = displayedDate.split('-').map(Number);
+    const [dh, dmin] = displayedTime.split(':').map(Number);
 
-    // Extract the parts into a key-value object
-    const p = {};
-    parts.forEach(({ type, value }) => {
-      p[type] = parseInt(value, 10);
-    });
+    // Step 4: Calculate the difference
+    const displayedUtc = Date.UTC(dy, dm - 1, dd, dh, dmin, 0);
+    const targetUtc = Date.UTC(year, month - 1, day, hour, minute, 0);
+    const diff = displayedUtc - targetUtc;
 
-    // IMPORTANT: formatToParts returns month as 1-12, but Date.UTC expects 0-11
-    // So we need to subtract 1 from the month when creating the Date
-    // 3. Create a Date object from the Timezone parts, treating them as UTC
-    const tzAsUtc = new Date(Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second || 0));
+    // Step 5: Adjust our guess
+    const correctUtc = new Date(utcGuess.getTime() - diff);
 
-    // 4. Calculate the offset (difference) between the TZ Wall Clock time and Naive UTC
-    const diff = tzAsUtc.getTime() - naiveUtc.getTime();
-
-    // 5. Apply the inverse of that offset to get the true UTC
-    const correctUtcTime = new Date(naiveUtc.getTime() - diff);
-
-    return correctUtcTime;
+    return correctUtc;
   };
 
   const handleSubmit = async (e) => {
