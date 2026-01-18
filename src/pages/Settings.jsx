@@ -84,6 +84,7 @@ function Settings({ user }) {
         facebook_connected: 'Facebook account connected successfully!',
         youtube_connected: 'YouTube account connected successfully!',
         twitch_connected: 'Twitch account connected successfully!',
+        kick_connected: 'Kick account connected successfully!',
       };
       setMessage(successMessages[success] || 'Account connected successfully!');
       setTimeout(() => setMessage(''), 5000);
@@ -99,6 +100,7 @@ function Settings({ user }) {
         facebook_auth_failed: 'Failed to connect Facebook account',
         youtube_auth_failed: 'Failed to connect YouTube account',
         twitch_auth_failed: 'Failed to connect Twitch account',
+        kick_auth_failed: 'Failed to connect Kick account',
       };
       setMessage(errorMessages[error] || 'Authentication failed');
       setTimeout(() => setMessage(''), 5000);
