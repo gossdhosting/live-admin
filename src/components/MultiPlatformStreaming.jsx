@@ -4,7 +4,7 @@ import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Alert, AlertDescription } from './ui/alert';
-import { Facebook, Youtube, Twitch, Wrench, Radio, Circle, CheckCircle, Lightbulb, AlertTriangle } from 'lucide-react';
+import { Facebook, Youtube, Twitch, Wrench, Radio, Circle, CheckCircle, Lightbulb, AlertTriangle, Zap } from 'lucide-react';
 import { useAlertDialog } from './ui/alert-dialog-modern';
 
 function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDescription, channelStatus, onPlatformsChange }) {
@@ -102,6 +102,11 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
           channelId,
           title,
         });
+      } else if (platform === 'kick') {
+        response = await api.post('/platforms/kick/setup-stream', {
+          channelId,
+          title,
+        });
       }
 
       if (response?.data?.success) {
@@ -192,6 +197,7 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
       facebook: Facebook,
       youtube: Youtube,
       twitch: Twitch,
+      kick: Zap,
       custom: Wrench,
     };
     return iconMap[platform] || Radio;
@@ -202,6 +208,7 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
       facebook: 'bg-blue-600 hover:bg-blue-700 text-white',
       youtube: 'bg-red-600 hover:bg-red-700 text-white',
       twitch: 'bg-purple-600 hover:bg-purple-700 text-white',
+      kick: 'bg-green-500 hover:bg-green-600 text-white',
       custom: 'bg-gray-600 hover:bg-gray-700 text-white',
     };
     return classes[platform] || 'bg-gray-600 hover:bg-gray-700 text-white';
@@ -212,6 +219,7 @@ function MultiPlatformStreaming({ channelId, channelName, streamTitle, streamDes
       facebook: 'border-blue-200',
       youtube: 'border-red-200',
       twitch: 'border-purple-200',
+      kick: 'border-green-200',
       custom: 'border-gray-200',
     };
     return borders[platform] || 'border-gray-200';
