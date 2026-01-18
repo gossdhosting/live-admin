@@ -64,35 +64,40 @@ function ScheduleStreamDialog({ channel, onClose, onScheduled }) {
 
   // Convert local date/time in a specific timezone to UTC
   const localToUtc = (dateStr, timeStr, timezone) => {
-    // Parse user input
+    // Parse user input: dateStr is "YYYY-MM-DD", timeStr is "HH:MM"
     const [year, month, day] = dateStr.split('-').map(Number);
     const [hour, minute] = timeStr.split(':').map(Number);
 
-    // Create a reference UTC date
-    const referenceUtc = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+    // Strategy: Create a date in UTC, see what time it shows in the target timezone,
+    // then adjust to find the UTC time that would display as the desired local time
 
-    // See what 12:00 UTC shows as in the target timezone
-    const formatter = new Intl.DateTimeFormat('en-US', {
+    // Start with an initial guess: treat the input as if it were UTC
+    let guessUtc = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
+
+    // Format this UTC time in the target timezone to see what it displays as
+    const formatter = new Intl.DateTimeFormat('en-CA', {
       timeZone: timezone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
       hour: '2-digit',
       minute: '2-digit',
+      second: '2-digit',
       hour12: false
     });
 
-    const timeInTz = formatter.format(referenceUtc);
-    const [tzHour, tzMinute] = timeInTz.split(':').map(s => parseInt(s.replace(/\D/g, '')));
+    const displayedInTz = formatter.format(guessUtc); // e.g., "2026-01-18, 23:30:00"
+    const [displayedDate, displayedTime] = displayedInTz.split(', ');
+    const [displayedYear, displayedMonth, displayedDay] = displayedDate.split('-').map(Number);
+    const [displayedHour, displayedMinute] = displayedTime.split(':').map(Number);
 
-    // Calculate timezone offset in minutes
-    // If 12:00 UTC shows as 17:30 in TZ, offset is +330 minutes (5.5 hours)
-    const offsetMinutes = (tzHour * 60 + tzMinute) - (12 * 60);
+    // Calculate the difference between what we want and what we got
+    const wantedMinutes = year * 525600 + month * 43800 + day * 1440 + hour * 60 + minute;
+    const displayedMinutes = displayedYear * 525600 + displayedMonth * 43800 + displayedDay * 1440 + displayedHour * 60 + displayedMinute;
+    const diffMinutes = wantedMinutes - displayedMinutes;
 
-    // User wants ${hour}:${minute} in their timezone
-    // To get UTC, subtract the offset
-    const utcHour = hour - Math.floor(offsetMinutes / 60);
-    const utcMinute = minute - (offsetMinutes % 60);
-
-    // Create the correct UTC date
-    const correctUtc = new Date(Date.UTC(year, month - 1, day, utcHour, utcMinute, 0));
+    // Adjust the UTC time by the difference
+    const correctUtc = new Date(guessUtc.getTime() + diffMinutes * 60 * 1000);
 
     return correctUtc;
   };
