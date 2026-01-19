@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/api';
-import RtmpTemplatesManager from '../components/RtmpTemplatesManager';
-import PlatformConnections from '../components/PlatformConnections';
 import WatermarkSettingsUser from '../components/WatermarkSettingsUser';
 import StreamPreview from '../components/StreamPreview';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -11,7 +9,7 @@ import { Button } from '../components/ui/button';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { Label } from '../components/ui/label';
 import { Input } from '../components/ui/input';
-import { User, Lock, Radio, FileText, Globe, Image as ImageIcon, Trash2 } from 'lucide-react';
+import { User, Lock, Image as ImageIcon, Trash2 } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,7 +31,7 @@ function Settings({ user }) {
   const [savingUserSettings, setSavingUserSettings] = useState(false);
   const [message, setMessage] = useState('');
   const [userSettingsMessage, setUserSettingsMessage] = useState('');
-  const [activeTab, setActiveTab] = useState('profile'); // profile, password, rtmp, watermark, platforms
+  const [activeTab, setActiveTab] = useState('profile'); // profile, password, watermark
 
   // Password change state
   const [passwordData, setPasswordData] = useState({
@@ -69,44 +67,12 @@ function Settings({ user }) {
     fetchUserSettings();
     fetchUserProfile();
 
-    // Check for URL parameters (tab selection, success/error messages from OAuth)
+    // Check for URL parameters (tab selection)
     const params = new URLSearchParams(location.search);
     const tab = params.get('tab');
-    const success = params.get('success');
-    const error = params.get('error');
 
     if (tab) {
       setActiveTab(tab);
-    }
-
-    if (success) {
-      const successMessages = {
-        facebook_connected: 'Facebook account connected successfully!',
-        youtube_connected: 'YouTube account connected successfully!',
-        twitch_connected: 'Twitch account connected successfully!',
-      };
-      setMessage(successMessages[success] || 'Account connected successfully!');
-      setTimeout(() => setMessage(''), 5000);
-
-      // If this is a popup window (OAuth callback), close it
-      if (window.opener) {
-        setTimeout(() => window.close(), 1000);
-      }
-    }
-
-    if (error) {
-      const errorMessages = {
-        facebook_auth_failed: 'Failed to connect Facebook account',
-        youtube_auth_failed: 'Failed to connect YouTube account',
-        twitch_auth_failed: 'Failed to connect Twitch account',
-      };
-      setMessage(errorMessages[error] || 'Authentication failed');
-      setTimeout(() => setMessage(''), 5000);
-
-      // If this is a popup window (OAuth callback), close it
-      if (window.opener) {
-        setTimeout(() => window.close(), 1000);
-      }
     }
 
     return () => {
@@ -332,7 +298,7 @@ function Settings({ user }) {
 
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-5 h-auto">
+            <TabsList className="grid w-full grid-cols-3 h-auto">
               <TabsTrigger value="profile" className="text-xs sm:text-sm gap-1.5 py-2">
                 <User className="w-4 h-4" />
                 <span className="hidden sm:inline">Profile</span>
@@ -341,17 +307,9 @@ function Settings({ user }) {
                 <Lock className="w-4 h-4" />
                 <span className="hidden sm:inline">Password</span>
               </TabsTrigger>
-              <TabsTrigger value="rtmp" className="text-xs sm:text-sm gap-1.5 py-2">
-                <Radio className="w-4 h-4" />
-                <span className="hidden sm:inline">RTMP</span>
-              </TabsTrigger>
               <TabsTrigger value="watermark" className="text-xs sm:text-sm gap-1.5 py-2">
                 <ImageIcon className="w-4 h-4" />
                 <span className="hidden sm:inline">Watermark</span>
-              </TabsTrigger>
-              <TabsTrigger value="platforms" className="text-xs sm:text-sm gap-1.5 py-2">
-                <Globe className="w-4 h-4" />
-                <span className="hidden sm:inline">Platforms</span>
               </TabsTrigger>
             </TabsList>
 
@@ -618,10 +576,6 @@ function Settings({ user }) {
               )}
             </TabsContent>
 
-            <TabsContent value="rtmp" className="mt-6">
-              <RtmpTemplatesManager />
-            </TabsContent>
-
             <TabsContent value="watermark" className="mt-6">
               {/* Watermark Settings Section */}
               <WatermarkSettingsUser onUpdate={fetchUserSettings} />
@@ -806,10 +760,6 @@ function Settings({ user }) {
                 </p>
               </div>
               </div>
-            </TabsContent>
-
-            <TabsContent value="platforms" className="mt-6">
-              <PlatformConnections />
             </TabsContent>
           </Tabs>
         </CardContent>

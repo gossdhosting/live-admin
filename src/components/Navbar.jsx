@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { LayoutDashboard, Clapperboard, Gem, Settings, Crown, LogOut, ArrowUpCircle, CreditCard } from 'lucide-react';
+import { LayoutDashboard, Clapperboard, Gem, Settings, Crown, LogOut, ArrowUpCircle, CreditCard, Globe } from 'lucide-react';
 import logoSvg from '/logo.svg';
 
 function Navbar({ user, onLogout }) {
@@ -36,6 +36,7 @@ function Navbar({ user, onLogout }) {
   const navLinks = [
     { path: '/', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/media', label: 'Media', icon: Clapperboard },
+    { path: '/platforms', label: 'Platforms', icon: Globe },
     { path: '/plans', label: 'Plans', icon: Gem },
     { path: '/settings', label: 'Settings', icon: Settings },
     ...(user && user.role === 'admin' ? [
