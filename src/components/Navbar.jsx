@@ -52,7 +52,6 @@ function Navbar({ user, onLogout }) {
     { path: '/media', label: 'Media', icon: Clapperboard },
     { path: '/platforms', label: 'Platforms', icon: Globe },
     { path: '/plans', label: 'Plans', icon: Gem },
-    { path: '/help', label: 'Help', icon: HelpCircle },
     { path: '/settings', label: 'Settings', icon: Settings },
     ...(user && user.role === 'admin' ? [
       { path: '/admin', label: 'Admin', icon: Crown },
@@ -151,6 +150,18 @@ function Navbar({ user, onLogout }) {
                         {user.plan_name || 'Free'}
                       </Badge>
                     </div>
+                  </div>
+
+                  {/* Help Menu Item */}
+                  <div className="px-2 py-2 border-b border-gray-100">
+                    <Link
+                      to="/help"
+                      onClick={() => setAccountDropdownOpen(false)}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                    >
+                      <HelpCircle className="w-4 h-4" />
+                      Help
+                    </Link>
                   </div>
 
                   {/* Logout Button */}
@@ -258,13 +269,20 @@ function Navbar({ user, onLogout }) {
           })}
         </div>
 
+        <Link to="/help" onClick={() => setMobileMenuOpen(false)}>
+          <Button className="w-full mt-6 bg-gray-700 hover:bg-gray-600 font-semibold gap-2">
+            <HelpCircle className="w-4 h-4" />
+            Help
+          </Button>
+        </Link>
+
         <Button
           onClick={() => {
             handleLogout();
             setMobileMenuOpen(false);
           }}
           variant="destructive"
-          className="w-full mt-6 bg-red-600 hover:bg-red-700 font-semibold gap-2"
+          className="w-full mt-3 bg-red-600 hover:bg-red-700 font-semibold gap-2"
         >
           <LogOut className="w-4 h-4" />
           Logout
