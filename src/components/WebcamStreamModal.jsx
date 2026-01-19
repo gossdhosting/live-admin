@@ -425,6 +425,11 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
       // Create and send offer
       console.log('Creating SDP offer...');
       const offer = await peerConnection.createOffer();
+      console.log('Created SDP offer');
+      console.log('Full SDP offer:', offer.sdp);
+      console.log('SDP has video:', offer.sdp.includes('m=video'));
+      console.log('SDP has audio:', offer.sdp.includes('m=audio'));
+
       console.log('Setting local description...');
       await peerConnection.setLocalDescription(offer);
 
