@@ -71,19 +71,50 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
     setError('');
 
     try {
+      // Check if page is served over HTTPS (required for getUserMedia except localhost)
+      const isSecure = window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      if (!isSecure) {
+        throw new Error('Camera access requires HTTPS. Please access this page using https:// instead of http://');
+      }
+
+      // Check if getUserMedia is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Your browser does not support camera/microphone access. Please use a modern browser like Chrome, Firefox, or Edge.');
+      }
+
+      console.log('Browser supports getUserMedia');
+      console.log('Current protocol:', window.location.protocol);
+
+      // First, check if devices exist before requesting permission
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      console.log('Enumerated devices before permission:', devices);
+
+      const hasCamera = devices.some(d => d.kind === 'videoinput');
+      const hasMicrophone = devices.some(d => d.kind === 'audioinput');
+
+      console.log('Has camera:', hasCamera, 'Has microphone:', hasMicrophone);
+
+      if (!hasCamera && !hasMicrophone) {
+        throw new Error('No camera or microphone found. Please connect a device and try again.');
+      }
+
+      console.log('Requesting camera and microphone permissions...');
+
       // Request camera and microphone permissions
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
+        video: hasCamera ? {
           width: { ideal: 1280 },
           height: { ideal: 720 },
           frameRate: { ideal: 30 }
-        },
-        audio: {
+        } : false,
+        audio: hasMicrophone ? {
           echoCancellation: true,
           noiseSuppression: true,
           autoGainControl: true
-        }
+        } : false
       });
+
+      console.log('Permissions granted, stream obtained:', stream);
 
       // Store stream
       localStreamRef.current = stream;
@@ -91,12 +122,16 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
       // Display in video element
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+        await videoRef.current.play();
       }
 
-      // Get available devices
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const videoDevices = devices.filter(d => d.kind === 'videoinput');
-      const audioDevices = devices.filter(d => d.kind === 'audioinput');
+      // Get available devices again with labels now available
+      const devicesWithLabels = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devicesWithLabels.filter(d => d.kind === 'videoinput');
+      const audioDevices = devicesWithLabels.filter(d => d.kind === 'audioinput');
+
+      console.log('Available cameras:', videoDevices);
+      console.log('Available microphones:', audioDevices);
 
       setCameraDevices(videoDevices);
       setAudioDevices(audioDevices);
@@ -106,10 +141,14 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
       const currentAudioTrack = stream.getAudioTracks()[0];
 
       if (currentVideoTrack) {
-        setSelectedCamera(currentVideoTrack.getSettings().deviceId || videoDevices[0]?.deviceId || '');
+        const settings = currentVideoTrack.getSettings();
+        setSelectedCamera(settings.deviceId || videoDevices[0]?.deviceId || '');
+        console.log('Selected camera:', settings.deviceId);
       }
       if (currentAudioTrack) {
-        setSelectedAudio(currentAudioTrack.getSettings().deviceId || audioDevices[0]?.deviceId || '');
+        const settings = currentAudioTrack.getSettings();
+        setSelectedAudio(settings.deviceId || audioDevices[0]?.deviceId || '');
+        console.log('Selected microphone:', settings.deviceId);
       }
 
       setPermissionsGranted(true);
@@ -117,11 +156,30 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
     } catch (err) {
       console.error('Permission error:', err);
       if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        setPermissionError('Camera and microphone permissions denied. Please allow access in your browser settings.');
+        setPermissionError('Camera and microphone permissions denied. Please click "Allow" when prompted by your browser.');
       } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
-        setPermissionError('No camera or microphone found. Please connect a device and try again.');
+        setPermissionError('No camera or microphone found. Please connect a camera/microphone and refresh the page.');
+      } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+        setPermissionError('Camera or microphone is already in use by another application. Please close other apps and try again.');
+      } else if (err.name === 'OverconstrainedError') {
+        setPermissionError('Camera does not support the requested settings. Trying with default settings...');
+        // Retry with minimal constraints
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+          localStreamRef.current = stream;
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+            await videoRef.current.play();
+          }
+          setPermissionsGranted(true);
+          setPermissionError('');
+        } catch (retryErr) {
+          setPermissionError(`Failed to access camera/microphone: ${retryErr.message}`);
+        }
+      } else if (err.message) {
+        setPermissionError(err.message);
       } else {
-        setPermissionError(`Failed to access camera/microphone: ${err.message}`);
+        setPermissionError(`Failed to access camera/microphone: ${err.toString()}`);
       }
     }
   };
