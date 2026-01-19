@@ -77,8 +77,8 @@ function EditChannelModal({ channel, onClose, onSuccess, isOpen }) {
       return;
     }
 
-    // RTMP input type doesn't require input_url or media_file_id
-    // Stream will come from nginx-rtmp server via stream key
+    // RTMP and Webcam input types don't require input_url or media_file_id
+    // Streams will come from nginx-rtmp server via stream key
 
     setLoading(true);
 
@@ -183,6 +183,16 @@ function EditChannelModal({ channel, onClose, onSuccess, isOpen }) {
                   onChange={handleChange}
                 />
                 Custom RTMP Input (OBS/vMix/etc.)
+              </label>
+              <label className="flex items-center gap-2 mb-0">
+                <input
+                  type="radio"
+                  name="input_type"
+                  value="webcam"
+                  checked={formData.input_type === 'webcam'}
+                  onChange={handleChange}
+                />
+                Camera (Webcam/Mobile Camera)
               </label>
             </div>
             {!(userStats?.youtube_restreaming === true || userStats?.youtube_restreaming === 1) && formData.input_type === 'youtube' && (

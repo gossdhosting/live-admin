@@ -77,8 +77,8 @@ function CreateChannelModal({ onClose, onSuccess, isOpen }) {
       return;
     }
 
-    // RTMP input type doesn't require input_url or media_file_id
-    // Stream will come from nginx-rtmp server via stream key
+    // RTMP and Webcam input types don't require input_url or media_file_id
+    // Streams will come from nginx-rtmp server via stream key
 
     setLoading(true);
 
@@ -185,6 +185,16 @@ function CreateChannelModal({ onClose, onSuccess, isOpen }) {
                 />
                 Custom RTMP Input (OBS/vMix/etc.)
               </label>
+              <label className="flex items-center gap-2 mb-0">
+                <input
+                  type="radio"
+                  name="input_type"
+                  value="webcam"
+                  checked={formData.input_type === 'webcam'}
+                  onChange={handleChange}
+                />
+                Camera (Webcam/Mobile Camera)
+              </label>
             </div>
             {!(userStats?.youtube_restreaming === true || userStats?.youtube_restreaming === 1) && (
               <p className="text-xs text-slate-500 mt-1">
@@ -258,6 +268,25 @@ function CreateChannelModal({ onClose, onSuccess, isOpen }) {
                 <p className="mb-2">rtmp://panel.rexstream.net:1935/live</p>
                 <p className="font-semibold text-gray-900 mb-1">Stream Key:</p>
                 <p className="text-gray-500 italic">Will be generated after creation</p>
+              </div>
+            </div>
+          )}
+
+          {formData.input_type === 'webcam' && (
+            <div className="space-y-3 bg-green-50 border border-green-200 rounded-lg p-4">
+              <div className="flex items-start gap-2">
+                <span className="text-green-600 text-lg">📹</span>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-green-900 mb-2">
+                    Camera Streaming
+                  </p>
+                  <ul className="text-xs text-green-800 space-y-1.5">
+                    <li>• After creating this channel, click "Go Live" to start camera streaming</li>
+                    <li>• You'll need to grant camera and microphone permissions in your browser</li>
+                    <li>• Your camera feed will be instantly streamed to all connected platforms</li>
+                    <li>• Works with webcam on desktop or mobile camera on phones/tablets</li>
+                  </ul>
+                </div>
               </div>
             </div>
           )}

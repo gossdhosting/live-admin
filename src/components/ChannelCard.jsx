@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import api from '../services/api';
 import MultiPlatformStreaming from './MultiPlatformStreaming';
 import ScheduleStreamDialog from './ScheduleStreamDialog';
+import WebcamStreamModal from './WebcamStreamModal';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader } from './ui/card';
 import { Badge } from './ui/badge';
@@ -30,6 +31,7 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
   const [watermarkEnabled, setWatermarkEnabled] = useState(Boolean(channel.watermark_enabled));
   const [configuredPlatforms, setConfiguredPlatforms] = useState([]);
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
+  const [showWebcamModal, setShowWebcamModal] = useState(false);
   const isAdmin = user && user.role === 'admin';
   const { showAlert } = useAlertDialog();
 
@@ -719,61 +721,76 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
       {/* Action Buttons - Always Visible */}
       <CardContent className="pt-0 pb-3 px-6">
         <div className="flex gap-2 flex-wrap items-center">
-          {channel.status !== 'running' ? (
-            <>
-              <Button
-                onClick={handleStart}
-                disabled={loading || hasSchedule}
-                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold shadow-sm gap-2"
-                size="sm"
-                title={hasSchedule ? 'Cannot start manually - stream is scheduled' : 'Start stream'}
-              >
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4 fill-current" />}
-                <span>{loading ? 'Starting...' : 'Start'}</span>
-              </Button>
-              {canSchedule && (
-                <Button
-                  onClick={() => setShowScheduleDialog(true)}
-                  variant="outline"
-                  disabled={loading}
-                  className="font-semibold gap-2"
-                  size="sm"
-                >
-                  <Calendar className="w-4 h-4" />
-                  <span>{hasSchedule ? 'Update Schedule' : 'Schedule'}</span>
-                </Button>
-              )}
-              {hasSchedule && (
-                <Badge variant="secondary" className="text-xs font-medium">
-                  📅 Scheduled: {new Date(channel.scheduled_stream.scheduled_start_time).toLocaleString('en-US', {
-                    timeZone: channel.scheduled_stream.timezone || 'UTC',
-                    dateStyle: 'short',
-                    timeStyle: 'short'
-                  })}
-                </Badge>
-              )}
-            </>
+          {/* Webcam Channels - Show Go Live Button */}
+          {channel.input_type === 'webcam' ? (
+            <Button
+              onClick={() => setShowWebcamModal(true)}
+              className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold shadow-sm gap-2"
+              size="sm"
+            >
+              <Video className="w-4 h-4" />
+              <span>Go Live</span>
+            </Button>
           ) : (
+            /* Non-Webcam Channels - Show Start/Stop/Restart */
             <>
-              <Button
-                variant="destructive"
-                onClick={handleStop}
-                disabled={loading}
-                className="font-semibold shadow-sm gap-2"
-                size="sm"
-              >
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Square className="w-4 h-4 fill-current" />}
-                <span>{loading ? 'Stopping...' : 'Stop'}</span>
-              </Button>
-              <Button
-                onClick={handleRestart}
-                disabled={loading}
-                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold shadow-sm gap-2"
-                size="sm"
-              >
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RotateCw className="w-4 h-4" />}
-                <span>{loading ? 'Restarting...' : 'Restart'}</span>
-              </Button>
+              {channel.status !== 'running' ? (
+                <>
+                  <Button
+                    onClick={handleStart}
+                    disabled={loading || hasSchedule}
+                    className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold shadow-sm gap-2"
+                    size="sm"
+                    title={hasSchedule ? 'Cannot start manually - stream is scheduled' : 'Start stream'}
+                  >
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4 fill-current" />}
+                    <span>{loading ? 'Starting...' : 'Start'}</span>
+                  </Button>
+                  {canSchedule && (
+                    <Button
+                      onClick={() => setShowScheduleDialog(true)}
+                      variant="outline"
+                      disabled={loading}
+                      className="font-semibold gap-2"
+                      size="sm"
+                    >
+                      <Calendar className="w-4 h-4" />
+                      <span>{hasSchedule ? 'Update Schedule' : 'Schedule'}</span>
+                    </Button>
+                  )}
+                  {hasSchedule && (
+                    <Badge variant="secondary" className="text-xs font-medium">
+                      📅 Scheduled: {new Date(channel.scheduled_stream.scheduled_start_time).toLocaleString('en-US', {
+                        timeZone: channel.scheduled_stream.timezone || 'UTC',
+                        dateStyle: 'short',
+                        timeStyle: 'short'
+                      })}
+                    </Badge>
+                  )}
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="destructive"
+                    onClick={handleStop}
+                    disabled={loading}
+                    className="font-semibold shadow-sm gap-2"
+                    size="sm"
+                  >
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Square className="w-4 h-4 fill-current" />}
+                    <span>{loading ? 'Stopping...' : 'Stop'}</span>
+                  </Button>
+                  <Button
+                    onClick={handleRestart}
+                    disabled={loading}
+                    className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold shadow-sm gap-2"
+                    size="sm"
+                  >
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RotateCw className="w-4 h-4" />}
+                    <span>{loading ? 'Restarting...' : 'Restart'}</span>
+                  </Button>
+                </>
+              )}
             </>
           )}
 
@@ -881,6 +898,18 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
           channel={channel}
           onClose={() => setShowScheduleDialog(false)}
           onScheduled={() => {
+            onUpdate && onUpdate();
+          }}
+        />
+      )}
+
+      {/* Webcam Stream Modal */}
+      {showWebcamModal && (
+        <WebcamStreamModal
+          channel={channel}
+          isOpen={showWebcamModal}
+          onClose={() => setShowWebcamModal(false)}
+          onUpdate={() => {
             onUpdate && onUpdate();
           }}
         />
