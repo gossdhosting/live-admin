@@ -1,15 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { LayoutDashboard, Clapperboard, Gem, Settings, Crown, LogOut, ArrowUpCircle, CreditCard, Globe } from 'lucide-react';
+import { LayoutDashboard, Clapperboard, Gem, Settings, Crown, LogOut, ArrowUpCircle, CreditCard, Globe, ChevronDown, User } from 'lucide-react';
 import logoSvg from '/logo.svg';
 
 function Navbar({ user, onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [accountDropdownOpen, setAccountDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
   const isAdminSession = localStorage.getItem('adminToken') !== null;
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setAccountDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleLogout = () => {
     onLogout();
@@ -87,14 +101,6 @@ function Navbar({ user, onLogout }) {
                 Return to Admin
               </Button>
             )}
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-lg">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-red-500 flex items-center justify-center font-bold text-white text-sm">
-                {user.email.charAt(0).toUpperCase()}
-              </div>
-              <Badge variant="secondary" className="text-xs font-medium">
-                {user.plan_name || 'Free'}
-              </Badge>
-            </div>
             {(!user.plan_name || user.plan_name === 'Free') && (
               <Link to="/plans">
                 <Button size="sm" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 font-semibold gap-1.5 text-xs">
@@ -103,15 +109,65 @@ function Navbar({ user, onLogout }) {
                 </Button>
               </Link>
             )}
-            <Button
-              onClick={handleLogout}
-              size="sm"
-              variant="destructive"
-              className="bg-red-600 hover:bg-red-700 font-semibold gap-1.5 text-xs"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              Logout
-            </Button>
+
+            {/* Account Dropdown */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setAccountDropdownOpen(!accountDropdownOpen)}
+                className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+              >
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-red-500 flex items-center justify-center font-bold text-white text-sm">
+                  {user.email.charAt(0).toUpperCase()}
+                </div>
+                <ChevronDown className={`w-4 h-4 transition-transform ${accountDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Dropdown Menu */}
+              {accountDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                  {/* User Info */}
+                  <div className="px-4 py-3 border-b border-gray-100">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-red-500 flex items-center justify-center font-bold text-white">
+                        {user.email.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 truncate">
+                          {user.name || user.email}
+                        </p>
+                        <p className="text-xs text-gray-500 truncate">
+                          {user.email}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Plan Info */}
+                  <div className="px-4 py-3 border-b border-gray-100">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Current Plan</span>
+                      <Badge variant="secondary" className="text-xs font-medium">
+                        {user.plan_name || 'Free'}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  {/* Logout Button */}
+                  <div className="px-2 py-2">
+                    <button
+                      onClick={() => {
+                        setAccountDropdownOpen(false);
+                        handleLogout();
+                      }}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Mobile Menu Button */}
