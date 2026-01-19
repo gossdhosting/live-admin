@@ -119,49 +119,52 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
       // Store stream
       localStreamRef.current = stream;
 
-      // Display in video element
-      if (videoRef.current) {
-        console.log('Setting video srcObject...');
-        videoRef.current.srcObject = stream;
-        console.log('Video srcObject set:', videoRef.current.srcObject);
-        console.log('Video element ready state:', videoRef.current.readyState);
-        console.log('Video paused:', videoRef.current.paused);
+      // Display in video element - use a small delay to ensure DOM is ready
+      setTimeout(() => {
+        if (videoRef.current && stream.active) {
+          console.log('Setting video srcObject...');
+          videoRef.current.srcObject = stream;
+          console.log('Video srcObject set:', videoRef.current.srcObject);
+          console.log('Video element ready state:', videoRef.current.readyState);
+          console.log('Video paused:', videoRef.current.paused);
 
-        // Force video to be visible
-        videoRef.current.style.display = 'block';
+          // Force video to be visible
+          videoRef.current.style.display = 'block';
 
-        try {
-          const playPromise = videoRef.current.play();
-          console.log('Play promise created');
-          await playPromise;
-          console.log('Video playback started successfully');
-          console.log('Video dimensions:', videoRef.current.videoWidth, 'x', videoRef.current.videoHeight);
-        } catch (playErr) {
-          console.error('Failed to start video playback:', playErr);
-          console.error('Error name:', playErr.name);
-          console.error('Error message:', playErr.message);
-          // Try again without await
-          videoRef.current.play().catch(e => {
-            console.error('Retry play failed:', e);
-          });
+          try {
+            const playPromise = videoRef.current.play();
+            console.log('Play promise created');
+            playPromise.then(() => {
+              console.log('Video playback started successfully');
+              console.log('Video dimensions:', videoRef.current.videoWidth, 'x', videoRef.current.videoHeight);
+            }).catch(playErr => {
+              console.error('Failed to start video playback:', playErr);
+              console.error('Error name:', playErr.name);
+              console.error('Error message:', playErr.message);
+            });
+          } catch (e) {
+            console.error('Play error:', e);
+          }
+
+          // Add event listeners to debug
+          videoRef.current.onloadedmetadata = () => {
+            console.log('Video metadata loaded');
+            console.log('Video dimensions:', videoRef.current.videoWidth, 'x', videoRef.current.videoHeight);
+          };
+
+          videoRef.current.onplay = () => {
+            console.log('Video play event fired');
+          };
+
+          videoRef.current.onplaying = () => {
+            console.log('Video playing event fired');
+          };
+        } else {
+          console.error('videoRef.current is null or stream is not active!');
+          console.log('videoRef.current:', videoRef.current);
+          console.log('stream.active:', stream?.active);
         }
-
-        // Add event listeners to debug
-        videoRef.current.onloadedmetadata = () => {
-          console.log('Video metadata loaded');
-          console.log('Video dimensions:', videoRef.current.videoWidth, 'x', videoRef.current.videoHeight);
-        };
-
-        videoRef.current.onplay = () => {
-          console.log('Video play event fired');
-        };
-
-        videoRef.current.onplaying = () => {
-          console.log('Video playing event fired');
-        };
-      } else {
-        console.error('videoRef.current is null!');
-      }
+      }, 100); // Small delay to ensure React has mounted the element
 
       // Get available devices again with labels now available
       const devicesWithLabels = await navigator.mediaDevices.enumerateDevices();
