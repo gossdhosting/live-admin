@@ -11,6 +11,7 @@ import MediaManager from './pages/MediaManager';
 import Plans from './pages/Plans';
 import Subscriptions from './pages/Subscriptions';
 import Platforms from './pages/Platforms';
+import Help from './pages/Help';
 import Navbar from './components/Navbar';
 import api from './services/api';
 import { AlertDialogProvider } from './components/ui/alert-dialog-modern';
@@ -98,6 +99,10 @@ function App() {
           <Route
             path="/platforms"
             element={user ? <Platforms user={user} /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/help"
+            element={user ? <Help /> : <Navigate to="/login" />}
           />
         </Routes>
       </Router>

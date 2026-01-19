@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { LayoutDashboard, Clapperboard, Gem, Settings, Crown, LogOut, ArrowUpCircle, CreditCard, Globe, ChevronDown, User } from 'lucide-react';
+import { LayoutDashboard, Clapperboard, Gem, Settings, Crown, LogOut, ArrowUpCircle, CreditCard, Globe, ChevronDown, User, HelpCircle } from 'lucide-react';
 import logoSvg from '/logo.svg';
 
 function Navbar({ user, onLogout }) {
@@ -52,6 +52,7 @@ function Navbar({ user, onLogout }) {
     { path: '/media', label: 'Media', icon: Clapperboard },
     { path: '/platforms', label: 'Platforms', icon: Globe },
     { path: '/plans', label: 'Plans', icon: Gem },
+    { path: '/help', label: 'Help', icon: HelpCircle },
     { path: '/settings', label: 'Settings', icon: Settings },
     ...(user && user.role === 'admin' ? [
       { path: '/admin', label: 'Admin', icon: Crown },

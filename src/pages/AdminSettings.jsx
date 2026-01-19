@@ -3,13 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import UserManagement from '../components/UserManagement';
 import PlanManagement from '../components/PlanManagement';
+import FAQManagement from '../components/FAQManagement';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Alert, AlertDescription } from '../components/ui/alert';
-import { Settings as SettingsIcon, Users, Gem, Mail, FileText, Bell, CreditCard, Ticket } from 'lucide-react';
+import { Settings as SettingsIcon, Users, Gem, Mail, FileText, Bell, CreditCard, Ticket, HelpCircle } from 'lucide-react';
 
 function AdminSettings({ user }) {
   const navigate = useNavigate();
@@ -341,7 +342,7 @@ function AdminSettings({ user }) {
 
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-8 h-auto gap-1">
+            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-9 h-auto gap-1">
               <TabsTrigger value="system" className="text-xs sm:text-sm gap-1.5 py-2">
                 <SettingsIcon className="w-4 h-4" />
                 <span className="hidden sm:inline">System</span>
@@ -373,6 +374,10 @@ function AdminSettings({ user }) {
               <TabsTrigger value="plans" className="text-xs sm:text-sm gap-1.5 py-2">
                 <Gem className="w-4 h-4" />
                 <span>Plans</span>
+              </TabsTrigger>
+              <TabsTrigger value="faq" className="text-xs sm:text-sm gap-1.5 py-2">
+                <HelpCircle className="w-4 h-4" />
+                <span>FAQ</span>
               </TabsTrigger>
             </TabsList>
 
@@ -1434,6 +1439,11 @@ function AdminSettings({ user }) {
 
             <TabsContent value="plans" className="mt-6">
               <PlanManagement />
+            </TabsContent>
+
+            {/* FAQ Tab */}
+            <TabsContent value="faq" className="mt-6">
+              <FAQManagement />
             </TabsContent>
           </Tabs>
         </CardContent>
