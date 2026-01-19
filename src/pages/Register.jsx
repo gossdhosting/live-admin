@@ -16,7 +16,8 @@ function Register() {
     confirmPassword: '',
     name: '',
     plan_id: '',
-    subscription_type: 'monthly'
+    subscription_type: 'monthly',
+    acceptedTOS: false
   });
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -57,6 +58,11 @@ function Register() {
       return;
     }
 
+    if (!formData.acceptedTOS) {
+      setError('You must accept the Terms of Service to continue');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -80,9 +86,10 @@ function Register() {
   };
 
   const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: type === 'checkbox' ? checked : value,
     });
   };
 
@@ -283,11 +290,33 @@ function Register() {
               </div>
             </div>
 
+            <div className="flex items-start space-x-2">
+              <input
+                type="checkbox"
+                id="acceptedTOS"
+                name="acceptedTOS"
+                checked={formData.acceptedTOS}
+                onChange={handleChange}
+                className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                required
+              />
+              <label htmlFor="acceptedTOS" className="text-sm text-muted-foreground">
+                I agree to the{' '}
+                <a
+                  href="https://www.rexstream.net/tos/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline font-medium"
+                >
+                  Terms of Service
+                </a>
+              </label>
+            </div>
 
             <Button
               type="submit"
               className="w-full"
-              disabled={loading}
+              disabled={loading || !formData.acceptedTOS}
             >
               {loading ? 'Creating Account...' : 'Create Account'}
             </Button>
