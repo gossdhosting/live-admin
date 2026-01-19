@@ -130,7 +130,6 @@ function PlatformConnections() {
       facebook: Facebook,
       youtube: Youtube,
       twitch: Twitch,
-      kick: Zap,
     };
     return iconMap[platform] || Radio;
   };
@@ -140,7 +139,6 @@ function PlatformConnections() {
       facebook: '#1877f2',
       youtube: '#ff0000',
       twitch: '#9146ff',
-      kick: '#53fc18',
     };
     return colors[platform] || '#3498db';
   };
@@ -159,7 +157,7 @@ function PlatformConnections() {
         Platform Connections
       </h3>
       <p style={{ color: '#7f8c8d', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
-        Connect your Facebook, YouTube, Twitch, and Kick accounts to stream directly to these platforms.
+        Connect your Facebook, YouTube, and Twitch accounts to stream directly to these platforms.
       </p>
 
       {message && (
@@ -178,7 +176,7 @@ function PlatformConnections() {
       )}
 
       <div style={{ display: 'grid', gap: '1rem' }}>
-        {['facebook', 'youtube', 'twitch', 'kick'].map((platform) => {
+        {['facebook', 'youtube', 'twitch'].map((platform) => {
           const connection = connections.find((c) => c.platform === platform);
           const isConnected = !!connection;
           const PlatformIcon = getPlatformIcon(platform);
