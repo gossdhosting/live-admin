@@ -442,6 +442,22 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
       console.log('Setting remote description...');
       await peerConnection.setRemoteDescription(new RTCSessionDescription(response.data.answer));
       console.log('Remote description set successfully');
+      console.log('Current connection state after setRemoteDescription:', peerConnection.connectionState);
+      console.log('Current ICE connection state:', peerConnection.iceConnectionState);
+      console.log('Current signaling state:', peerConnection.signalingState);
+
+      // Wait a bit for connection to establish
+      setTimeout(() => {
+        console.log('Connection state after 2s:', peerConnection.connectionState);
+        console.log('ICE connection state after 2s:', peerConnection.iceConnectionState);
+
+        // If connected but UI not updated, manually update
+        if (peerConnection.connectionState === 'connected' || peerConnection.iceConnectionState === 'connected') {
+          console.log('Manually updating UI to connected state');
+          setStreamStatus('connected');
+          setIsStreaming(true);
+        }
+      }, 2000);
 
       // Update parent component
       if (onUpdate) {
