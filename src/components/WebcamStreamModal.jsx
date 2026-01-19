@@ -121,15 +121,46 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
 
       // Display in video element
       if (videoRef.current) {
+        console.log('Setting video srcObject...');
         videoRef.current.srcObject = stream;
+        console.log('Video srcObject set:', videoRef.current.srcObject);
+        console.log('Video element ready state:', videoRef.current.readyState);
+        console.log('Video paused:', videoRef.current.paused);
+
+        // Force video to be visible
+        videoRef.current.style.display = 'block';
+
         try {
-          await videoRef.current.play();
-          console.log('Video playback started');
+          const playPromise = videoRef.current.play();
+          console.log('Play promise created');
+          await playPromise;
+          console.log('Video playback started successfully');
+          console.log('Video dimensions:', videoRef.current.videoWidth, 'x', videoRef.current.videoHeight);
         } catch (playErr) {
           console.error('Failed to start video playback:', playErr);
+          console.error('Error name:', playErr.name);
+          console.error('Error message:', playErr.message);
           // Try again without await
-          videoRef.current.play().catch(e => console.error('Retry play failed:', e));
+          videoRef.current.play().catch(e => {
+            console.error('Retry play failed:', e);
+          });
         }
+
+        // Add event listeners to debug
+        videoRef.current.onloadedmetadata = () => {
+          console.log('Video metadata loaded');
+          console.log('Video dimensions:', videoRef.current.videoWidth, 'x', videoRef.current.videoHeight);
+        };
+
+        videoRef.current.onplay = () => {
+          console.log('Video play event fired');
+        };
+
+        videoRef.current.onplaying = () => {
+          console.log('Video playing event fired');
+        };
+      } else {
+        console.error('videoRef.current is null!');
       }
 
       // Get available devices again with labels now available
@@ -308,6 +339,9 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
 
     try {
       console.log('Starting WebRTC stream for channel', channel.id);
+      console.log('Video element before streaming:', videoRef.current);
+      console.log('Video srcObject before streaming:', videoRef.current?.srcObject);
+      console.log('Local stream:', localStreamRef.current);
 
       // Initialize WebRTC session
       console.log('Initializing WebRTC session on backend...');
@@ -507,6 +541,7 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
                     playsInline
                     muted
                     className="w-full h-full object-contain"
+                    style={{ display: 'block', backgroundColor: '#000' }}
                   />
 
                   {/* Camera Controls Overlay */}
