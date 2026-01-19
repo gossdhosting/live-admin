@@ -122,7 +122,14 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
       // Display in video element
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        await videoRef.current.play();
+        try {
+          await videoRef.current.play();
+          console.log('Video playback started');
+        } catch (playErr) {
+          console.error('Failed to start video playback:', playErr);
+          // Try again without await
+          videoRef.current.play().catch(e => console.error('Retry play failed:', e));
+        }
       }
 
       // Get available devices again with labels now available
@@ -300,8 +307,12 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
     setStreamStatus('connecting');
 
     try {
+      console.log('Starting WebRTC stream for channel', channel.id);
+
       // Initialize WebRTC session
-      await api.post(`/webrtc/start/${channel.id}`);
+      console.log('Initializing WebRTC session on backend...');
+      const startResponse = await api.post(`/webrtc/start/${channel.id}`);
+      console.log('WebRTC session initialized:', startResponse.data);
 
       // Create peer connection
       const configuration = {
@@ -311,20 +322,29 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
         ]
       };
 
+      console.log('Creating RTCPeerConnection...');
       const peerConnection = new RTCPeerConnection(configuration);
       peerConnectionRef.current = peerConnection;
 
       // Add local tracks to peer connection
-      localStreamRef.current.getTracks().forEach(track => {
+      console.log('Adding local tracks to peer connection...');
+      const tracks = localStreamRef.current.getTracks();
+      console.log('Available tracks:', tracks);
+
+      tracks.forEach(track => {
+        console.log('Adding track:', track.kind, track.label);
         peerConnection.addTrack(track, localStreamRef.current);
       });
 
       // Handle ICE candidates
       peerConnection.onicecandidate = (event) => {
         if (event.candidate) {
+          console.log('Sending ICE candidate to backend');
           api.post(`/webrtc/ice-candidate/${channel.id}`, {
             candidate: event.candidate.toJSON()
           }).catch(err => console.error('Failed to send ICE candidate:', err));
+        } else {
+          console.log('All ICE candidates sent');
         }
       };
 
@@ -333,19 +353,29 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
         console.log('Connection state:', peerConnection.connectionState);
 
         if (peerConnection.connectionState === 'connected') {
+          console.log('WebRTC connection established!');
           setStreamStatus('connected');
           setIsStreaming(true);
         } else if (peerConnection.connectionState === 'failed' || peerConnection.connectionState === 'disconnected') {
+          console.error('WebRTC connection failed or disconnected');
           setStreamStatus('error');
           setError('Connection to server lost');
           stopStreaming();
         }
       };
 
+      // Handle ICE connection state
+      peerConnection.oniceconnectionstatechange = () => {
+        console.log('ICE connection state:', peerConnection.iceConnectionState);
+      };
+
       // Create and send offer
+      console.log('Creating SDP offer...');
       const offer = await peerConnection.createOffer();
+      console.log('Setting local description...');
       await peerConnection.setLocalDescription(offer);
 
+      console.log('Sending offer to backend...');
       const response = await api.post(`/webrtc/offer/${channel.id}`, {
         offer: {
           type: offer.type,
@@ -353,8 +383,12 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
         }
       });
 
+      console.log('Received answer from backend:', response.data);
+
       // Set remote answer
+      console.log('Setting remote description...');
       await peerConnection.setRemoteDescription(new RTCSessionDescription(response.data.answer));
+      console.log('Remote description set successfully');
 
       // Update parent component
       if (onUpdate) {
@@ -363,8 +397,13 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
 
     } catch (err) {
       console.error('Failed to start streaming:', err);
+      console.error('Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      });
       setStreamStatus('error');
-      setError(err.response?.data?.error || 'Failed to start streaming');
+      setError(err.response?.data?.error || err.message || 'Failed to start streaming');
       setIsStreaming(false);
     }
   };
