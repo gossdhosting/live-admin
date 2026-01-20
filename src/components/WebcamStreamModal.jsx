@@ -475,19 +475,12 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
               // FIX: Response is {success: true, status: {status: 'connected', ...}}
               // So we need to check statusResponse.data.status.status (nested)
               if (statusResponse.data.status?.status === 'connected') {
-                console.log('WebRTC bridge is ready, starting platform streaming...');
-                // Wait an additional 2 seconds for RTMP stream to stabilize
-                await new Promise(resolve => setTimeout(resolve, 2000));
-
-                // Start the actual streaming to platforms
-                try {
-                  console.log('Starting stream on channel to push to platforms...');
-                  await api.post(`/channels/${channel.id}/start`);
-                  console.log('Channel stream started successfully');
-                } catch (err) {
-                  console.error('Failed to start channel stream:', err);
-                  setError('WebRTC connected but failed to start platform streaming: ' + (err.response?.data?.error || err.message));
-                }
+                console.log('WebRTC bridge is connected!');
+                // Backend will automatically start platform streaming after first frame
+                // No need to call /channels/${channel.id}/start manually
+                console.log('Platform streaming will start automatically when first frame is received');
+                setStreamStatus('connected');
+                setIsStreaming(true);
                 break;
               }
             } catch (err) {
