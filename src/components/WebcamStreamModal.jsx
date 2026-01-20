@@ -451,8 +451,8 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
       console.log('Current ICE connection state:', peerConnection.iceConnectionState);
       console.log('Current signaling state:', peerConnection.signalingState);
 
-      // Wait a bit for connection to establish
-      setTimeout(async () => {
+      // Wait for connection to establish and WebRTC bridge to start
+      const waitForBridgeAndStartStream = async () => {
         console.log('Connection state after 2s:', peerConnection.connectionState);
         console.log('ICE connection state after 2s:', peerConnection.iceConnectionState);
 
@@ -462,17 +462,48 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
           setStreamStatus('connected');
           setIsStreaming(true);
 
-          // Start the actual streaming to platforms
-          try {
-            console.log('Starting stream on channel to push to platforms...');
-            await api.post(`/channels/${channel.id}/start`);
-            console.log('Channel stream started successfully');
-          } catch (err) {
-            console.error('Failed to start channel stream:', err);
-            setError('WebRTC connected but failed to start platform streaming: ' + (err.response?.data?.error || err.message));
+          // Wait for WebRTC bridge to start publishing (check status)
+          console.log('Waiting for WebRTC bridge to start publishing...');
+          let attempts = 0;
+          const maxAttempts = 15; // 15 seconds max wait
+
+          while (attempts < maxAttempts) {
+            try {
+              const statusResponse = await api.get(`/webrtc/status/${channel.id}`);
+              console.log('WebRTC bridge status:', statusResponse.data);
+
+              if (statusResponse.data.status === 'connected' || statusResponse.data.status === 'running') {
+                console.log('WebRTC bridge is ready, starting platform streaming...');
+                // Wait an additional 2 seconds for RTMP stream to stabilize
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                // Start the actual streaming to platforms
+                try {
+                  console.log('Starting stream on channel to push to platforms...');
+                  await api.post(`/channels/${channel.id}/start`);
+                  console.log('Channel stream started successfully');
+                } catch (err) {
+                  console.error('Failed to start channel stream:', err);
+                  setError('WebRTC connected but failed to start platform streaming: ' + (err.response?.data?.error || err.message));
+                }
+                break;
+              }
+            } catch (err) {
+              console.log('Waiting for bridge...', err.message);
+            }
+
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            attempts++;
+          }
+
+          if (attempts >= maxAttempts) {
+            console.error('WebRTC bridge did not start in time');
+            setError('WebRTC bridge failed to start. Please try again.');
           }
         }
-      }, 2000);
+      };
+
+      setTimeout(waitForBridgeAndStartStream, 2000);
 
       // Update parent component
       if (onUpdate) {
