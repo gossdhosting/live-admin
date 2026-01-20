@@ -571,25 +571,130 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
     }
   };
 
-  const handleClose = () => {
-    stopStreaming();
-    onClose();
+  // FORCE DISCONNECT: Emergency cleanup even if backend is crashed or unresponsive
+  const forceDisconnect = async () => {
+    console.log('[Force Disconnect] Initiating emergency cleanup');
+
+    try {
+      // Try to stop backend (but don't wait if it fails)
+      const stopPromises = [];
+
+      if (isStreaming) {
+        stopPromises.push(
+          api.post(`/channels/${channel.id}/stop`).catch(err =>
+            console.warn('[Force Disconnect] Backend channel stop failed (may be crashed):', err.message)
+          )
+        );
+        stopPromises.push(
+          api.post(`/webrtc/stop/${channel.id}`).catch(err =>
+            console.warn('[Force Disconnect] Backend WebRTC stop failed (may be crashed):', err.message)
+          )
+        );
+      }
+
+      // Don't wait more than 2 seconds for backend
+      await Promise.race([
+        Promise.all(stopPromises),
+        new Promise(resolve => setTimeout(resolve, 2000))
+      ]);
+
+    } catch (err) {
+      console.error('[Force Disconnect] Backend cleanup error (continuing anyway):', err);
+    }
+
+    // CRITICAL: Always clean up local resources regardless of backend state
+    try {
+      // Close peer connection
+      if (peerConnectionRef.current) {
+        console.log('[Force Disconnect] Closing peer connection');
+        peerConnectionRef.current.close();
+        peerConnectionRef.current = null;
+      }
+
+      // Stop all media tracks
+      if (localStreamRef.current) {
+        console.log('[Force Disconnect] Stopping local media tracks');
+        localStreamRef.current.getTracks().forEach(track => {
+          track.stop();
+          console.log(`[Force Disconnect] Stopped ${track.kind} track`);
+        });
+        localStreamRef.current = null;
+      }
+
+      // Clear video element
+      if (videoRef.current) {
+        console.log('[Force Disconnect] Clearing video element');
+        videoRef.current.srcObject = null;
+      }
+
+      console.log('[Force Disconnect] Local cleanup complete');
+    } catch (err) {
+      console.error('[Force Disconnect] Local cleanup error:', err);
+    }
+
+    // Reset all state
+    setIsStreaming(false);
+    setStreamStatus('idle');
+    setPermissionsGranted(false);
+    setError('');
+    setIsMuted(false);
+    setIsVideoOff(false);
+
+    // Update parent component
+    if (onUpdate) {
+      onUpdate();
+    }
+
+    console.log('[Force Disconnect] Emergency disconnect complete');
+  };
+
+  // IMPORTANT: Don't stop streaming when modal closes - allow minimize
+  // This prevents accidental disconnections and multiple connections
+  const handleMinimize = () => {
+    console.log('[Modal] Minimizing (keeping camera connection alive)');
+    onClose(); // Just close the modal UI, don't stop streaming
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] p-0 overflow-hidden">
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      // CRITICAL: Only allow closing via explicit user action
+      // Don't close when clicking outside or pressing ESC if camera is active
+      if (!open && (permissionsGranted || isStreaming)) {
+        console.log('[Modal] Prevented accidental close - camera is active');
+        return; // Block the close
+      }
+      if (!open) {
+        handleMinimize();
+      }
+    }}>
+      <DialogContent
+        className="max-w-6xl max-h-[90vh] p-0 overflow-hidden sm:max-w-[95vw] sm:max-h-[95vh]"
+        onPointerDownOutside={(e) => {
+          // Prevent closing when clicking outside if camera is active
+          if (permissionsGranted || isStreaming) {
+            e.preventDefault();
+            console.log('[Modal] Blocked outside click - use Disconnect button');
+          }
+        }}
+        onEscapeKeyDown={(e) => {
+          // Prevent closing with ESC key if camera is active
+          if (permissionsGranted || isStreaming) {
+            e.preventDefault();
+            console.log('[Modal] Blocked ESC key - use Disconnect button');
+          }
+        }}
+      >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="px-6 py-4 border-b bg-gradient-to-r from-slate-50 to-gray-50">
-            <h2 className="text-xl font-bold text-gray-900">Go Live: {channel.name}</h2>
-            <p className="text-sm text-gray-600 mt-1">Stream directly from your camera to all connected platforms</p>
+          <div className="px-4 sm:px-6 py-3 sm:py-4 border-b bg-gradient-to-r from-slate-50 to-gray-50">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900">Go Live: {channel.name}</h2>
+            <p className="text-xs sm:text-sm text-gray-600 mt-1">Stream directly from your camera to all connected platforms</p>
           </div>
 
-          {/* Main Content - Landscape Layout */}
-          <div className="flex flex-1 overflow-hidden">
-            {/* Left Side - Camera Preview (2/3 width) */}
-            <div className="flex-1 bg-black relative flex items-center justify-center">
+          {/* Main Content - Responsive Layout */}
+          <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
+            {/* Left Side - Camera Preview (2/3 width on desktop, full width on mobile) */}
+            <div className="flex-1 bg-black relative flex items-center justify-center min-h-[300px] md:min-h-0">
               {!permissionsGranted ? (
                 <div className="text-center p-8">
                   <Video className="w-16 h-16 text-gray-400 mx-auto mb-4" />
@@ -620,22 +725,22 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
                   />
 
                   {/* Camera Controls Overlay */}
-                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
+                  <div className="absolute bottom-3 sm:bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
                     <Button
                       onClick={toggleVideo}
                       variant={isVideoOff ? "destructive" : "secondary"}
                       size="sm"
-                      className="rounded-full w-10 h-10 p-0"
+                      className="rounded-full w-10 h-10 sm:w-12 sm:h-12 p-0"
                     >
-                      {isVideoOff ? <VideoOff className="w-5 h-5" /> : <Video className="w-5 h-5" />}
+                      {isVideoOff ? <VideoOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Video className="w-4 h-4 sm:w-5 sm:h-5" />}
                     </Button>
                     <Button
                       onClick={toggleMute}
                       variant={isMuted ? "destructive" : "secondary"}
                       size="sm"
-                      className="rounded-full w-10 h-10 p-0"
+                      className="rounded-full w-10 h-10 sm:w-12 sm:h-12 p-0"
                     >
-                      {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                      {isMuted ? <MicOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Mic className="w-4 h-4 sm:w-5 sm:h-5" />}
                     </Button>
                   </div>
 
@@ -652,9 +757,9 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
               )}
             </div>
 
-            {/* Right Side - Controls and Info (1/3 width) */}
-            <div className="w-96 border-l bg-white flex flex-col">
-              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            {/* Right Side - Controls and Info (1/3 width on desktop, full width on mobile) */}
+            <div className="w-full md:w-96 border-l md:border-l border-t md:border-t-0 bg-white flex flex-col">
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
                 {/* Device Selection */}
                 {permissionsGranted && !isStreaming && (
                   <div className="space-y-4">
@@ -737,7 +842,7 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
               </div>
 
               {/* Action Buttons */}
-              <div className="p-6 border-t bg-gray-50">
+              <div className="p-4 sm:p-6 border-t bg-gray-50 space-y-2 sm:space-y-3">
                 {!isStreaming ? (
                   <Button
                     onClick={startStreaming}
@@ -766,9 +871,38 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
                   </Button>
                 )}
 
-                {platforms.length === 0 && (
+                {/* Force Disconnect Button - Always visible if camera is active */}
+                {(permissionsGranted || isStreaming) && (
+                  <Button
+                    onClick={forceDisconnect}
+                    variant="outline"
+                    className="w-full border-2 border-orange-500 text-orange-600 hover:bg-orange-50 hover:text-orange-700 font-semibold h-10"
+                  >
+                    <AlertCircle className="w-4 h-4 mr-2" />
+                    Force Disconnect Camera
+                  </Button>
+                )}
+
+                {/* Minimize Button - Allow closing modal without stopping camera */}
+                {(permissionsGranted || isStreaming) && (
+                  <Button
+                    onClick={handleMinimize}
+                    variant="ghost"
+                    className="w-full text-gray-600 hover:text-gray-800 h-10"
+                  >
+                    Minimize (Keep Camera Running)
+                  </Button>
+                )}
+
+                {platforms.length === 0 && !isStreaming && (
                   <p className="text-xs text-amber-600 mt-2 text-center">
                     Connect platforms in the Platforms tab before going live
+                  </p>
+                )}
+
+                {(permissionsGranted || isStreaming) && (
+                  <p className="text-xs text-blue-600 mt-2 text-center">
+                    Modal prevents accidental closure. Use Force Disconnect to stop camera.
                   </p>
                 )}
               </div>
