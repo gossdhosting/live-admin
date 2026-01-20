@@ -472,7 +472,9 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
               const statusResponse = await api.get(`/webrtc/status/${channel.id}`);
               console.log('WebRTC bridge status:', statusResponse.data);
 
-              if (statusResponse.data.status === 'connected') {
+              // FIX: Response is {success: true, status: {status: 'connected', ...}}
+              // So we need to check statusResponse.data.status.status (nested)
+              if (statusResponse.data.status?.status === 'connected') {
                 console.log('WebRTC bridge is ready, starting platform streaming...');
                 // Wait an additional 2 seconds for RTMP stream to stabilize
                 await new Promise(resolve => setTimeout(resolve, 2000));
