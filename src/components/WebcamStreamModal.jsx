@@ -452,7 +452,7 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
       console.log('Current signaling state:', peerConnection.signalingState);
 
       // Wait a bit for connection to establish
-      setTimeout(() => {
+      setTimeout(async () => {
         console.log('Connection state after 2s:', peerConnection.connectionState);
         console.log('ICE connection state after 2s:', peerConnection.iceConnectionState);
 
@@ -461,6 +461,16 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
           console.log('Manually updating UI to connected state');
           setStreamStatus('connected');
           setIsStreaming(true);
+
+          // Start the actual streaming to platforms
+          try {
+            console.log('Starting stream on channel to push to platforms...');
+            await api.post(`/channels/${channel.id}/start`);
+            console.log('Channel stream started successfully');
+          } catch (err) {
+            console.error('Failed to start channel stream:', err);
+            setError('WebRTC connected but failed to start platform streaming: ' + (err.response?.data?.error || err.message));
+          }
         }
       }, 2000);
 
@@ -484,9 +494,24 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
 
   const stopStreaming = async () => {
     try {
-      // Stop WebRTC on server
+      // Stop channel stream (platform streaming)
       if (isStreaming) {
-        await api.post(`/webrtc/stop/${channel.id}`);
+        try {
+          console.log('Stopping channel stream...');
+          await api.post(`/channels/${channel.id}/stop`);
+          console.log('Channel stream stopped');
+        } catch (err) {
+          console.error('Failed to stop channel stream:', err);
+        }
+
+        // Stop WebRTC on server
+        try {
+          console.log('Stopping WebRTC bridge...');
+          await api.post(`/webrtc/stop/${channel.id}`);
+          console.log('WebRTC bridge stopped');
+        } catch (err) {
+          console.error('Failed to stop WebRTC:', err);
+        }
       }
 
       // Close peer connection
