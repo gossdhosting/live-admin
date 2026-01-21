@@ -346,6 +346,17 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
       console.log('Video srcObject before streaming:', videoRef.current?.srcObject);
       console.log('Local stream:', localStreamRef.current);
 
+      // FIX: Explicitly stop any existing session for this channel before starting a new one
+      // This handles browser refreshes where the backend might still have a zombie connection
+      try {
+        console.log('[Pre-Start Cleanup] Stopping any existing WebRTC session for channel', channel.id);
+        await api.post(`/webrtc/stop/${channel.id}`);
+        console.log('[Pre-Start Cleanup] Existing session stopped (or none existed)');
+      } catch (stopError) {
+        // Ignore 404s or other errors - just means no session was running
+        console.log('[Pre-Start Cleanup] Stop call result:', stopError.response?.status || 'error', '(safe to ignore)');
+      }
+
       // Initialize WebRTC session
       console.log('Initializing WebRTC session on backend...');
       const startResponse = await api.post(`/webrtc/start/${channel.id}`);
