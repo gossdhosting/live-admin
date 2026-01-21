@@ -101,11 +101,13 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
       console.log('Requesting camera and microphone permissions...');
 
       // Request camera and microphone permissions
+      // Use 'min' constraint to REQUIRE 1280x720 (hard requirement)
+      // This prevents resolution mismatches that cause color corruption
       const stream = await navigator.mediaDevices.getUserMedia({
         video: hasCamera ? {
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-          frameRate: { ideal: 30 }
+          width: { min: 1280, ideal: 1280 },
+          height: { min: 720, ideal: 720 },
+          frameRate: { ideal: 30, max: 30 }
         } : false,
         audio: hasMicrophone ? {
           echoCancellation: true,
@@ -236,9 +238,9 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
       const newStream = await navigator.mediaDevices.getUserMedia({
         video: {
           deviceId: { exact: deviceId },
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-          frameRate: { ideal: 30 }
+          width: { min: 1280, ideal: 1280 },
+          height: { min: 720, ideal: 720 },
+          frameRate: { ideal: 30, max: 30 }
         },
         audio: false
       });
