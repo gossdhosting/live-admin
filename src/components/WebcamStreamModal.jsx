@@ -100,6 +100,17 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
 
       console.log('Requesting camera and microphone permissions...');
 
+      // CRITICAL: Stop any existing tracks before requesting new media
+      // This prevents reusing old 640x360 streams that cause resolution mismatch
+      if (localStreamRef.current) {
+        console.log('Stopping existing tracks before requesting new media');
+        localStreamRef.current.getTracks().forEach(track => {
+          console.log(`Stopping old ${track.kind} track: ${track.label}, settings:`, track.getSettings());
+          track.stop();
+        });
+        localStreamRef.current = null;
+      }
+
       // Request camera and microphone permissions
       // Use 'min' constraint to REQUIRE 1280x720 (hard requirement)
       // This prevents resolution mismatches that cause color corruption
@@ -117,6 +128,22 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
       });
 
       console.log('Permissions granted, stream obtained:', stream);
+
+      // Log actual stream resolution to verify constraints worked
+      const videoTrack = stream.getVideoTracks()[0];
+      if (videoTrack) {
+        const settings = videoTrack.getSettings();
+        console.log('Video track settings:', settings);
+        console.log(`Actual resolution: ${settings.width}x${settings.height}, frameRate: ${settings.frameRate}`);
+
+        // Verify we got 1280x720 as required
+        if (settings.width !== 1280 || settings.height !== 720) {
+          console.error(`❌ WARNING: Got ${settings.width}x${settings.height} instead of required 1280x720!`);
+          console.error('Camera may not support 1280x720. This will cause green tint issues.');
+        } else {
+          console.log('✅ Resolution verified: 1280x720 as required');
+        }
+      }
 
       // Store stream
       localStreamRef.current = stream;
