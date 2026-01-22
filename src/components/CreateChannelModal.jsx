@@ -265,7 +265,7 @@ function CreateChannelModal({ onClose, onSuccess, isOpen }) {
               </div>
               <div className="bg-white border border-blue-200 rounded p-3 text-xs font-mono text-gray-700">
                 <p className="font-semibold text-gray-900 mb-1">RTMP Server:</p>
-                <p className="mb-2">rtmp://panel.rexstream.net:1935/live</p>
+                <p className="mb-2">rtmp://streaming.rexstream.net:1935/live</p>
                 <p className="font-semibold text-gray-900 mb-1">Stream Key:</p>
                 <p className="text-gray-500 italic">Will be generated after creation</p>
               </div>

@@ -284,14 +284,14 @@ function EditChannelModal({ channel, onClose, onSuccess, isOpen }) {
                   <p className="font-semibold text-gray-900 text-xs mb-1">RTMP Server URL:</p>
                   <div className="flex items-center gap-2">
                     <code className="flex-1 bg-gray-50 px-2 py-1.5 rounded text-xs font-mono text-gray-700 border border-gray-200">
-                      rtmp://panel.rexstream.net:1935/live
+                      rtmp://streaming.rexstream.net:1935/live
                     </code>
                     <Button
                       type="button"
                       size="sm"
                       variant="outline"
                       onClick={() => {
-                        navigator.clipboard.writeText('rtmp://panel.rexstream.net:1935/live');
+                        navigator.clipboard.writeText('rtmp://streaming.rexstream.net:1935/live');
                       }}
                       className="text-xs"
                     >
