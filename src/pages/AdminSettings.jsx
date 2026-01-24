@@ -392,70 +392,324 @@ function AdminSettings({ user }) {
               )}
 
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="hls_segment_duration">HLS Segment Duration (seconds)</Label>
-                  <Input
-                    type="number"
-                    id="hls_segment_duration"
-                    value={settings.hls_segment_duration || ''}
-                    onChange={(e) => handleChange('hls_segment_duration', e.target.value)}
-                    min="1"
-                    max="10"
-                  />
-                  <p className="text-sm text-gray-500">
-                    Recommended: 4 seconds. Lower values reduce latency but increase bandwidth.
-                  </p>
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Stream Limits</h3>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="max_concurrent_streams">Max Concurrent Streams</Label>
+                    <Input
+                      type="number"
+                      id="max_concurrent_streams"
+                      value={settings.max_concurrent_streams || ''}
+                      onChange={(e) => handleChange('max_concurrent_streams', e.target.value)}
+                      min="1"
+                      max="100"
+                    />
+                    <p className="text-sm text-gray-500">
+                      Maximum number of streams that can run simultaneously.
+                    </p>
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="hls_list_size">HLS Playlist Size (segments)</Label>
-                  <Input
-                    type="number"
-                    id="hls_list_size"
-                    value={settings.hls_list_size || ''}
-                    onChange={(e) => handleChange('hls_list_size', e.target.value)}
-                    min="3"
-                    max="20"
-                  />
-                  <p className="text-sm text-gray-500">
-                    Number of segments to keep in the playlist. Recommended: 6
-                  </p>
+                <div className="pt-6 border-t space-y-4">
+                  <h3 className="text-lg font-semibold">Quality Presets</h3>
+                  <p className="text-sm text-gray-600">Configure resolution and bitrate for each quality preset</p>
+
+                  {/* 480p Settings */}
+                  <div className="p-4 border rounded-lg bg-gray-50">
+                    <h4 className="font-semibold mb-3">480p Quality</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="quality_480p_width">Width (px)</Label>
+                        <Input
+                          type="number"
+                          id="quality_480p_width"
+                          value={settings.quality_480p_width || '854'}
+                          onChange={(e) => handleChange('quality_480p_width', e.target.value)}
+                          min="320"
+                          max="1920"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="quality_480p_height">Height (px)</Label>
+                        <Input
+                          type="number"
+                          id="quality_480p_height"
+                          value={settings.quality_480p_height || '480'}
+                          onChange={(e) => handleChange('quality_480p_height', e.target.value)}
+                          min="240"
+                          max="1080"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="quality_480p_bitrate">Bitrate (kbps)</Label>
+                        <Input
+                          type="number"
+                          id="quality_480p_bitrate"
+                          value={settings.quality_480p_bitrate || '2500'}
+                          onChange={(e) => handleChange('quality_480p_bitrate', e.target.value)}
+                          min="500"
+                          max="10000"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 720p Settings */}
+                  <div className="p-4 border rounded-lg bg-gray-50">
+                    <h4 className="font-semibold mb-3">720p Quality (HD)</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="quality_720p_width">Width (px)</Label>
+                        <Input
+                          type="number"
+                          id="quality_720p_width"
+                          value={settings.quality_720p_width || '1280'}
+                          onChange={(e) => handleChange('quality_720p_width', e.target.value)}
+                          min="640"
+                          max="2560"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="quality_720p_height">Height (px)</Label>
+                        <Input
+                          type="number"
+                          id="quality_720p_height"
+                          value={settings.quality_720p_height || '720'}
+                          onChange={(e) => handleChange('quality_720p_height', e.target.value)}
+                          min="480"
+                          max="1440"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="quality_720p_bitrate">Bitrate (kbps)</Label>
+                        <Input
+                          type="number"
+                          id="quality_720p_bitrate"
+                          value={settings.quality_720p_bitrate || '4000'}
+                          onChange={(e) => handleChange('quality_720p_bitrate', e.target.value)}
+                          min="1000"
+                          max="15000"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 1080p Settings */}
+                  <div className="p-4 border rounded-lg bg-gray-50">
+                    <h4 className="font-semibold mb-3">1080p Quality (Full HD)</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="quality_1080p_width">Width (px)</Label>
+                        <Input
+                          type="number"
+                          id="quality_1080p_width"
+                          value={settings.quality_1080p_width || '1920'}
+                          onChange={(e) => handleChange('quality_1080p_width', e.target.value)}
+                          min="1280"
+                          max="3840"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="quality_1080p_height">Height (px)</Label>
+                        <Input
+                          type="number"
+                          id="quality_1080p_height"
+                          value={settings.quality_1080p_height || '1080'}
+                          onChange={(e) => handleChange('quality_1080p_height', e.target.value)}
+                          min="720"
+                          max="2160"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="quality_1080p_bitrate">Bitrate (kbps)</Label>
+                        <Input
+                          type="number"
+                          id="quality_1080p_bitrate"
+                          value={settings.quality_1080p_bitrate || '6000'}
+                          onChange={(e) => handleChange('quality_1080p_bitrate', e.target.value)}
+                          min="2000"
+                          max="20000"
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="max_concurrent_streams">Max Concurrent Streams</Label>
-                  <Input
-                    type="number"
-                    id="max_concurrent_streams"
-                    value={settings.max_concurrent_streams || ''}
-                    onChange={(e) => handleChange('max_concurrent_streams', e.target.value)}
-                    min="1"
-                    max="100"
-                  />
-                  <p className="text-sm text-gray-500">
-                    Maximum number of streams that can run simultaneously.
-                  </p>
-                </div>
+                <div className="pt-6 border-t space-y-4">
+                  <h3 className="text-lg font-semibold">Encoding Parameters</h3>
+                  <p className="text-sm text-gray-600">Configure FFmpeg encoding settings for all streams</p>
 
-                <div className="space-y-2">
-                  <Label htmlFor="ffmpeg_threading">FFmpeg Threading Mode</Label>
-                  <select
-                    id="ffmpeg_threading"
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    value={settings.ffmpeg_threading || 'auto'}
-                    onChange={(e) => handleChange('ffmpeg_threading', e.target.value)}
-                  >
-                    <option value="auto">Auto (Recommended - Uses all CPU cores)</option>
-                    <option value="1">Single Thread (Lower CPU usage, slower encoding)</option>
-                    <option value="2">2 Threads</option>
-                    <option value="4">4 Threads</option>
-                    <option value="8">8 Threads</option>
-                  </select>
-                  <p className="text-sm text-gray-500">
-                    Auto mode uses all available CPU cores for faster encoding. Use single thread for low-resource VPS.
-                    <br />
-                    <strong>Note:</strong> Changes apply to newly started streams only. Restart existing streams to apply.
-                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="ffmpeg_preset">Encoding Preset</Label>
+                      <select
+                        id="ffmpeg_preset"
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        value={settings.ffmpeg_preset || 'veryfast'}
+                        onChange={(e) => handleChange('ffmpeg_preset', e.target.value)}
+                      >
+                        <option value="ultrafast">Ultrafast (Lowest CPU, Lower Quality)</option>
+                        <option value="superfast">Superfast</option>
+                        <option value="veryfast">Veryfast (Recommended)</option>
+                        <option value="faster">Faster</option>
+                        <option value="fast">Fast</option>
+                        <option value="medium">Medium (Higher CPU, Better Quality)</option>
+                        <option value="slow">Slow (Very High CPU)</option>
+                        <option value="slower">Slower (Extreme CPU)</option>
+                        <option value="veryslow">Veryslow (Maximum CPU)</option>
+                      </select>
+                      <p className="text-sm text-gray-500">
+                        Faster presets use less CPU but produce larger files. Slower presets = better quality.
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="ffmpeg_tune">Encoding Tune</Label>
+                      <select
+                        id="ffmpeg_tune"
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        value={settings.ffmpeg_tune || 'zerolatency'}
+                        onChange={(e) => handleChange('ffmpeg_tune', e.target.value)}
+                      >
+                        <option value="zerolatency">Zero Latency (Live Streaming - Recommended)</option>
+                        <option value="film">Film (High Quality Video)</option>
+                        <option value="animation">Animation</option>
+                        <option value="grain">Grain (Film Grain Preservation)</option>
+                        <option value="stillimage">Still Image</option>
+                        <option value="fastdecode">Fast Decode</option>
+                      </select>
+                      <p className="text-sm text-gray-500">
+                        Zero latency is recommended for live streaming.
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="ffmpeg_profile">H.264 Profile</Label>
+                      <select
+                        id="ffmpeg_profile"
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        value={settings.ffmpeg_profile || 'main'}
+                        onChange={(e) => handleChange('ffmpeg_profile', e.target.value)}
+                      >
+                        <option value="baseline">Baseline (Most Compatible)</option>
+                        <option value="main">Main (Recommended)</option>
+                        <option value="high">High (Best Quality, Less Compatible)</option>
+                      </select>
+                      <p className="text-sm text-gray-500">
+                        Main profile is recommended for streaming platforms.
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="ffmpeg_level">H.264 Level</Label>
+                      <select
+                        id="ffmpeg_level"
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        value={settings.ffmpeg_level || '4.1'}
+                        onChange={(e) => handleChange('ffmpeg_level', e.target.value)}
+                      >
+                        <option value="3.0">3.0</option>
+                        <option value="3.1">3.1</option>
+                        <option value="4.0">4.0</option>
+                        <option value="4.1">4.1 (Recommended)</option>
+                        <option value="4.2">4.2</option>
+                        <option value="5.0">5.0</option>
+                        <option value="5.1">5.1</option>
+                        <option value="5.2">5.2</option>
+                      </select>
+                      <p className="text-sm text-gray-500">
+                        4.1 supports up to 1080p @ 30fps.
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="ffmpeg_fps">Frame Rate (FPS)</Label>
+                      <Input
+                        type="number"
+                        id="ffmpeg_fps"
+                        value={settings.ffmpeg_fps || '30'}
+                        onChange={(e) => handleChange('ffmpeg_fps', e.target.value)}
+                        min="15"
+                        max="60"
+                      />
+                      <p className="text-sm text-gray-500">
+                        30 FPS is standard for most platforms. 60 FPS requires more bandwidth.
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="ffmpeg_keyframe_interval">Keyframe Interval (GOP)</Label>
+                      <Input
+                        type="number"
+                        id="ffmpeg_keyframe_interval"
+                        value={settings.ffmpeg_keyframe_interval || '60'}
+                        onChange={(e) => handleChange('ffmpeg_keyframe_interval', e.target.value)}
+                        min="30"
+                        max="300"
+                      />
+                      <p className="text-sm text-gray-500">
+                        Keyframes every N frames. 60 = 2 seconds at 30fps. Lower = better seek, higher CPU.
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="ffmpeg_audio_bitrate">Audio Bitrate (kbps)</Label>
+                      <Input
+                        type="number"
+                        id="ffmpeg_audio_bitrate"
+                        value={settings.ffmpeg_audio_bitrate || '128'}
+                        onChange={(e) => handleChange('ffmpeg_audio_bitrate', e.target.value)}
+                        min="64"
+                        max="320"
+                      />
+                      <p className="text-sm text-gray-500">
+                        128 kbps is standard. 192-256 kbps for music streams.
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="ffmpeg_audio_sample_rate">Audio Sample Rate (Hz)</Label>
+                      <select
+                        id="ffmpeg_audio_sample_rate"
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        value={settings.ffmpeg_audio_sample_rate || '48000'}
+                        onChange={(e) => handleChange('ffmpeg_audio_sample_rate', e.target.value)}
+                      >
+                        <option value="44100">44.1 kHz (CD Quality)</option>
+                        <option value="48000">48 kHz (Professional - Recommended)</option>
+                      </select>
+                      <p className="text-sm text-gray-500">
+                        48 kHz is standard for video production.
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="ffmpeg_threading">Threading Mode</Label>
+                      <select
+                        id="ffmpeg_threading"
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        value={settings.ffmpeg_threading || 'auto'}
+                        onChange={(e) => handleChange('ffmpeg_threading', e.target.value)}
+                      >
+                        <option value="auto">Auto (Uses All CPU Cores - Recommended)</option>
+                        <option value="1">Single Thread (Lower CPU usage)</option>
+                        <option value="2">2 Threads</option>
+                        <option value="4">4 Threads</option>
+                        <option value="8">8 Threads</option>
+                      </select>
+                      <p className="text-sm text-gray-500">
+                        Auto mode uses all available CPU cores for faster encoding.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-4">
+                    <p className="text-sm text-yellow-800">
+                      <strong>⚠️ Important:</strong> Changes to encoding settings apply to newly started streams only.
+                      Restart existing streams to apply new settings.
+                    </p>
+                  </div>
                 </div>
 
                 <div className="flex justify-end">
@@ -607,13 +861,10 @@ function AdminSettings({ user }) {
                 <h3 className="text-lg font-semibold mb-4">Server Information</h3>
                 <div className="space-y-2 text-sm">
                   <p>
-                    <strong>HLS Base Path:</strong> /var/www/hls (configured on backend)
-                  </p>
-                  <p>
                     <strong>FFmpeg Path:</strong> /usr/bin/ffmpeg (configured on backend)
                   </p>
                   <p className="text-gray-500">
-                    Update these values in the backend .env file
+                    Update this value in the backend .env file
                   </p>
                 </div>
               </div>
