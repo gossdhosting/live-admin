@@ -8,14 +8,15 @@ import {
   signOut as firebaseSignOut
 } from 'firebase/auth';
 
-// Firebase configuration from environment variables
+// Firebase configuration with defaults
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyDsf_UQyTiVGLpGT2Uz_WKSMK-N44Jh8A0",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "zebcast-938e4.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "zebcast-938e4",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "zebcast-938e4.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "223606386678",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:223606386678:web:8ade522485ba6ebdc561d7",
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-KQYKQEZYBG"
 };
 
 // Initialize Firebase
