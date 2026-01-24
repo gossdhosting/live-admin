@@ -542,6 +542,24 @@ function AdminSettings({ user }) {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
+                      <Label htmlFor="ffmpeg_encoder">Video Encoder</Label>
+                      <select
+                        id="ffmpeg_encoder"
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        value={settings.ffmpeg_encoder || 'libx264'}
+                        onChange={(e) => handleChange('ffmpeg_encoder', e.target.value)}
+                      >
+                        <option value="libx264">libx264 (CPU - Software Encoding)</option>
+                        <option value="h264_nvenc">h264_nvenc (NVIDIA GPU - Hardware Acceleration)</option>
+                        <option value="h264_qsv">h264_qsv (Intel GPU - Hardware Acceleration)</option>
+                        <option value="h264_videotoolbox">h264_videotoolbox (macOS GPU - Hardware Acceleration)</option>
+                      </select>
+                      <p className="text-sm text-gray-500">
+                        Hardware encoders (NVENC, QSV, VideoToolbox) reduce CPU usage by 80-90% but require compatible GPU.
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
                       <Label htmlFor="ffmpeg_preset">Encoding Preset</Label>
                       <select
                         id="ffmpeg_preset"
