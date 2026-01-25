@@ -223,7 +223,9 @@ function PlatformConnections() {
                     <div>
                       <p style={{ margin: '0.25rem 0 0 0', color: '#2ecc71', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <CheckCircle size={16} />
-                        Connected as {connection.platform_user_name || connection.platform_user_email}
+                        Connected as {platform === 'facebook' && connection.platform_page_name
+                          ? connection.platform_page_name
+                          : (connection.platform_user_name || connection.platform_user_email)}
                       </p>
                       {(platform === 'facebook' && facebookPages.length > 0) && (
                         <div style={{ marginTop: '0.5rem' }}>
@@ -251,11 +253,6 @@ function PlatformConnections() {
                             ))}
                           </select>
                         </div>
-                      )}
-                      {(platform === 'facebook' && connection.platform_page_name && facebookPages.length === 0) && (
-                        <p style={{ margin: '0.25rem 0 0 0', color: '#7f8c8d', fontSize: '0.85rem' }}>
-                          Page: {connection.platform_page_name}
-                        </p>
                       )}
                       {(platform !== 'facebook' && connection.platform_channel_name) && (
                         <p style={{ margin: '0.25rem 0 0 0', color: '#7f8c8d', fontSize: '0.85rem' }}>
