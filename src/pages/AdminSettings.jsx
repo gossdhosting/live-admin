@@ -413,62 +413,62 @@ function AdminSettings({ user }) {
     );
   }
 
+  const navItems = [
+    { value: 'system', icon: SettingsIcon, label: 'System Settings' },
+    { value: 'smtp', icon: Mail, label: 'SMTP Configuration' },
+    { value: 'email-templates', icon: FileText, label: 'Email Templates' },
+    { value: 'notifications', icon: Bell, label: 'Notifications' },
+    { value: 'payment', icon: CreditCard, label: 'Payment Settings' },
+    { value: 'coupons', icon: Ticket, label: 'Coupons', onClick: fetchCoupons },
+    { value: 'cache', icon: Database, label: 'Media Cache', onClick: fetchCacheStats },
+    { value: 'users', icon: Users, label: 'User Management' },
+    { value: 'plans', icon: Gem, label: 'Plan Management' },
+    { value: 'faq', icon: HelpCircle, label: 'FAQ Management' },
+  ];
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle>Admin Settings</CardTitle>
-            <Button variant="outline" onClick={() => navigate('/')}>
-              Back to Dashboard
-            </Button>
-          </div>
-        </CardHeader>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Admin Settings</h1>
+        <Button variant="outline" onClick={() => navigate('/')}>
+          Back to Dashboard
+        </Button>
+      </div>
 
-        <CardContent>
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* Side Navigation */}
+        <div className="lg:w-64 flex-shrink-0">
+          <Card>
+            <CardContent className="p-2">
+              <nav className="space-y-1">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={item.value}
+                      onClick={() => {
+                        setActiveTab(item.value);
+                        if (item.onClick) item.onClick();
+                      }}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
+                        activeTab === item.value
+                          ? 'bg-blue-600 text-white'
+                          : 'text-gray-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      <Icon className="w-5 h-5 flex-shrink-0" />
+                      <span className="text-sm font-medium">{item.label}</span>
+                    </button>
+                  );
+                })}
+              </nav>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Main Content Area */}
+        <div className="flex-1">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-10 h-auto gap-1">
-              <TabsTrigger value="system" className="text-xs sm:text-sm gap-1.5 py-2">
-                <SettingsIcon className="w-4 h-4" />
-                <span className="hidden sm:inline">System</span>
-              </TabsTrigger>
-              <TabsTrigger value="smtp" className="text-xs sm:text-sm gap-1.5 py-2">
-                <Mail className="w-4 h-4" />
-                <span>SMTP</span>
-              </TabsTrigger>
-              <TabsTrigger value="email-templates" className="text-xs sm:text-sm gap-1.5 py-2">
-                <FileText className="w-4 h-4" />
-                <span>Email</span>
-              </TabsTrigger>
-              <TabsTrigger value="notifications" className="text-xs sm:text-sm gap-1.5 py-2">
-                <Bell className="w-4 h-4" />
-                <span>Notify</span>
-              </TabsTrigger>
-              <TabsTrigger value="payment" className="text-xs sm:text-sm gap-1.5 py-2">
-                <CreditCard className="w-4 h-4" />
-                <span>Payment</span>
-              </TabsTrigger>
-              <TabsTrigger value="coupons" className="text-xs sm:text-sm gap-1.5 py-2" onClick={fetchCoupons}>
-                <Ticket className="w-4 h-4" />
-                <span>Coupons</span>
-              </TabsTrigger>
-              <TabsTrigger value="cache" className="text-xs sm:text-sm gap-1.5 py-2" onClick={fetchCacheStats}>
-                <Database className="w-4 h-4" />
-                <span>Cache</span>
-              </TabsTrigger>
-              <TabsTrigger value="users" className="text-xs sm:text-sm gap-1.5 py-2">
-                <Users className="w-4 h-4" />
-                <span>Users</span>
-              </TabsTrigger>
-              <TabsTrigger value="plans" className="text-xs sm:text-sm gap-1.5 py-2">
-                <Gem className="w-4 h-4" />
-                <span>Plans</span>
-              </TabsTrigger>
-              <TabsTrigger value="faq" className="text-xs sm:text-sm gap-1.5 py-2">
-                <HelpCircle className="w-4 h-4" />
-                <span>FAQ</span>
-              </TabsTrigger>
-            </TabsList>
 
             {/* System Settings Tab */}
             <TabsContent value="system" className="mt-6 space-y-6">
@@ -2021,8 +2021,8 @@ function AdminSettings({ user }) {
               <FAQManagement />
             </TabsContent>
           </Tabs>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
