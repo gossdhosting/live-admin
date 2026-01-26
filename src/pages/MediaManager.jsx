@@ -13,6 +13,7 @@ function MediaManager({ user }) {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [userStats, setUserStats] = useState(null);
   const [previewMedia, setPreviewMedia] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
   const isAdmin = user && user.role === 'admin';
 
   useEffect(() => {
@@ -108,6 +109,21 @@ function MediaManager({ user }) {
       return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     }
     return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handlePreview = async (media) => {
+    setPreviewMedia(media);
+    setPreviewUrl(null); // Reset URL
+
+    try {
+      // Fetch the video URL (will be signed URL for S3, local path for local storage)
+      const response = await api.get(`/media/${media.id}/url`);
+      setPreviewUrl(response.data.url);
+    } catch (err) {
+      console.error('Failed to get media URL:', err);
+      setError('Failed to load video preview');
+      setPreviewMedia(null);
+    }
   };
 
   if (loading) {
@@ -242,7 +258,7 @@ function MediaManager({ user }) {
 
               <div className="flex gap-2 mt-3">
                 <Button
-                  onClick={() => setPreviewMedia(media)}
+                  onClick={() => handlePreview(media)}
                   className="flex-1"
                   size="sm"
                 >
@@ -283,14 +299,24 @@ function MediaManager({ user }) {
             </div>
 
             <div className="p-6">
-              <video
-                controls
-                autoPlay
-                className="w-full max-h-[500px] bg-black rounded"
-              >
-                <source src={`https://streaming.rexstream.net/uploads/media/${previewMedia.filename}`} type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
+              {!previewUrl ? (
+                <div className="w-full max-h-[500px] bg-gray-900 rounded flex items-center justify-center text-white p-12">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+                    <p>Loading video...</p>
+                  </div>
+                </div>
+              ) : (
+                <video
+                  controls
+                  autoPlay
+                  className="w-full max-h-[500px] bg-black rounded"
+                  key={previewUrl}
+                >
+                  <source src={previewUrl} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              )}
 
               <div className="mt-6 p-4 bg-gray-50 rounded">
                 <h3 className="mb-3 font-semibold">Video Details</h3>
