@@ -27,6 +27,8 @@ function AdminSettings({ user }) {
   const [smtpMessage, setSmtpMessage] = useState('');
   const [testingPushover, setTestingPushover] = useState(false);
   const [pushoverMessage, setPushoverMessage] = useState('');
+  const [testingS3, setTestingS3] = useState(false);
+  const [s3Message, setS3Message] = useState('');
   const [paymentSettings, setPaymentSettings] = useState({});
   const [savingPayment, setSavingPayment] = useState(false);
   const [paymentMessage, setPaymentMessage] = useState('');
@@ -317,6 +319,27 @@ function AdminSettings({ user }) {
       setTimeout(() => setPushoverMessage(''), 5000);
     } finally {
       setTestingPushover(false);
+    }
+  };
+
+  const handleTestS3 = async () => {
+    setTestingS3(true);
+    setS3Message('');
+
+    try {
+      const response = await api.post('/settings/test-s3', {
+        aws_access_key_id: settings.aws_access_key_id,
+        aws_secret_access_key: settings.aws_secret_access_key,
+        aws_region: settings.aws_region,
+        s3_bucket_name: settings.s3_bucket_name,
+      });
+      setS3Message('Success! ' + response.data.message);
+      setTimeout(() => setS3Message(''), 5000);
+    } catch (error) {
+      setS3Message(error.response?.data?.error || 'Failed to connect to S3');
+      setTimeout(() => setS3Message(''), 5000);
+    } finally {
+      setTestingS3(false);
     }
   };
 
@@ -728,6 +751,96 @@ function AdminSettings({ user }) {
                       Restart existing streams to apply new settings.
                     </p>
                   </div>
+                </div>
+
+                <div className="pt-6 border-t space-y-4">
+                  <h3 className="text-lg font-semibold">AWS S3 Storage</h3>
+                  <p className="text-sm text-gray-600">
+                    Configure AWS S3 for video storage. Watermarks will remain stored locally.
+                  </p>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="aws_access_key_id">AWS Access Key ID</Label>
+                    <Input
+                      type="text"
+                      id="aws_access_key_id"
+                      value={settings.aws_access_key_id || ''}
+                      onChange={(e) => handleChange('aws_access_key_id', e.target.value)}
+                      placeholder="AKIAIOSFODNN7EXAMPLE"
+                    />
+                    <p className="text-sm text-gray-500">
+                      Your AWS IAM user access key ID
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="aws_secret_access_key">AWS Secret Access Key</Label>
+                    <Input
+                      type="password"
+                      id="aws_secret_access_key"
+                      value={settings.aws_secret_access_key || ''}
+                      onChange={(e) => handleChange('aws_secret_access_key', e.target.value)}
+                      placeholder="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+                    />
+                    <p className="text-sm text-gray-500">
+                      Your AWS IAM user secret access key (stored securely)
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="s3_bucket_name">S3 Bucket Name</Label>
+                    <Input
+                      type="text"
+                      id="s3_bucket_name"
+                      value={settings.s3_bucket_name || ''}
+                      onChange={(e) => handleChange('s3_bucket_name', e.target.value)}
+                      placeholder="restream-media"
+                    />
+                    <p className="text-sm text-gray-500">
+                      Name of your S3 bucket for storing media files
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="aws_region">AWS Region</Label>
+                    <select
+                      id="aws_region"
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      value={settings.aws_region || 'us-east-1'}
+                      onChange={(e) => handleChange('aws_region', e.target.value)}
+                    >
+                      <option value="us-east-1">US East (N. Virginia)</option>
+                      <option value="us-east-2">US East (Ohio)</option>
+                      <option value="us-west-1">US West (N. California)</option>
+                      <option value="us-west-2">US West (Oregon)</option>
+                      <option value="eu-west-1">EU (Ireland)</option>
+                      <option value="eu-central-1">EU (Frankfurt)</option>
+                      <option value="ap-southeast-1">Asia Pacific (Singapore)</option>
+                      <option value="ap-northeast-1">Asia Pacific (Tokyo)</option>
+                    </select>
+                    <p className="text-sm text-gray-500">
+                      AWS region where your S3 bucket is located
+                    </p>
+                  </div>
+
+                  <div className="flex justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleTestS3}
+                      disabled={testingS3}
+                    >
+                      {testingS3 ? 'Testing...' : 'Test S3 Connection'}
+                    </Button>
+                  </div>
+
+                  {s3Message && (
+                    <Alert className={s3Message.includes('Success') ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
+                      <AlertDescription className={s3Message.includes('Success') ? 'text-green-800' : 'text-red-800'}>
+                        {s3Message}
+                      </AlertDescription>
+                    </Alert>
+                  )}
                 </div>
 
                 <div className="flex justify-end">
