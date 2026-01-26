@@ -10,7 +10,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Alert, AlertDescription } from '../components/ui/alert';
-import { Settings as SettingsIcon, Users, Gem, Mail, FileText, Bell, CreditCard, Ticket, HelpCircle } from 'lucide-react';
+import { Settings as SettingsIcon, Users, Gem, Mail, FileText, Bell, CreditCard, Ticket, HelpCircle, Database } from 'lucide-react';
 
 function AdminSettings({ user }) {
   const navigate = useNavigate();
@@ -46,6 +46,10 @@ function AdminSettings({ user }) {
   });
   const [creatingCoupon, setCreatingCoupon] = useState(false);
   const [couponMessage, setCouponMessage] = useState('');
+  const [cacheStats, setCacheStats] = useState(null);
+  const [loadingCache, setLoadingCache] = useState(false);
+  const [clearingCache, setClearingCache] = useState(false);
+  const [cacheMessage, setCacheMessage] = useState('');
 
   useEffect(() => {
     // Redirect if not admin
@@ -343,6 +347,64 @@ function AdminSettings({ user }) {
     }
   };
 
+  const fetchCacheStats = async () => {
+    setLoadingCache(true);
+    setCacheMessage('');
+    try {
+      const response = await api.get('/cache/stats');
+      setCacheStats(response.data);
+    } catch (error) {
+      console.error('Failed to fetch cache stats:', error);
+      setCacheMessage('Failed to load cache statistics');
+    } finally {
+      setLoadingCache(false);
+    }
+  };
+
+  const handleClearCache = async () => {
+    if (!window.confirm('Are you sure you want to clear the entire media cache? This will force all S3 videos to be re-downloaded on next stream.')) {
+      return;
+    }
+
+    setClearingCache(true);
+    setCacheMessage('');
+    try {
+      await api.post('/cache/clear');
+      setCacheMessage('Cache cleared successfully!');
+      fetchCacheStats(); // Refresh stats
+      setTimeout(() => setCacheMessage(''), 5000);
+    } catch (error) {
+      setCacheMessage(error.response?.data?.error || 'Failed to clear cache');
+      setTimeout(() => setCacheMessage(''), 5000);
+    } finally {
+      setClearingCache(false);
+    }
+  };
+
+  const handleRemoveFromCache = async (s3Key) => {
+    if (!window.confirm(`Remove this file from cache?`)) {
+      return;
+    }
+
+    try {
+      await api.delete(`/cache/${encodeURIComponent(s3Key)}`);
+      setCacheMessage('File removed from cache');
+      fetchCacheStats(); // Refresh stats
+      setTimeout(() => setCacheMessage(''), 3000);
+    } catch (error) {
+      setCacheMessage(error.response?.data?.error || 'Failed to remove file');
+      setTimeout(() => setCacheMessage(''), 3000);
+    }
+  };
+
+  const formatBytes = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -365,7 +427,7 @@ function AdminSettings({ user }) {
 
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-9 h-auto gap-1">
+            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-10 h-auto gap-1">
               <TabsTrigger value="system" className="text-xs sm:text-sm gap-1.5 py-2">
                 <SettingsIcon className="w-4 h-4" />
                 <span className="hidden sm:inline">System</span>
@@ -389,6 +451,10 @@ function AdminSettings({ user }) {
               <TabsTrigger value="coupons" className="text-xs sm:text-sm gap-1.5 py-2" onClick={fetchCoupons}>
                 <Ticket className="w-4 h-4" />
                 <span>Coupons</span>
+              </TabsTrigger>
+              <TabsTrigger value="cache" className="text-xs sm:text-sm gap-1.5 py-2" onClick={fetchCacheStats}>
+                <Database className="w-4 h-4" />
+                <span>Cache</span>
               </TabsTrigger>
               <TabsTrigger value="users" className="text-xs sm:text-sm gap-1.5 py-2">
                 <Users className="w-4 h-4" />
@@ -1821,6 +1887,133 @@ function AdminSettings({ user }) {
 
             <TabsContent value="plans" className="mt-6">
               <PlanManagement />
+            </TabsContent>
+
+            {/* Cache Management Tab */}
+            <TabsContent value="cache" className="mt-6">
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Media Cache Management</h3>
+                  <p className="text-sm text-gray-600 mb-4">
+                    The media cache stores S3 videos locally to reduce AWS costs. First stream downloads from S3, subsequent streams use cached files.
+                  </p>
+                </div>
+
+                {cacheMessage && (
+                  <Alert className={cacheMessage.includes('Failed') || cacheMessage.includes('Error') ? 'border-red-500 bg-red-50' : 'border-green-500 bg-green-50'}>
+                    <AlertDescription>{cacheMessage}</AlertDescription>
+                  </Alert>
+                )}
+
+                {/* Cache Statistics */}
+                {cacheStats && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Cache Statistics</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <div className="text-sm text-gray-600 mb-1">Total Files</div>
+                          <div className="text-2xl font-bold text-blue-700">{cacheStats.totalFiles}</div>
+                        </div>
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                          <div className="text-sm text-gray-600 mb-1">Cache Size</div>
+                          <div className="text-2xl font-bold text-green-700">{cacheStats.currentSizeGB} GB</div>
+                          <div className="text-xs text-gray-500">of {cacheStats.maxSizeGB} GB max</div>
+                        </div>
+                        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                          <div className="text-sm text-gray-600 mb-1">Utilization</div>
+                          <div className="text-2xl font-bold text-purple-700">{cacheStats.utilizationPercent}%</div>
+                          <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                            <div
+                              className={`h-2 rounded-full ${cacheStats.utilizationPercent > 90 ? 'bg-red-600' : cacheStats.utilizationPercent > 70 ? 'bg-yellow-500' : 'bg-green-500'}`}
+                              style={{ width: `${cacheStats.utilizationPercent}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-3">
+                        <Button
+                          onClick={fetchCacheStats}
+                          disabled={loadingCache}
+                          variant="outline"
+                        >
+                          {loadingCache ? 'Refreshing...' : 'Refresh Stats'}
+                        </Button>
+                        <Button
+                          onClick={handleClearCache}
+                          disabled={clearingCache}
+                          variant="destructive"
+                        >
+                          {clearingCache ? 'Clearing...' : 'Clear Entire Cache'}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Cached Files List */}
+                {cacheStats && cacheStats.files && cacheStats.files.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Cached Files ({cacheStats.files.length})</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2 max-h-96 overflow-y-auto">
+                        {cacheStats.files.map((file, index) => (
+                          <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded border">
+                            <div className="flex-1 min-w-0">
+                              <div className="font-mono text-xs text-gray-700 truncate">{file.key}</div>
+                              <div className="text-xs text-gray-500 mt-1">
+                                Size: {file.sizeMB} MB | Last accessed: {new Date(file.lastAccessed).toLocaleString()}
+                                {file.downloading && <span className="ml-2 text-yellow-600 font-semibold">⬇️ Downloading...</span>}
+                              </div>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleRemoveFromCache(file.key)}
+                              disabled={file.downloading}
+                              className="ml-3"
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Load Stats Button */}
+                {!cacheStats && (
+                  <Card>
+                    <CardContent className="py-8 text-center">
+                      <p className="text-gray-600 mb-4">Click the button below to load cache statistics</p>
+                      <Button onClick={fetchCacheStats} disabled={loadingCache}>
+                        {loadingCache ? 'Loading...' : 'Load Cache Statistics'}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Cost Savings Info */}
+                <Card className="bg-blue-50 border-blue-200">
+                  <CardHeader>
+                    <CardTitle className="text-base text-blue-900">💰 Cost Savings</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-blue-800 mb-3">
+                      Without cache: Streaming the same 2GB video 100 times would cost <strong>$18/month</strong> in AWS data transfer.
+                    </p>
+                    <p className="text-sm text-blue-800">
+                      With cache: First download costs $0.18, then <strong>$0/month</strong> for the next 99 streams. <strong>Savings: 99%</strong>
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
 
             {/* FAQ Tab */}
