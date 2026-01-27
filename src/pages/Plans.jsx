@@ -331,6 +331,11 @@ function Plans() {
 
                   <div className="flex items-center gap-2 text-sm">
                     <span className="text-green-600 text-lg">✓</span>
+                    <span>{plan.cloud_storage_enabled ? '☁️ Cloud Storage (AWS S3)' : '💾 Local Storage'}</span>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-green-600 text-lg">✓</span>
                     <span><strong>{formatDuration(plan.max_stream_duration)}</strong> per Stream</span>
                   </div>
 
