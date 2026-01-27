@@ -1,0 +1,19 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "2AYN3GL56H.com.rexstream.app",
+        "paths": [
+          "/api/app/oauth-callback",
+          "/api/app/*"
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": [
+      "2AYN3GL56H.com.rexstream.app"
+    ]
+  }
+}
