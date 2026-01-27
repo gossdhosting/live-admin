@@ -10,7 +10,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Alert, AlertDescription } from '../components/ui/alert';
-import { Settings as SettingsIcon, Users, Gem, Mail, FileText, Bell, CreditCard, Ticket, HelpCircle, Database } from 'lucide-react';
+import { Settings as SettingsIcon, Users, Gem, Mail, FileText, Bell, CreditCard, Ticket, HelpCircle, Database, ChevronLeft, ChevronRight } from 'lucide-react';
 
 function AdminSettings({ user }) {
   const navigate = useNavigate();
@@ -50,6 +50,7 @@ function AdminSettings({ user }) {
   const [loadingCache, setLoadingCache] = useState(false);
   const [clearingCache, setClearingCache] = useState(false);
   const [cacheMessage, setCacheMessage] = useState('');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     // Redirect if not admin
@@ -437,9 +438,22 @@ function AdminSettings({ user }) {
 
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Side Navigation */}
-        <div className="lg:w-64 flex-shrink-0">
+        <div className={`relative flex-shrink-0 transition-all duration-300 ${sidebarCollapsed ? 'lg:w-16' : 'lg:w-64'}`}>
           <Card>
             <CardContent className="p-2">
+              {/* Collapse Button */}
+              <button
+                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                className="hidden lg:flex items-center justify-center w-full mb-2 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                title={sidebarCollapsed ? 'Expand menu' : 'Collapse menu'}
+              >
+                {sidebarCollapsed ? (
+                  <ChevronRight className="w-5 h-5 text-gray-600" />
+                ) : (
+                  <ChevronLeft className="w-5 h-5 text-gray-600" />
+                )}
+              </button>
+
               <nav className="space-y-1">
                 {navItems.map((item) => {
                   const Icon = item.icon;
@@ -455,9 +469,10 @@ function AdminSettings({ user }) {
                           ? 'bg-blue-600 text-white'
                           : 'text-gray-700 hover:bg-gray-100'
                       }`}
+                      title={sidebarCollapsed ? item.label : ''}
                     >
                       <Icon className="w-5 h-5 flex-shrink-0" />
-                      <span className="text-sm font-medium">{item.label}</span>
+                      {!sidebarCollapsed && <span className="text-sm font-medium">{item.label}</span>}
                     </button>
                   );
                 })}
@@ -471,16 +486,18 @@ function AdminSettings({ user }) {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
 
             {/* System Settings Tab */}
-            <TabsContent value="system" className="mt-6 space-y-6">
+            <TabsContent value="system" className="mt-6">
               {message && (
-                <Alert className={message.includes('success') ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
+                <Alert className={`mb-6 ${message.includes('success') ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
                   <AlertDescription className={message.includes('success') ? 'text-green-800' : 'text-red-800'}>
                     {message}
                   </AlertDescription>
                 </Alert>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <Card>
+                <CardContent className="pt-6">
+                  <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Stream Limits</h3>
 
@@ -1065,17 +1082,23 @@ function AdminSettings({ user }) {
                   </p>
                 </div>
               </div>
+                  </form>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             {/* SMTP Settings Tab */}
-            <TabsContent value="smtp" className="mt-6 space-y-6">
+            <TabsContent value="smtp" className="mt-6">
               {smtpMessage && (
-                <Alert className={smtpMessage.includes('success') || smtpMessage.includes('sent') ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
+                <Alert className={`mb-6 ${smtpMessage.includes('success') || smtpMessage.includes('sent') ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
                   <AlertDescription className={smtpMessage.includes('success') || smtpMessage.includes('sent') ? 'text-green-800' : 'text-red-800'}>
                     {smtpMessage}
                   </AlertDescription>
                 </Alert>
               )}
+
+              <Card>
+                <CardContent className="pt-6 space-y-6">
 
               <div>
                 <h3 className="text-lg font-semibold mb-2">Email Configuration</h3>
@@ -1233,6 +1256,8 @@ function AdminSettings({ user }) {
                   </ul>
                 </div>
               </div>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             {/* Email Templates Tab */}
