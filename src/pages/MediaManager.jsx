@@ -251,6 +251,7 @@ function MediaManager({ user }) {
                     <strong>👤 Uploaded by:</strong> {media.user_email || `User #${media.user_id}`}
                   </div>
                 )}
+                <div><strong>Storage:</strong> {media.storage_type === 's3' ? '☁️ Cloud (AWS S3)' : '💾 Local'}</div>
                 <div><strong>Size:</strong> {formatFileSize(media.file_size)}</div>
                 <div><strong>Duration:</strong> {formatDuration(media.duration)}</div>
                 <div><strong>Uploaded:</strong> {new Date(media.created_at).toLocaleDateString()}</div>
