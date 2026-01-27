@@ -1082,7 +1082,6 @@ function AdminSettings({ user }) {
                   </p>
                 </div>
               </div>
-                  </form>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -1261,23 +1260,25 @@ function AdminSettings({ user }) {
             </TabsContent>
 
             {/* Email Templates Tab */}
-            <TabsContent value="email-templates" className="mt-6 space-y-6">
+            <TabsContent value="email-templates" className="mt-6">
               {message && (
-                <Alert className={message.includes('success') ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
+                <Alert className={`mb-6 ${message.includes('success') ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
                   <AlertDescription className={message.includes('success') ? 'text-green-800' : 'text-red-800'}>
                     {message}
                   </AlertDescription>
                 </Alert>
               )}
 
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Email Templates</h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  Customize email templates sent to users. Use variables like {'${name}'}, {'${email}'}, {'${resetLink}'} in your templates.
-                </p>
-              </div>
+              <Card>
+                <CardContent className="pt-6 space-y-6">
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Email Templates</h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Customize email templates sent to users. Use variables like {'${name}'}, {'${email}'}, {'${resetLink}'} in your templates.
+                    </p>
+                  </div>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
+                  <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="email_header">Email Header</Label>
                   <textarea
@@ -1334,32 +1335,36 @@ function AdminSettings({ user }) {
                   </p>
                 </div>
 
-                <div className="flex justify-end">
-                  <Button type="submit" disabled={saving}>
-                    {saving ? 'Saving...' : 'Save Email Templates'}
-                  </Button>
-                </div>
-              </form>
+                    <div className="flex justify-end">
+                      <Button type="submit" disabled={saving}>
+                        {saving ? 'Saving...' : 'Save Email Templates'}
+                      </Button>
+                    </div>
+                  </form>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             {/* Notifications Tab */}
-            <TabsContent value="notifications" className="mt-6 space-y-6">
+            <TabsContent value="notifications" className="mt-6">
               {pushoverMessage && (
-                <Alert className={pushoverMessage.includes('success') || pushoverMessage.includes('sent') ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
+                <Alert className={`mb-6 ${pushoverMessage.includes('success') || pushoverMessage.includes('sent') ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
                   <AlertDescription className={pushoverMessage.includes('success') || pushoverMessage.includes('sent') ? 'text-green-800' : 'text-red-800'}>
                     {pushoverMessage}
                   </AlertDescription>
                 </Alert>
               )}
 
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Notification Settings</h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  Configure email and push notifications for admin alerts
-                </p>
-              </div>
+              <Card>
+                <CardContent className="pt-6 space-y-6">
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Notification Settings</h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Configure email and push notifications for admin alerts
+                    </p>
+                  </div>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
+                  <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Admin Email Notifications */}
                 <div className="p-4 border rounded-lg space-y-4">
                   <h4 className="font-semibold">Admin Email Notifications</h4>
@@ -1439,26 +1444,30 @@ function AdminSettings({ user }) {
                   </div>
                 </div>
 
-                <div className="flex justify-end">
-                  <Button type="submit" disabled={saving}>
-                    {saving ? 'Saving...' : 'Save Notification Settings'}
-                  </Button>
-                </div>
-              </form>
+                    <div className="flex justify-end">
+                      <Button type="submit" disabled={saving}>
+                        {saving ? 'Saving...' : 'Save Notification Settings'}
+                      </Button>
+                    </div>
+                  </form>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             {/* Payment Settings Tab */}
             <TabsContent value="payment" className="mt-6">
-              <form onSubmit={handlePaymentSubmit} className="space-y-6">
-                {paymentMessage && (
-                  <Alert className={paymentMessage.includes('success') ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
-                    <AlertDescription className={paymentMessage.includes('success') ? 'text-green-800' : 'text-red-800'}>
-                      {paymentMessage}
-                    </AlertDescription>
-                  </Alert>
-                )}
+              {paymentMessage && (
+                <Alert className={`mb-6 ${paymentMessage.includes('success') ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
+                  <AlertDescription className={paymentMessage.includes('success') ? 'text-green-800' : 'text-red-800'}>
+                    {paymentMessage}
+                  </AlertDescription>
+                </Alert>
+              )}
 
-                <div className="space-y-4">
+              <Card>
+                <CardContent className="pt-6 space-y-6">
+                  <form onSubmit={handlePaymentSubmit} className="space-y-6">
+                    <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Stripe Configuration</h3>
                   <p className="text-sm text-gray-600">
                     Configure Stripe payment gateway for subscription billing. Get your API keys from{' '}
@@ -1689,31 +1698,37 @@ function AdminSettings({ user }) {
                   </div>
                 </div>
 
-                <div className="flex justify-end">
-                  <Button type="submit" disabled={saving}>
-                    {saving ? 'Saving...' : 'Save IAP Settings'}
-                  </Button>
-                </div>
-              </form>
+                    <div className="flex justify-end">
+                      <Button type="submit" disabled={saving}>
+                        {saving ? 'Saving...' : 'Save IAP Settings'}
+                      </Button>
+                    </div>
+                  </form>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             {/* Users Tab */}
             <TabsContent value="users" className="mt-6">
-              <UserManagement />
+              <Card>
+                <CardContent className="pt-6">
+                  <UserManagement />
+                </CardContent>
+              </Card>
             </TabsContent>
 
             {/* Plans Tab */}
             {/* Coupons Tab */}
             <TabsContent value="coupons" className="mt-6">
-              <div className="space-y-6">
-                {couponMessage && (
-                  <Alert className={couponMessage.includes('success') ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
-                    <AlertDescription className={couponMessage.includes('success') ? 'text-green-800' : 'text-red-800'}>
-                      {couponMessage}
-                    </AlertDescription>
-                  </Alert>
-                )}
+              {couponMessage && (
+                <Alert className={`mb-6 ${couponMessage.includes('success') ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
+                  <AlertDescription className={couponMessage.includes('success') ? 'text-green-800' : 'text-red-800'}>
+                    {couponMessage}
+                  </AlertDescription>
+                </Alert>
+              )}
 
+              <div className="space-y-6">
                 {/* Create Coupon Form */}
                 <Card>
                   <CardHeader>
@@ -1911,26 +1926,31 @@ function AdminSettings({ user }) {
             </TabsContent>
 
             <TabsContent value="plans" className="mt-6">
-              <PlanManagement />
+              <Card>
+                <CardContent className="pt-6">
+                  <PlanManagement />
+                </CardContent>
+              </Card>
             </TabsContent>
 
             {/* Cache Management Tab */}
             <TabsContent value="cache" className="mt-6">
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-semibold mb-2">Media Cache Management</h3>
-                  <p className="text-sm text-gray-600 mb-4">
-                    The media cache stores S3 videos locally to reduce AWS costs. First stream downloads from S3, subsequent streams use cached files.
-                  </p>
-                </div>
+              {cacheMessage && (
+                <Alert className={`mb-6 ${cacheMessage.includes('Failed') || cacheMessage.includes('Error') ? 'border-red-500 bg-red-50' : 'border-green-500 bg-green-50'}`}>
+                  <AlertDescription>{cacheMessage}</AlertDescription>
+                </Alert>
+              )}
 
-                {cacheMessage && (
-                  <Alert className={cacheMessage.includes('Failed') || cacheMessage.includes('Error') ? 'border-red-500 bg-red-50' : 'border-green-500 bg-green-50'}>
-                    <AlertDescription>{cacheMessage}</AlertDescription>
-                  </Alert>
-                )}
+              <Card>
+                <CardContent className="pt-6 space-y-6">
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Media Cache Management</h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      The media cache stores S3 videos locally to reduce AWS costs. First stream downloads from S3, subsequent streams use cached files.
+                    </p>
+                  </div>
 
-                {/* Cache Statistics */}
+                  {/* Cache Statistics */}
                 {cacheStats && (
                   <Card>
                     <CardHeader>
@@ -2024,26 +2044,31 @@ function AdminSettings({ user }) {
                   </Card>
                 )}
 
-                {/* Cost Savings Info */}
-                <Card className="bg-blue-50 border-blue-200">
-                  <CardHeader>
-                    <CardTitle className="text-base text-blue-900">💰 Cost Savings</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-blue-800 mb-3">
-                      Without cache: Streaming the same 2GB video 100 times would cost <strong>$18/month</strong> in AWS data transfer.
-                    </p>
-                    <p className="text-sm text-blue-800">
-                      With cache: First download costs $0.18, then <strong>$0/month</strong> for the next 99 streams. <strong>Savings: 99%</strong>
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
+                  {/* Cost Savings Info */}
+                  <Card className="bg-blue-50 border-blue-200">
+                    <CardHeader>
+                      <CardTitle className="text-base text-blue-900">💰 Cost Savings</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-blue-800 mb-3">
+                        Without cache: Streaming the same 2GB video 100 times would cost <strong>$18/month</strong> in AWS data transfer.
+                      </p>
+                      <p className="text-sm text-blue-800">
+                        With cache: First download costs $0.18, then <strong>$0/month</strong> for the next 99 streams. <strong>Savings: 99%</strong>
+                      </p>
+                    </CardContent>
+                  </Card>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             {/* FAQ Tab */}
             <TabsContent value="faq" className="mt-6">
-              <FAQManagement />
+              <Card>
+                <CardContent className="pt-6">
+                  <FAQManagement />
+                </CardContent>
+              </Card>
             </TabsContent>
           </Tabs>
         </div>
