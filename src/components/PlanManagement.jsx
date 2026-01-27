@@ -249,9 +249,14 @@ function PlanManagement() {
                 <td style={{ padding: '0.75rem' }}>{plan.max_platform_connections || 1}</td>
                 <td style={{ padding: '0.75rem' }}>{plan.max_bitrate}k</td>
                 <td style={{ padding: '0.75rem' }}>
-                  {plan.storage_limit_mb >= 1024
-                    ? `${(plan.storage_limit_mb / 1024).toFixed(1)}GB`
-                    : `${plan.storage_limit_mb}MB`}
+                  <div>
+                    {plan.storage_limit_mb >= 1024
+                      ? `${(plan.storage_limit_mb / 1024).toFixed(1)}GB`
+                      : `${plan.storage_limit_mb}MB`}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '2px' }}>
+                    {plan.cloud_storage_enabled ? '☁️ Cloud (S3)' : '💾 Local'}
+                  </div>
                 </td>
                 <td style={{ padding: '0.75rem' }}>
                   <span style={{
