@@ -324,6 +324,7 @@ function MediaManager({ user }) {
                   <div><strong>File Name:</strong> {previewMedia.original_name}</div>
                   <div><strong>Size:</strong> {formatFileSize(previewMedia.file_size)}</div>
                   <div><strong>Duration:</strong> {formatDuration(previewMedia.duration)}</div>
+                  <div><strong>Storage:</strong> {previewMedia.storage_type === 's3' ? '☁️ AWS S3' : '💾 Local'}</div>
                   <div><strong>Uploaded:</strong> {new Date(previewMedia.created_at).toLocaleDateString()}</div>
                   {isAdmin && previewMedia.user_email && (
                     <div><strong>Uploaded by:</strong> {previewMedia.user_email}</div>
