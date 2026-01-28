@@ -7,6 +7,7 @@ import { Label } from '../components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { signInWithGoogle, signInWithFacebook, signInWithApple, isFirebaseAvailable } from '../config/firebase';
+import { executeRecaptcha } from '../utils/recaptcha';
 
 function Register() {
   const navigate = useNavigate();
@@ -66,12 +67,16 @@ function Register() {
     setLoading(true);
 
     try {
+      // Execute reCAPTCHA
+      const recaptchaToken = await executeRecaptcha('REGISTER');
+
       await api.post('/users/register', {
         email: formData.email,
         password: formData.password,
         name: formData.name,
         plan_id: formData.plan_id,
-        subscription_type: formData.subscription_type
+        subscription_type: formData.subscription_type,
+        recaptchaToken
       });
 
       setSuccess(true);

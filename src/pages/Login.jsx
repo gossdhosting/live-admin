@@ -7,6 +7,7 @@ import { Label } from '../components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { signInWithGoogle, signInWithFacebook, signInWithApple, isFirebaseAvailable } from '../config/firebase';
+import { executeRecaptcha } from '../utils/recaptcha';
 
 function Login({ onLogin }) {
   const [formData, setFormData] = useState({
@@ -23,7 +24,13 @@ function Login({ onLogin }) {
     setLoading(true);
 
     try {
-      const response = await api.post('/auth/login', formData);
+      // Execute reCAPTCHA
+      const recaptchaToken = await executeRecaptcha('LOGIN');
+
+      const response = await api.post('/auth/login', {
+        ...formData,
+        recaptchaToken
+      });
       onLogin(response.data.user, response.data.token);
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed');
