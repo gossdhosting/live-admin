@@ -10,7 +10,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Alert, AlertDescription } from '../components/ui/alert';
-import { Settings as SettingsIcon, Users, Gem, Mail, FileText, Bell, CreditCard, Ticket, HelpCircle, Database, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Settings as SettingsIcon, Users, Gem, Mail, FileText, Bell, CreditCard, Ticket, HelpCircle, Database, ChevronLeft, ChevronRight, AlertTriangle, Radio, ShieldAlert } from 'lucide-react';
 
 function AdminSettings({ user }) {
   const navigate = useNavigate();
@@ -828,9 +828,10 @@ function AdminSettings({ user }) {
                     </div>
                   </div>
 
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-4">
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-4 flex items-start gap-2">
+                    <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
                     <p className="text-sm text-yellow-800">
-                      <strong>⚠️ Important:</strong> Changes to encoding settings apply to newly started streams only.
+                      <strong>Important:</strong> Changes to encoding settings apply to newly started streams only.
                       Restart existing streams to apply new settings.
                     </p>
                   </div>
@@ -1540,7 +1541,7 @@ function AdminSettings({ user }) {
                     {/* Live Keys Section */}
                     <div className="border border-red-300 bg-red-50 rounded-lg p-4">
                       <h4 className="font-semibold text-red-900 mb-3 flex items-center gap-2">
-                        <span>🔴</span> Live Keys (Production Mode)
+                        <Radio className="w-4 h-4 text-red-600" /> Live Keys (Production Mode)
                       </h4>
                       <div className="space-y-3">
                         <div>
@@ -1565,8 +1566,8 @@ function AdminSettings({ user }) {
                             placeholder="sk_live_..."
                             className="bg-white"
                           />
-                          <p className="text-sm text-red-600 mt-1">
-                            ⚠️ Keep this secret! Never share or expose this key.
+                          <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+                            <ShieldAlert className="w-4 h-4" /> Keep this secret! Never share or expose this key.
                           </p>
                         </div>
 

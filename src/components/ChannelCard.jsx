@@ -279,20 +279,20 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
     const percentComplete = (runtimeMinutes / maxDuration) * 100;
 
     let statusColor = '#27ae60';
-    let statusIcon = '⏱️';
+    let isWarning = false;
     if (percentComplete >= 90) {
       statusColor = '#e74c3c';
-      statusIcon = '⚠️';
+      isWarning = true;
     } else if (percentComplete >= 75) {
       statusColor = '#f39c12';
-      statusIcon = '⚠️';
+      isWarning = true;
     }
 
     return (
       <div className="bg-gray-50 p-4 rounded-md mt-4" style={{ border: `2px solid ${statusColor}` }}>
         <div className="flex justify-between items-center mb-2">
           <div className="text-sm font-semibold text-gray-800 flex items-center gap-1.5">
-            {statusIcon === '⚠️' ? <AlertTriangle className="w-4 h-4" style={{ color: statusColor }} /> : <Video className="w-4 h-4" style={{ color: statusColor }} />}
+            {isWarning ? <AlertTriangle className="w-4 h-4" style={{ color: statusColor }} /> : <Video className="w-4 h-4" style={{ color: statusColor }} />}
             Stream Duration
           </div>
           <div className="text-lg font-bold font-mono" style={{ color: statusColor }}>
@@ -571,51 +571,89 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
         );
 
       case 'watermark':
+        const hasCustomWatermarkPermission = userStats?.limits?.custom_watermark === true;
+
         return (
           <div className="p-6">
-            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
-              <div>
-                <h4 className="font-semibold text-gray-900 mb-1">Enable Watermark</h4>
-                <p className="text-sm text-gray-600">
-                  {watermarkEnabled ? 'Watermark is enabled for this stream' : 'Watermark is disabled for this stream'}
-                </p>
+            {/* Show info for users without custom watermark permission */}
+            {!hasCustomWatermarkPermission && (
+              <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <ImageIcon className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-semibold text-blue-900 mb-1">Default Watermark Applied</h4>
+                    <p className="text-sm text-blue-700">
+                      Your current plan uses the platform's default watermark. Upgrade your plan to upload and use custom watermarks.
+                    </p>
+                  </div>
+                </div>
               </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={watermarkEnabled}
-                  onChange={async (e) => {
-                    const newValue = e.target.checked;
-                    // Optimistic update
-                    setWatermarkEnabled(newValue);
+            )}
 
-                    try {
-                      await api.put(`/channels/${channel.id}`, {
-                        watermark_enabled: newValue ? 1 : 0
-                      });
-                      // Refresh to ensure we're in sync with server
-                      onUpdate();
-                    } catch (error) {
-                      // Revert on error
-                      setWatermarkEnabled(!newValue);
-                      await showAlert({
-                        title: 'Failed to Update Watermark',
-                        message: error.response?.data?.error || 'Failed to update watermark setting',
-                        type: 'error'
-                      });
-                    }
-                  }}
-                  disabled={channel.status === 'running'}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 peer-disabled:opacity-50 peer-disabled:cursor-not-allowed"></div>
-              </label>
-            </div>
+            {/* Watermark toggle - only for users with custom watermark permission */}
+            {hasCustomWatermarkPermission ? (
+              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-1">Enable Custom Watermark</h4>
+                  <p className="text-sm text-gray-600">
+                    {watermarkEnabled ? 'Your custom watermark is enabled for this stream' : 'Custom watermark is disabled - default watermark will be used'}
+                  </p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={watermarkEnabled}
+                    onChange={async (e) => {
+                      const newValue = e.target.checked;
+                      // Optimistic update
+                      setWatermarkEnabled(newValue);
 
-            {channel.status === 'running' && (
+                      try {
+                        await api.put(`/channels/${channel.id}`, {
+                          watermark_enabled: newValue ? 1 : 0
+                        });
+                        // Refresh to ensure we're in sync with server
+                        onUpdate();
+                      } catch (error) {
+                        // Revert on error
+                        setWatermarkEnabled(!newValue);
+                        await showAlert({
+                          title: 'Failed to Update Watermark',
+                          message: error.response?.data?.error || 'Failed to update watermark setting',
+                          type: 'error'
+                        });
+                      }
+                    }}
+                    disabled={channel.status === 'running'}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 peer-disabled:opacity-50 peer-disabled:cursor-not-allowed"></div>
+                </label>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div>
+                  <h4 className="font-semibold text-gray-500 mb-1">Custom Watermark</h4>
+                  <p className="text-sm text-gray-400">
+                    Custom watermark feature is not available on your current plan
+                  </p>
+                </div>
+                <label className="relative inline-flex items-center cursor-not-allowed opacity-50">
+                  <input
+                    type="checkbox"
+                    checked={false}
+                    disabled={true}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 rounded-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5"></div>
+                </label>
+              </div>
+            )}
+
+            {channel.status === 'running' && hasCustomWatermarkPermission && (
               <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
                 <p className="text-sm text-yellow-800">
-                  ⚠️ Stop the stream to change watermark settings
+                  Stop the stream to change watermark settings
                 </p>
               </div>
             )}
@@ -759,8 +797,9 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
                     </Button>
                   )}
                   {hasSchedule && (
-                    <Badge variant="secondary" className="text-xs font-medium">
-                      📅 Scheduled: {new Date(channel.scheduled_stream.scheduled_start_time).toLocaleString('en-US', {
+                    <Badge variant="secondary" className="text-xs font-medium flex items-center gap-1">
+                      <Calendar className="w-3 h-3" />
+                      Scheduled: {new Date(channel.scheduled_stream.scheduled_start_time).toLocaleString('en-US', {
                         timeZone: channel.scheduled_stream.timezone || 'UTC',
                         dateStyle: 'short',
                         timeStyle: 'short'

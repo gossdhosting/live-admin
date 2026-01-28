@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
+import { Cloud, HardDrive, Calendar } from 'lucide-react';
 
 function PlanManagement() {
   const [plans, setPlans] = useState([]);
@@ -254,8 +255,12 @@ function PlanManagement() {
                       ? `${(plan.storage_limit_mb / 1024).toFixed(1)}GB`
                       : `${plan.storage_limit_mb}MB`}
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '2px' }}>
-                    {plan.cloud_storage_enabled ? '☁️ Cloud (S3)' : '💾 Local'}
+                  <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                    {plan.cloud_storage_enabled ? (
+                      <><Cloud style={{ width: '0.875rem', height: '0.875rem' }} /> Cloud (S3)</>
+                    ) : (
+                      <><HardDrive style={{ width: '0.875rem', height: '0.875rem' }} /> Local</>
+                    )}
                   </div>
                 </td>
                 <td style={{ padding: '0.75rem' }}>
@@ -296,9 +301,12 @@ function PlanManagement() {
                         borderRadius: '4px',
                         fontSize: '0.8rem',
                         backgroundColor: '#3498db',
-                        color: '#fff'
+                        color: '#fff',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.25rem'
                       }} title="Scheduled streaming enabled">
-                        📅 Schedule
+                        <Calendar style={{ width: '0.875rem', height: '0.875rem' }} /> Schedule
                       </span>
                     )}
                   </div>

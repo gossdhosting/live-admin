@@ -5,6 +5,7 @@ import StreamPreview from './StreamPreview';
 import { Button } from './ui/button';
 import { Label } from './ui/label';
 import { Alert, AlertDescription } from './ui/alert';
+import { CheckCircle } from 'lucide-react';
 
 function WatermarkSettingsUser({ onUpdate }) {
   const [uploading, setUploading] = useState(false);
@@ -193,8 +194,9 @@ function WatermarkSettingsUser({ onUpdate }) {
             )}
             {settings.watermark_path && (
               <div className="flex items-center gap-3 mt-2">
-                <span className="text-sm text-green-600 font-medium">
-                  ✓ Watermark uploaded
+                <span className="text-sm text-green-600 font-medium flex items-center gap-1">
+                  <CheckCircle className="w-4 h-4" />
+                  Watermark uploaded
                 </span>
                 <Button
                   variant="destructive"

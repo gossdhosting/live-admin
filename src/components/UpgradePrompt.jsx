@@ -1,4 +1,5 @@
 import React from 'react';
+import { Rocket } from 'lucide-react';
 
 function UpgradePrompt({
   currentPlan,
@@ -30,10 +31,9 @@ function UpgradePrompt({
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
         <div style={{
-          fontSize: '2.5rem',
           lineHeight: 1
         }}>
-          🚀
+          <Rocket style={{ width: '2.5rem', height: '2.5rem' }} />
         </div>
         <div style={{ flex: 1 }}>
           <h3 style={{ margin: 0, marginBottom: '0.5rem', fontSize: '1.1rem' }}>

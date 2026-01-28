@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import UpgradePrompt from '../components/UpgradePrompt';
 import { Button } from '../components/ui/button';
-import { Upload } from 'lucide-react';
+import { Upload, Cloud, HardDrive, Eye, User } from 'lucide-react';
 
 function MediaManager({ user }) {
   const [mediaFiles, setMediaFiles] = useState([]);
@@ -247,11 +247,19 @@ function MediaManager({ user }) {
 
               <div className="text-sm text-gray-600 mb-2 space-y-1">
                 {isAdmin && (
-                  <div className="bg-blue-50 p-2 rounded mb-2 text-blue-700">
-                    <strong>👤 Uploaded by:</strong> {media.user_email || `User #${media.user_id}`}
+                  <div className="bg-blue-50 p-2 rounded mb-2 text-blue-700 flex items-center gap-1">
+                    <User className="w-4 h-4" />
+                    <strong>Uploaded by:</strong> {media.user_email || `User #${media.user_id}`}
                   </div>
                 )}
-                <div><strong>Storage:</strong> {media.storage_type === 's3' ? '☁️ Cloud (AWS S3)' : '💾 Local'}</div>
+                <div className="flex items-center gap-1">
+                  <strong>Storage:</strong>
+                  {media.storage_type === 's3' ? (
+                    <span className="flex items-center gap-1"><Cloud className="w-4 h-4" /> Cloud (AWS S3)</span>
+                  ) : (
+                    <span className="flex items-center gap-1"><HardDrive className="w-4 h-4" /> Local</span>
+                  )}
+                </div>
                 <div><strong>Size:</strong> {formatFileSize(media.file_size)}</div>
                 <div><strong>Duration:</strong> {formatDuration(media.duration)}</div>
                 <div><strong>Uploaded:</strong> {new Date(media.created_at).toLocaleDateString()}</div>
@@ -263,7 +271,7 @@ function MediaManager({ user }) {
                   className="flex-1"
                   size="sm"
                 >
-                  👁️ Preview
+                  <Eye className="w-4 h-4 mr-1" /> Preview
                 </Button>
                 <Button
                   onClick={() => handleDelete(media.id)}
@@ -325,7 +333,14 @@ function MediaManager({ user }) {
                   <div><strong>File Name:</strong> {previewMedia.original_name}</div>
                   <div><strong>Size:</strong> {formatFileSize(previewMedia.file_size)}</div>
                   <div><strong>Duration:</strong> {formatDuration(previewMedia.duration)}</div>
-                  <div><strong>Storage:</strong> {previewMedia.storage_type === 's3' ? '☁️ AWS S3' : '💾 Local'}</div>
+                  <div className="flex items-center gap-1">
+                    <strong>Storage:</strong>
+                    {previewMedia.storage_type === 's3' ? (
+                      <span className="flex items-center gap-1"><Cloud className="w-4 h-4" /> AWS S3</span>
+                    ) : (
+                      <span className="flex items-center gap-1"><HardDrive className="w-4 h-4" /> Local</span>
+                    )}
+                  </div>
                   <div><strong>Uploaded:</strong> {new Date(previewMedia.created_at).toLocaleDateString()}</div>
                   {isAdmin && previewMedia.user_email && (
                     <div><strong>Uploaded by:</strong> {previewMedia.user_email}</div>

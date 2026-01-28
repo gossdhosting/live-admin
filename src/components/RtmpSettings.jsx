@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
+import { Facebook, Youtube, Twitch, Settings } from 'lucide-react';
 
 function RtmpSettings({ channelId, channelName }) {
   const [destinations, setDestinations] = useState([]);
@@ -136,13 +137,13 @@ function RtmpSettings({ channelId, channelName }) {
   };
 
   const getPlatformIcon = (platform) => {
-    const icons = {
-      facebook: '📘',
-      youtube: '📺',
-      twitch: '🎮',
-      custom: '🔧',
-    };
-    return icons[platform] || '🔧';
+    const iconProps = { style: { width: '1.25rem', height: '1.25rem' } };
+    switch (platform) {
+      case 'facebook': return <Facebook {...iconProps} color="#1877f2" />;
+      case 'youtube': return <Youtube {...iconProps} color="#ff0000" />;
+      case 'twitch': return <Twitch {...iconProps} color="#9146ff" />;
+      default: return <Settings {...iconProps} color="#666" />;
+    }
   };
 
   const getPlatformLabel = (platform) => {

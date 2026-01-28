@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
+import { Check, X } from 'lucide-react';
 
 function UserManagement() {
   const [users, setUsers] = useState([]);
@@ -246,7 +247,7 @@ function UserManagement() {
                         {user.auth_provider.charAt(0).toUpperCase() + user.auth_provider.slice(1)}
                       </span>
                       {(user.email_verified === 1 || user.email_verified === true) && (
-                        <span style={{ color: '#27ae60', fontSize: '0.8rem' }} title="Email Verified">✓</span>
+                        <Check style={{ color: '#27ae60', width: '1rem', height: '1rem' }} title="Email Verified" />
                       )}
                     </div>
                   ) : (
@@ -572,9 +573,13 @@ function UserManagement() {
                     <div>
                       <strong>Email Verified:</strong>{' '}
                       {(userDetails.user.email_verified === 1 || userDetails.user.email_verified === true) ? (
-                        <span style={{ color: '#27ae60', fontWeight: '600' }}>✓ Yes</span>
+                        <span style={{ color: '#27ae60', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                          <Check style={{ width: '1rem', height: '1rem' }} /> Yes
+                        </span>
                       ) : (
-                        <span style={{ color: '#e74c3c' }}>✗ No</span>
+                        <span style={{ color: '#e74c3c', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                          <X style={{ width: '1rem', height: '1rem' }} /> No
+                        </span>
                       )}
                     </div>
                   </div>

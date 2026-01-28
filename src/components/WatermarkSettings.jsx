@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import UpgradePrompt from './UpgradePrompt';
+import { AlertTriangle, CheckCircle } from 'lucide-react';
 
 function WatermarkSettings({ channel, onUpdate }) {
   const [uploading, setUploading] = useState(false);
@@ -169,8 +170,12 @@ function WatermarkSettings({ channel, onUpdate }) {
           marginBottom: '1rem',
           color: '#856404',
           fontSize: '0.9rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
         }}>
-          ⚠️ Stop the stream to modify watermark settings
+          <AlertTriangle style={{ width: '1rem', height: '1rem' }} />
+          Stop the stream to modify watermark settings
         </div>
       )}
 
@@ -204,8 +209,9 @@ function WatermarkSettings({ channel, onUpdate }) {
                 alignItems: 'center',
                 gap: '0.5rem',
               }}>
-                <span style={{ color: '#27ae60', fontSize: '0.9rem' }}>
-                  ✓ Watermark uploaded
+                <span style={{ color: '#27ae60', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  <CheckCircle style={{ width: '1rem', height: '1rem' }} />
+                  Watermark uploaded
                 </span>
                 <button
                   className="btn btn-danger"

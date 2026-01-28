@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { TIMEZONES } from '../constants/timezones';
+import { Calendar } from 'lucide-react';
 
 function ScheduleStreamDialog({ channel, onClose, onScheduled }) {
   const [loading, setLoading] = useState(false);
@@ -230,7 +231,9 @@ function ScheduleStreamDialog({ channel, onClose, onScheduled }) {
             marginBottom: '1rem',
             border: '1px solid #2196f3'
           }}>
-            <strong>📅 Currently Scheduled:</strong>
+            <strong style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+              <Calendar style={{ width: '1rem', height: '1rem' }} /> Currently Scheduled:
+            </strong>
             <div style={{ fontSize: '0.9rem', marginTop: '0.25rem' }}>
               {new Date(scheduledStream.scheduled_start_time).toLocaleString('en-US', {
                 dateStyle: 'full',

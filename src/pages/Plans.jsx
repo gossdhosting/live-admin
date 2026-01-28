@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Alert, AlertDescription } from '../components/ui/alert';
+import { Check, X, Cloud, HardDrive } from 'lucide-react';
 
 function Plans() {
   const [plans, setPlans] = useState([]);
@@ -315,46 +316,51 @@ function Plans() {
                 {/* Features List */}
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-sm">
-                    <span className="text-green-600 text-lg">✓</span>
+                    <Check className="w-5 h-5 text-green-600" />
                     <span><strong>{plan.max_concurrent_streams}</strong> Concurrent Stream{plan.max_concurrent_streams > 1 ? 's' : ''}</span>
                   </div>
 
                   <div className="flex items-center gap-2 text-sm">
-                    <span className="text-green-600 text-lg">✓</span>
+                    <Check className="w-5 h-5 text-green-600" />
                     <span><strong>{formatBitrate(plan.max_bitrate)}</strong> Quality</span>
                   </div>
 
                   <div className="flex items-center gap-2 text-sm">
-                    <span className="text-green-600 text-lg">✓</span>
+                    <Check className="w-5 h-5 text-green-600" />
                     <span><strong>{formatStorage(plan.storage_limit_mb)}</strong> Storage</span>
                   </div>
 
                   <div className="flex items-center gap-2 text-sm">
-                    <span className="text-green-600 text-lg">✓</span>
-                    <span>{plan.cloud_storage_enabled ? '☁️ Cloud Storage (AWS S3)' : '💾 Local Storage'}</span>
+                    <Check className="w-5 h-5 text-green-600" />
+                    <span className="flex items-center gap-1">
+                      {plan.cloud_storage_enabled ? <Cloud className="w-4 h-4" /> : <HardDrive className="w-4 h-4" />}
+                      {plan.cloud_storage_enabled ? 'Cloud Storage (AWS S3)' : 'Local Storage'}
+                    </span>
                   </div>
 
                   <div className="flex items-center gap-2 text-sm">
-                    <span className="text-green-600 text-lg">✓</span>
+                    <Check className="w-5 h-5 text-green-600" />
                     <span><strong>{formatDuration(plan.max_stream_duration)}</strong> per Stream</span>
                   </div>
 
                   <div className="flex items-center gap-2 text-sm">
-                    <span className="text-green-600 text-lg">✓</span>
+                    <Check className="w-5 h-5 text-green-600" />
                     <span><strong>{plan.max_platform_connections || 1}</strong> Platform Connection{(plan.max_platform_connections || 1) > 1 ? 's' : ''}</span>
                   </div>
 
                   <div className="flex items-center gap-2 text-sm">
-                    <span className={`text-lg ${plan.custom_watermark ? 'text-green-600' : 'text-red-600'}`}>
-                      {plan.custom_watermark ? '✓' : '✗'}
-                    </span>
+                    {plan.custom_watermark ? (
+                      <Check className="w-5 h-5 text-green-600" />
+                    ) : (
+                      <X className="w-5 h-5 text-red-600" />
+                    )}
                     <span className={plan.custom_watermark ? '' : 'text-gray-500'}>
                       Custom Watermarks
                     </span>
                   </div>
 
                   <div className="flex items-center gap-2 text-sm">
-                    <span className="text-green-600 text-lg">✓</span>
+                    <Check className="w-5 h-5 text-green-600" />
                     <span>24/7 Support</span>
                   </div>
                 </div>

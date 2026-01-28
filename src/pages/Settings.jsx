@@ -9,7 +9,7 @@ import { Button } from '../components/ui/button';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { Label } from '../components/ui/label';
 import { Input } from '../components/ui/input';
-import { User, Lock, Image as ImageIcon, Trash2 } from 'lucide-react';
+import { User, Lock, Image as ImageIcon, Trash2, AlertTriangle } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -568,8 +568,9 @@ function Settings({ user }) {
                 </div>
 
                 <Alert className="border-yellow-200 bg-yellow-50">
-                  <AlertDescription className="text-yellow-800">
-                    ⚠️ After changing your password, you will be logged out and need to login again.
+                  <AlertDescription className="text-yellow-800 flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                    <span>After changing your password, you will be logged out and need to login again.</span>
                   </AlertDescription>
                 </Alert>
               </form>

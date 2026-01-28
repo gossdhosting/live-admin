@@ -6,7 +6,7 @@ import EditChannelModal from '../components/EditChannelModal';
 import UpgradePrompt from '../components/UpgradePrompt';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { RefreshCw, Plus, CheckCircle, AlertTriangle, XCircle, Radio } from 'lucide-react';
+import { RefreshCw, Plus, CheckCircle, AlertTriangle, XCircle, Radio, AlertCircle } from 'lucide-react';
 
 function Dashboard({ user }) {
   const [channels, setChannels] = useState([]);
@@ -228,9 +228,12 @@ function Dashboard({ user }) {
 
             {/* Storage limit warning (80% used) */}
             {userStats && (userStats?.usage?.storage_mb || 0) / userStats.limits.storage_limit_mb > 0.8 && (
-              <div className="mt-4 p-4 bg-yellow-50 border border-yellow-300 rounded-lg text-yellow-800 text-sm">
-                ⚠️ You're using {Math.round((userStats?.usage?.storage_mb || 0) / userStats.limits.storage_limit_mb * 100)}% of your storage limit.
-                {(userStats?.usage?.storage_mb || 0) / userStats.limits.storage_limit_mb > 0.95 && ' Uploads may fail soon.'}
+              <div className="mt-4 p-4 bg-yellow-50 border border-yellow-300 rounded-lg text-yellow-800 text-sm flex items-center gap-2">
+                <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                <span>
+                  You're using {Math.round((userStats?.usage?.storage_mb || 0) / userStats.limits.storage_limit_mb * 100)}% of your storage limit.
+                  {(userStats?.usage?.storage_mb || 0) / userStats.limits.storage_limit_mb > 0.95 && ' Uploads may fail soon.'}
+                </span>
               </div>
             )}
 
