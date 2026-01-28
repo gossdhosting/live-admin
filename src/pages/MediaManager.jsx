@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import UpgradePrompt from '../components/UpgradePrompt';
 import { Button } from '../components/ui/button';
-import { Upload, Cloud, HardDrive, Eye, User } from 'lucide-react';
+import { Upload, Cloud, HardDrive, Eye, User, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
+
+const ITEMS_PER_PAGE = 12;
 
 function MediaManager({ user }) {
   const [mediaFiles, setMediaFiles] = useState([]);
@@ -14,7 +16,14 @@ function MediaManager({ user }) {
   const [userStats, setUserStats] = useState(null);
   const [previewMedia, setPreviewMedia] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const isAdmin = user && user.role === 'admin';
+
+  // Pagination calculations
+  const totalPages = Math.ceil(mediaFiles.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const paginatedFiles = mediaFiles.slice(startIndex, endIndex);
 
   useEffect(() => {
     fetchMediaFiles();
@@ -72,6 +81,7 @@ function MediaManager({ user }) {
       setUploading(false);
       setUploadProgress(0);
       fetchMediaFiles();
+      setCurrentPage(1); // Go to first page to see new upload
       e.target.value = ''; // Reset input
     } catch (err) {
       setError(err.response?.data?.error || 'Upload failed');
@@ -236,7 +246,7 @@ function MediaManager({ user }) {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {mediaFiles.map((media) => (
+          {paginatedFiles.map((media) => (
             <div
               key={media.id}
               className="border border-gray-300 rounded-lg p-4 bg-white hover:shadow-lg transition-shadow"
@@ -279,11 +289,70 @@ function MediaManager({ user }) {
                   className="flex-1"
                   size="sm"
                 >
-                  🗑️ Delete
+                  <Trash2 className="w-4 h-4 mr-1" /> Delete
                 </Button>
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-4 mt-6 pb-4">
+          <Button
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            variant="outline"
+            size="sm"
+          >
+            <ChevronLeft className="w-4 h-4 mr-1" /> Previous
+          </Button>
+
+          <div className="flex items-center gap-2">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+              // Show first page, last page, current page, and pages around current
+              const showPage = page === 1 ||
+                page === totalPages ||
+                (page >= currentPage - 1 && page <= currentPage + 1);
+
+              const showEllipsis = page === currentPage - 2 || page === currentPage + 2;
+
+              if (showEllipsis && !showPage && page !== 1 && page !== totalPages) {
+                return <span key={page} className="px-2 text-gray-400">...</span>;
+              }
+
+              if (!showPage) return null;
+
+              return (
+                <Button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  variant={currentPage === page ? "default" : "outline"}
+                  size="sm"
+                  className="w-10"
+                >
+                  {page}
+                </Button>
+              );
+            })}
+          </div>
+
+          <Button
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            variant="outline"
+            size="sm"
+          >
+            Next <ChevronRight className="w-4 h-4 ml-1" />
+          </Button>
+        </div>
+      )}
+
+      {/* Page Info */}
+      {mediaFiles.length > 0 && (
+        <div className="text-center text-sm text-gray-500 mt-2">
+          Showing {startIndex + 1}-{Math.min(endIndex, mediaFiles.length)} of {mediaFiles.length} videos
         </div>
       )}
 
