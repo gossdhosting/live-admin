@@ -5,6 +5,7 @@ import { Badge } from '../components/ui/badge';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { MessageSquare, Clock, CheckCircle, XCircle, Filter, Search, Users } from 'lucide-react';
 import TicketDetail from '../components/tickets/TicketDetail';
+import UserDetailsModal from '../components/tickets/UserDetailsModal';
 
 function Tickets({ user }) {
   const [tickets, setTickets] = useState([]);
@@ -12,6 +13,7 @@ function Tickets({ user }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedTicket, setSelectedTicket] = useState(null);
+  const [selectedUserId, setSelectedUserId] = useState(null);
   const [filters, setFilters] = useState({
     status: 'all',
     category: 'all',
@@ -47,6 +49,15 @@ function Tickets({ user }) {
   const handleCloseDetail = () => {
     setSelectedTicket(null);
     fetchData();
+  };
+
+  const handleUserClick = (e, userId) => {
+    e.stopPropagation(); // Prevent ticket from opening
+    setSelectedUserId(userId);
+  };
+
+  const handleCloseUserModal = () => {
+    setSelectedUserId(null);
   };
 
   const getStatusBadge = (status) => {
@@ -272,7 +283,15 @@ function Tickets({ user }) {
                         {ticket.subject}
                       </h4>
                       <div className="flex items-center gap-4 text-sm text-gray-600">
-                        <span>User: {ticket.user_name || ticket.user_email}</span>
+                        <span>
+                          User:{' '}
+                          <button
+                            onClick={(e) => handleUserClick(e, ticket.user_id)}
+                            className="text-blue-600 hover:underline font-medium"
+                          >
+                            {ticket.user_name || ticket.user_email}
+                          </button>
+                        </span>
                         {ticket.channel_name && <span>• Channel: {ticket.channel_name}</span>}
                         {ticket.assigned_admin_name && (
                           <span>• Assigned to: {ticket.assigned_admin_name}</span>
@@ -294,6 +313,11 @@ function Tickets({ user }) {
           )}
         </CardContent>
       </Card>
+
+      {/* User Details Modal */}
+      {selectedUserId && (
+        <UserDetailsModal userId={selectedUserId} onClose={handleCloseUserModal} />
+      )}
     </div>
   );
 }
