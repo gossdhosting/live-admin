@@ -5,7 +5,7 @@ import { Badge } from '../components/ui/badge';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { AlertCircle, CreditCard, DollarSign, TrendingUp, Users, X, Check, Search, Download } from 'lucide-react';
+import { AlertCircle, CreditCard, DollarSign, TrendingUp, Users, X, Check, Search, Download, Trash2, Shield } from 'lucide-react';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import api from '../services/api';
 
@@ -19,6 +19,8 @@ const Subscriptions = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSubscription, setSelectedSubscription] = useState(null);
   const [canceling, setCanceling] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [mode, setMode] = useState('sandbox');
 
   useEffect(() => {
     fetchSubscriptions();
@@ -31,6 +33,7 @@ const Subscriptions = () => {
       const response = await api.get('/billing/admin/subscriptions');
       setSubscriptions(response.data.subscriptions || []);
       setStats(response.data.stats || {});
+      setMode(response.data.mode || 'sandbox');
     } catch (error) {
       console.error('Failed to fetch subscriptions:', error);
       setError('Failed to load subscriptions');
@@ -67,6 +70,25 @@ const Subscriptions = () => {
       alert('Failed to cancel subscription');
     } finally {
       setCanceling(false);
+    }
+  };
+
+  const handleDeleteSubscription = async (subscriptionId) => {
+    if (!confirm('Are you sure you want to DELETE this subscription from the database? This action cannot be undone!')) {
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      await api.delete(`/billing/admin/subscription/${subscriptionId}`);
+      await fetchSubscriptions();
+      setSelectedSubscription(null);
+      alert('Subscription deleted successfully');
+    } catch (error) {
+      console.error('Failed to delete subscription:', error);
+      alert('Failed to delete subscription');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -137,6 +159,12 @@ const Subscriptions = () => {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Subscription Management</h1>
           <p className="text-gray-600 mt-1">Manage user subscriptions and billing</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Shield className="w-5 h-5 text-gray-500" />
+          <Badge className={mode === 'live' ? 'bg-green-500' : 'bg-yellow-500'}>
+            {mode === 'live' ? 'LIVE MODE' : 'SANDBOX MODE'}
+          </Badge>
         </div>
       </div>
 
@@ -296,6 +324,15 @@ const Subscriptions = () => {
                                   Cancel
                                 </Button>
                               )}
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => handleDeleteSubscription(sub.stripe_subscription_id)}
+                                disabled={deleting}
+                                className="bg-red-700 hover:bg-red-800"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
                             </div>
                           </td>
                         </tr>
@@ -430,6 +467,15 @@ const Subscriptions = () => {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Mode Badge */}
+              <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-2">
+                <Shield className="w-5 h-5 text-gray-500" />
+                <span className="text-sm text-gray-600">Payment Mode:</span>
+                <Badge className={mode === 'live' ? 'bg-green-500' : 'bg-yellow-500'}>
+                  {mode === 'live' ? 'LIVE' : 'SANDBOX'}
+                </Badge>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label className="text-gray-500">User</Label>
@@ -475,24 +521,35 @@ const Subscriptions = () => {
                 )}
               </div>
 
-              {selectedSubscription.status === 'active' && !selectedSubscription.cancel_at_period_end && (
-                <div className="flex gap-2 pt-4 border-t">
-                  <Button
-                    variant="destructive"
-                    onClick={() => handleCancelSubscription(selectedSubscription.stripe_subscription_id, false)}
-                    disabled={canceling}
-                  >
-                    Cancel at Period End
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => handleCancelSubscription(selectedSubscription.stripe_subscription_id, true)}
-                    disabled={canceling}
-                  >
-                    Cancel Immediately
-                  </Button>
-                </div>
-              )}
+              <div className="flex gap-2 pt-4 border-t">
+                {selectedSubscription.status === 'active' && !selectedSubscription.cancel_at_period_end && (
+                  <>
+                    <Button
+                      variant="destructive"
+                      onClick={() => handleCancelSubscription(selectedSubscription.stripe_subscription_id, false)}
+                      disabled={canceling}
+                    >
+                      Cancel at Period End
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => handleCancelSubscription(selectedSubscription.stripe_subscription_id, true)}
+                      disabled={canceling}
+                    >
+                      Cancel Immediately
+                    </Button>
+                  </>
+                )}
+                <Button
+                  variant="destructive"
+                  onClick={() => handleDeleteSubscription(selectedSubscription.stripe_subscription_id)}
+                  disabled={deleting}
+                  className="bg-red-700 hover:bg-red-800 ml-auto"
+                >
+                  <Trash2 className="h-4 w-4 mr-1" />
+                  Delete from DB
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
