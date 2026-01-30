@@ -12,6 +12,7 @@ import Plans from './pages/Plans';
 import Subscriptions from './pages/Subscriptions';
 import Platforms from './pages/Platforms';
 import Help from './pages/Help';
+import Tickets from './pages/Tickets';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import api from './services/api';
@@ -106,6 +107,10 @@ function App() {
               <Route
                 path="/help"
                 element={user ? <Help /> : <Navigate to="/login" />}
+              />
+              <Route
+                path="/tickets"
+                element={user && user.role === 'admin' ? <Tickets user={user} /> : <Navigate to="/" />}
               />
             </Routes>
           </main>
