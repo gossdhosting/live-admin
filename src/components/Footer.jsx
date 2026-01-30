@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, Activity } from 'lucide-react';
+import { Activity } from 'lucide-react';
 import api from '../services/api';
 
 function Footer() {
@@ -87,25 +87,18 @@ function Footer() {
               </p>
             </div>
 
-            {/* Made with love */}
-            <div className="text-center">
-              <p className="text-sm text-gray-400 flex items-center gap-1.5">
-                Made with <Heart className="w-4 h-4 text-red-500 fill-current" /> by Rexstream Team
-              </p>
-            </div>
-
             {/* Links */}
             <div className="flex gap-4 text-sm text-gray-300">
               <a href="https://www.rexstream.net" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
                 Website
               </a>
               <span className="text-gray-600">•</span>
-              <a href="https://www.rexstream.net/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
-                Privacy
+              <a href="https://www.rexstream.net/privacy-policy/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                Privacy Policy
               </a>
               <span className="text-gray-600">•</span>
-              <a href="https://www.rexstream.net/terms" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
-                Terms
+              <a href="https://www.rexstream.net/tos/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                Terms of Service
               </a>
             </div>
           </div>
