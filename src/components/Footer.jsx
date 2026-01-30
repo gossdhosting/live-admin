@@ -65,8 +65,15 @@ function Footer() {
   return (
     <footer className="bg-gradient-to-r from-[#212836] to-black text-white py-6 mt-auto border-t border-gray-700">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-4">
-          {/* Status Banner */}
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          {/* Copyright - Left */}
+          <div className="text-center md:text-left">
+            <p className="text-sm text-gray-300">
+              © {currentYear} Rexstream. All rights reserved.
+            </p>
+          </div>
+
+          {/* Status Banner - Center */}
           <div className="flex justify-center">
             <div className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-gray-700">
               <Activity className="w-4 h-4 text-gray-300" />
@@ -78,29 +85,19 @@ function Footer() {
             </div>
           </div>
 
-          {/* Main Footer Content */}
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            {/* Copyright */}
-            <div className="text-center md:text-left">
-              <p className="text-sm text-gray-300">
-                © {currentYear} Rexstream. All rights reserved.
-              </p>
-            </div>
-
-            {/* Links */}
-            <div className="flex gap-4 text-sm text-gray-300">
-              <a href="https://www.rexstream.net" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
-                Website
-              </a>
-              <span className="text-gray-600">•</span>
-              <a href="https://www.rexstream.net/privacy-policy/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
-                Privacy Policy
-              </a>
-              <span className="text-gray-600">•</span>
-              <a href="https://www.rexstream.net/tos/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
-                Terms of Service
-              </a>
-            </div>
+          {/* Links - Right */}
+          <div className="flex gap-4 text-sm text-gray-300">
+            <a href="https://www.rexstream.net" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+              Website
+            </a>
+            <span className="text-gray-600">•</span>
+            <a href="https://www.rexstream.net/privacy-policy/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+              Privacy Policy
+            </a>
+            <span className="text-gray-600">•</span>
+            <a href="https://www.rexstream.net/tos/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+              Terms of Service
+            </a>
           </div>
         </div>
       </div>
