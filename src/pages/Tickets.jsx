@@ -15,10 +15,12 @@ function Tickets({ user }) {
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [filters, setFilters] = useState({
-    status: 'all',
+    status: 'open',
     category: 'all',
     search: ''
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const ticketsPerPage = 10;
 
   useEffect(() => {
     fetchData();
@@ -107,6 +109,17 @@ function Tickets({ user }) {
     }
     return true;
   });
+
+  // Pagination
+  const totalPages = Math.ceil(filteredTickets.length / ticketsPerPage);
+  const indexOfLastTicket = currentPage * ticketsPerPage;
+  const indexOfFirstTicket = indexOfLastTicket - ticketsPerPage;
+  const currentTickets = filteredTickets.slice(indexOfFirstTicket, indexOfLastTicket);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   if (selectedTicket) {
     return (
@@ -265,8 +278,9 @@ function Tickets({ user }) {
               <p className="text-gray-500 text-lg">No tickets found</p>
             </div>
           ) : (
-            <div className="space-y-3">
-              {filteredTickets.map((ticket) => (
+            <>
+              <div className="space-y-3">
+                {currentTickets.map((ticket) => (
                 <div
                   key={ticket.id}
                   onClick={() => handleTicketClick(ticket)}
@@ -309,7 +323,54 @@ function Tickets({ user }) {
                   </div>
                 </div>
               ))}
-            </div>
+              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between mt-6 pt-4 border-t border-gray-200 gap-3">
+                  <div className="text-sm text-gray-600">
+                    Showing {indexOfFirstTicket + 1} to {Math.min(indexOfLastTicket, filteredTickets.length)} of {filteredTickets.length} tickets
+                  </div>
+                  <div className="flex gap-2 flex-wrap justify-center">
+                    <button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className={`px-3 py-1 rounded-md ${
+                        currentPage === 1
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                      }`}
+                    >
+                      Previous
+                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <button
+                        key={page}
+                        onClick={() => handlePageChange(page)}
+                        className={`px-3 py-1 rounded-md ${
+                          currentPage === page
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className={`px-3 py-1 rounded-md ${
+                        currentPage === totalPages
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                      }`}
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </CardContent>
       </Card>
