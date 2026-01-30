@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { signInWithGoogle, signInWithFacebook, signInWithApple, isFirebaseAvailable } from '../config/firebase';
 import { executeRecaptcha } from '../utils/recaptcha';
+import logoSvg from '/logo.svg';
 
 function Login({ onLogin }) {
   const [formData, setFormData] = useState({
@@ -76,7 +77,10 @@ function Login({ onLogin }) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#212836] to-black p-4">
       <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
+        <CardHeader className="space-y-3">
+          <div className="flex justify-center mb-2">
+            <img src={logoSvg} alt="Rexstream" className="h-12" />
+          </div>
           <CardTitle className="text-2xl font-bold text-center">Rexstream Login</CardTitle>
           <CardDescription className="text-center">
             Enter your credentials to access your account
