@@ -75,12 +75,12 @@ function Login({ onLogin }) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#212836] to-black p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[#212836] to-black p-4">
+      <div className="flex justify-center mb-8">
+        <img src={logoSvg} alt="Rexstream" className="h-16" />
+      </div>
       <Card className="w-full max-w-md">
-        <CardHeader className="space-y-3">
-          <div className="flex justify-center mb-2">
-            <img src={logoSvg} alt="Rexstream" className="h-12" />
-          </div>
+        <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">Rexstream Login</CardTitle>
           <CardDescription className="text-center">
             Enter your credentials to access your account
