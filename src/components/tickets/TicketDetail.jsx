@@ -124,7 +124,8 @@ function TicketDetail({ ticket: initialTicket, onClose }) {
   };
 
   const getAttachmentUrl = (attachmentId) => {
-    return `${api.defaults.baseURL}/tickets/attachments/${attachmentId}/download`;
+    const token = localStorage.getItem('token');
+    return `${api.defaults.baseURL}/tickets/attachments/${attachmentId}/download?token=${token}`;
   };
 
   const downloadAttachment = async (attachmentId, filename) => {
