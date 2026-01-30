@@ -21,6 +21,14 @@ const QUALITY_PRESET_LABELS = {
   'high': '1080p (4.5 Mbps)',
 };
 
+// Input type labels mapping
+const INPUT_TYPE_LABELS = {
+  'youtube': 'YouTube URL',
+  'rtmp': 'Custom RTMP',
+  'webcam': 'Webcam',
+  'video': 'Prerecorded Video',
+};
+
 function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
   const [loading, setLoading] = useState(false);
   const [logs, setLogs] = useState([]);
@@ -747,6 +755,9 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
           </div>
           <div className="flex items-center gap-2">
             {getStatusBadge()}
+            <Badge variant="outline" className="text-xs font-medium">
+              {INPUT_TYPE_LABELS[channel.input_type] || channel.input_type}
+            </Badge>
             {channel.status === 'running' && runtime > 0 && (
               <Badge variant="secondary" className="text-xs font-mono font-semibold">
                 ⏱ {formatRuntime(runtime)}
