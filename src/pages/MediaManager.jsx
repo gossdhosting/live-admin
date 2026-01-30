@@ -184,18 +184,47 @@ function MediaManager({ user }) {
         </>
       )}
 
-      {/* Storage Info */}
-      <div className="bg-gray-100 p-4 rounded-lg mb-6 flex justify-between items-center flex-wrap gap-4">
-        <div>
-          <strong>Total Storage Used:</strong> {formatFileSize(totalStorage)}
+      {/* Storage Info Card */}
+      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 p-6 rounded-lg mb-6 shadow-sm">
+        <div className="flex justify-between items-center flex-wrap gap-4">
+          <div className="flex-1">
+            <div className="text-sm text-gray-600 mb-1">Storage Used</div>
+            <div className="text-2xl font-bold text-gray-900">
+              {formatFileSize(totalStorage)}
+              {userStats && userStats.limits.storage_limit && (
+                <span className="text-base text-gray-500 font-normal ml-2">
+                  of {formatFileSize(userStats.limits.storage_limit)}
+                </span>
+              )}
+            </div>
+            {userStats && userStats.limits.storage_limit && (
+              <div className="mt-2 bg-gray-200 rounded-full h-2 overflow-hidden">
+                <div
+                  className={`h-full transition-all ${
+                    totalStorage >= userStats.limits.storage_limit * 0.9
+                      ? 'bg-red-500'
+                      : totalStorage >= userStats.limits.storage_limit * 0.8
+                      ? 'bg-yellow-500'
+                      : 'bg-blue-500'
+                  }`}
+                  style={{ width: `${Math.min((totalStorage / userStats.limits.storage_limit) * 100, 100)}%` }}
+                ></div>
+              </div>
+            )}
+          </div>
+          <div className="text-right">
+            <div className="text-sm text-gray-600 mb-1">Total Files</div>
+            <div className="text-2xl font-bold text-gray-900">{mediaFiles.length}</div>
+          </div>
           {userStats && userStats.limits.storage_limit && (
-            <span className="text-gray-500 ml-2">
-              / {formatFileSize(userStats.limits.storage_limit)} ({Math.round((totalStorage / userStats.limits.storage_limit) * 100)}%)
-            </span>
+            <div className="text-right">
+              <div className="text-sm text-gray-600 mb-1">Plan Limit</div>
+              <div className="text-lg font-semibold text-indigo-600">
+                {formatFileSize(userStats.limits.storage_limit)}
+              </div>
+              <div className="text-xs text-gray-500">{userStats.plan.name} Plan</div>
+            </div>
           )}
-        </div>
-        <div>
-          <strong>Total Files:</strong> {mediaFiles.length}
         </div>
       </div>
 
@@ -249,7 +278,7 @@ function MediaManager({ user }) {
           {paginatedFiles.map((media) => (
             <div
               key={media.id}
-              className="border border-gray-300 rounded-lg p-4 bg-white hover:shadow-lg transition-shadow"
+              className="border border-gray-200 rounded-lg p-4 bg-gradient-to-br from-white to-gray-50 hover:shadow-xl hover:border-blue-300 transition-all duration-200"
             >
               <h3 className="text-base font-semibold mb-2 break-words">
                 {media.original_name}

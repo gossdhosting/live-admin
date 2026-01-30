@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { LayoutDashboard, Clapperboard, Gem, Settings, Crown, LogOut, ArrowUpCircle, CreditCard, Globe, ChevronDown, User, HelpCircle } from 'lucide-react';
+import { LayoutDashboard, Clapperboard, Gem, Settings, Crown, LogOut, ArrowUpCircle, CreditCard, Globe, ChevronDown, User, HelpCircle, Smartphone } from 'lucide-react';
 import logoSvg from '/logo.svg';
 
 function Navbar({ user, onLogout }) {
@@ -152,8 +152,18 @@ function Navbar({ user, onLogout }) {
                     </div>
                   </div>
 
-                  {/* Help Menu Item */}
+                  {/* Menu Items */}
                   <div className="px-2 py-2 border-b border-gray-100">
+                    <a
+                      href="https://www.rexstream.net/app/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setAccountDropdownOpen(false)}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                    >
+                      <Smartphone className="w-4 h-4" />
+                      Download Our App
+                    </a>
                     <Link
                       to="/help"
                       onClick={() => setAccountDropdownOpen(false)}
@@ -269,8 +279,20 @@ function Navbar({ user, onLogout }) {
           })}
         </div>
 
+        <a
+          href="https://www.rexstream.net/app/"
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          <Button className="w-full mt-6 bg-blue-600 hover:bg-blue-700 font-semibold gap-2">
+            <Smartphone className="w-4 h-4" />
+            Download Our App
+          </Button>
+        </a>
+
         <Link to="/help" onClick={() => setMobileMenuOpen(false)}>
-          <Button className="w-full mt-6 bg-gray-700 hover:bg-gray-600 font-semibold gap-2">
+          <Button className="w-full mt-3 bg-gray-700 hover:bg-gray-600 font-semibold gap-2">
             <HelpCircle className="w-4 h-4" />
             Help
           </Button>
