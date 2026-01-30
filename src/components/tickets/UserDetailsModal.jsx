@@ -16,12 +16,21 @@ function UserDetailsModal({ userId, onClose }) {
   const fetchUserDetails = async () => {
     try {
       setLoading(true);
-      const response = await api.get(`/admin/users/${userId}`);
-      setUser(response.data.user);
+      const response = await api.get(`/users/${userId}/details`);
+
+      // Merge user data with plan info for display
+      const userData = {
+        ...response.data.user,
+        ...response.data.plan,
+        plan_name: response.data.plan?.name,
+        subscription_status: response.data.user.subscription_status || 'inactive'
+      };
+
+      setUser(userData);
       setError('');
     } catch (err) {
       console.error('Failed to fetch user details:', err);
-      setError('Failed to load user details');
+      setError(err.response?.data?.error || 'Failed to load user details');
     } finally {
       setLoading(false);
     }

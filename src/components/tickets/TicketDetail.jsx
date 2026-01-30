@@ -8,6 +8,7 @@ import {
   Paperclip, Download, Send, Loader2, Upload, User, XCircle as RemoveIcon,
   Trash2, Eye
 } from 'lucide-react';
+import UserDetailsModal from './UserDetailsModal';
 
 function TicketDetail({ ticket: initialTicket, onClose }) {
   const [ticket, setTicket] = useState(null);
@@ -18,6 +19,7 @@ function TicketDetail({ ticket: initialTicket, onClose }) {
   const [submitting, setSubmitting] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
 
   useEffect(() => {
     fetchTicketDetail();
@@ -117,6 +119,15 @@ function TicketDetail({ ticket: initialTicket, onClose }) {
     }
   };
 
+  const handleUserClick = (e, userId) => {
+    e.stopPropagation();
+    setSelectedUserId(userId);
+  };
+
+  const handleCloseUserModal = () => {
+    setSelectedUserId(null);
+  };
+
   const isImageFile = (filename) => {
     const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'];
     const ext = filename.split('.').pop().toLowerCase();
@@ -213,14 +224,25 @@ function TicketDetail({ ticket: initialTicket, onClose }) {
               </Badge>
             </div>
             <h2 className="text-xl md:text-2xl font-semibold text-gray-900 mb-2 break-words">{ticket.subject}</h2>
-            {ticket.channel_name && (
+            <div className="space-y-1">
               <p className="text-sm text-gray-600">
-                Related Channel: <span className="font-medium">{ticket.channel_name}</span>
+                Created by:{' '}
+                <button
+                  onClick={(e) => handleUserClick(e, ticket.user_id)}
+                  className="text-blue-600 hover:underline font-medium"
+                >
+                  {ticket.user_name || ticket.user_email}
+                </button>
               </p>
-            )}
-            <p className="text-xs text-gray-500 mt-1">
-              Created {new Date(ticket.created_at).toLocaleString()}
-            </p>
+              {ticket.channel_name && (
+                <p className="text-sm text-gray-600">
+                  Related Channel: <span className="font-medium">{ticket.channel_name}</span>
+                </p>
+              )}
+              <p className="text-xs text-gray-500">
+                Created {new Date(ticket.created_at).toLocaleString()}
+              </p>
+            </div>
           </div>
 
           <div className="flex gap-2 flex-shrink-0">
@@ -288,9 +310,12 @@ function TicketDetail({ ticket: initialTicket, onClose }) {
                         : 'bg-gray-100 text-gray-900 rounded-bl-none'
                     }`}>
                       <div className={`flex items-center gap-2 mb-1 ${isAdmin ? 'justify-end' : 'justify-start'}`}>
-                        <span className={`text-xs font-semibold ${isAdmin ? 'text-blue-100' : 'text-gray-600'}`}>
+                        <button
+                          onClick={(e) => handleUserClick(e, message.user_id)}
+                          className={`text-xs font-semibold hover:underline ${isAdmin ? 'text-blue-100' : 'text-gray-600'}`}
+                        >
                           {message.user_name || message.user_email}
-                        </span>
+                        </button>
                         {isAdmin && (
                           <Badge variant="default" className="bg-blue-500 text-white text-xs px-2 py-0">
                             Support
@@ -453,6 +478,11 @@ function TicketDetail({ ticket: initialTicket, onClose }) {
             />
           </div>
         </div>
+      )}
+
+      {/* User Details Modal */}
+      {selectedUserId && (
+        <UserDetailsModal userId={selectedUserId} onClose={handleCloseUserModal} />
       )}
     </div>
   );
