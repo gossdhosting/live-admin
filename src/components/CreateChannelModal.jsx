@@ -301,25 +301,6 @@ function CreateChannelModal({ onClose, onSuccess, isOpen }) {
             </div>
           )}
 
-          {formData.input_type === 'screen' && (
-            <div className="space-y-3 bg-purple-50 border border-purple-200 rounded-lg p-4">
-              <div className="flex items-start gap-2">
-                <span className="text-purple-600 text-lg">🖥️</span>
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-purple-900 mb-2">
-                    Screen Share Streaming
-                  </p>
-                  <ul className="text-xs text-purple-800 space-y-1.5">
-                    <li>• After creating this channel, click "Go Live" to start screen sharing</li>
-                    <li>• You'll need to grant screen recording permissions in your browser</li>
-                    <li>• Choose to share your entire screen, a window, or a browser tab</li>
-                    <li>• Optional system audio capture to include desktop sound</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          )}
-
           {formData.input_type === 'video' && (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
