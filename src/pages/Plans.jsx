@@ -276,8 +276,8 @@ function Plans() {
         </Card>
       )}
 
-      {/* Payment Method Card - Only show if user has a paid plan */}
-      {userStats && userStats.plan.price_monthly > 0 && (
+      {/* Payment Method Card - Only show if user has a paid plan AND payment method exists */}
+      {userStats && userStats.plan.price_monthly > 0 && paymentMethod && (
         <Card className="mb-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -288,25 +288,17 @@ function Plans() {
           <CardContent>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                {paymentMethod ? (
-                  <>
-                    <div className="w-12 h-8 bg-gray-100 rounded border border-gray-300 flex items-center justify-center">
-                      <CreditCard className="w-6 h-6 text-gray-600" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900">
-                        {paymentMethod.card?.brand?.toUpperCase() || 'Card'} ending in {paymentMethod.card?.last4}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        Expires {paymentMethod.card?.exp_month?.toString().padStart(2, '0')}/{paymentMethod.card?.exp_year}
-                      </p>
-                    </div>
-                  </>
-                ) : (
-                  <div>
-                    <p className="text-gray-600">Loading payment method...</p>
-                  </div>
-                )}
+                <div className="w-12 h-8 bg-gray-100 rounded border border-gray-300 flex items-center justify-center">
+                  <CreditCard className="w-6 h-6 text-gray-600" />
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900">
+                    {paymentMethod.card?.brand?.toUpperCase() || 'Card'} ending in {paymentMethod.card?.last4}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Expires {paymentMethod.card?.exp_month?.toString().padStart(2, '0')}/{paymentMethod.card?.exp_year}
+                  </p>
+                </div>
               </div>
               <Button
                 onClick={handleManagePaymentMethods}
