@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import UpgradePrompt from '../components/UpgradePrompt';
 import { Button } from '../components/ui/button';
-import { Upload, Cloud, HardDrive, Eye, User, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
+import { Upload, Cloud, HardDrive, Eye, User, ChevronLeft, ChevronRight, Trash2, Clapperboard } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 12;
 
@@ -143,7 +143,10 @@ function MediaManager({ user }) {
   return (
     <div className="page-container">
       <div className="page-header">
-        <h1>Media Manager</h1>
+        <h1 className="flex items-center gap-3">
+          <Clapperboard className="w-8 h-8 text-primary" />
+          Media Manager
+        </h1>
         <p className="text-gray-500">Upload and manage pre-recorded videos for streaming</p>
       </div>
 

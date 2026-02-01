@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Alert, AlertDescription } from '../components/ui/alert';
-import { Check, X, Cloud, HardDrive, CreditCard, ExternalLink } from 'lucide-react';
+import { Check, X, Cloud, HardDrive, CreditCard, ExternalLink, Gem } from 'lucide-react';
 
 function Plans() {
   const [plans, setPlans] = useState([]);
@@ -173,7 +173,7 @@ function Plans() {
   const handleManagePaymentMethods = async () => {
     try {
       setLoadingPortal(true);
-      const response = await api.post('/billing/portal');
+      const response = await api.post('/billing/create-portal-session');
       if (response.data.url) {
         window.location.href = response.data.url;
       }
@@ -209,7 +209,10 @@ function Plans() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Subscription Plans</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+          <Gem className="w-8 h-8 text-primary" />
+          Subscription Plans
+        </h1>
         <p className="text-gray-600">Choose the plan that fits your streaming needs</p>
 
         {/* Billing Cycle Toggle */}
