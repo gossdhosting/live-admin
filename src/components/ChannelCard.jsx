@@ -771,8 +771,8 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
       {/* Action Buttons - Always Visible */}
       <CardContent className="pt-0 pb-3 px-6">
         <div className="flex gap-2 flex-wrap items-center">
-          {/* Webcam/Screen Channels - Show Go Live Button */}
-          {(channel.input_type === 'webcam' || channel.input_type === 'screen') ? (
+          {/* Webcam Channels - Show Go Live Button */}
+          {channel.input_type === 'webcam' ? (
             <Button
               onClick={() => setShowWebcamModal(true)}
               className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold shadow-sm gap-2"
@@ -781,6 +781,11 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
               <Video className="w-4 h-4" />
               <span>Go Live</span>
             </Button>
+          ) : channel.input_type === 'screen' ? (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-900">
+              <p className="font-semibold mb-1">Screen Share Not Yet Implemented</p>
+              <p className="text-xs">Screen sharing modal is under development. Please use webcam for now or change input type to webcam in Edit Stream.</p>
+            </div>
           ) : (
             /* Non-Webcam Channels - Show Start/Stop/Restart */
             <>
