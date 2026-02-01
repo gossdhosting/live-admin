@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Alert, AlertDescription } from '../components/ui/alert';
-import { Check, X, Cloud, HardDrive } from 'lucide-react';
+import { Check, X, Cloud, HardDrive, CreditCard, ExternalLink } from 'lucide-react';
 
 function Plans() {
   const [plans, setPlans] = useState([]);
@@ -16,6 +16,7 @@ function Plans() {
   const [upgradePreview, setUpgradePreview] = useState(null);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState(null);
+  const [loadingPortal, setLoadingPortal] = useState(false);
 
   useEffect(() => {
     fetchPlans();
@@ -169,6 +170,20 @@ function Plans() {
     }
   };
 
+  const handleManagePaymentMethods = async () => {
+    try {
+      setLoadingPortal(true);
+      const response = await api.post('/billing/portal');
+      if (response.data.url) {
+        window.location.href = response.data.url;
+      }
+    } catch (error) {
+      console.error('Failed to create portal session:', error);
+      alert('Failed to open payment portal. Please try again.');
+      setLoadingPortal(false);
+    }
+  };
+
   const planColors = {
     'Free': 'bg-gray-500',
     'Basic': 'bg-blue-500',
@@ -254,6 +269,55 @@ function Plans() {
                 </p>
               </div>
             </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Payment Method Card - Only show if user has a paid plan */}
+      {userStats && userStats.plan.price_monthly > 0 && (
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CreditCard className="w-5 h-5" />
+              Payment Method
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {paymentMethod ? (
+                  <>
+                    <div className="w-12 h-8 bg-gray-100 rounded border border-gray-300 flex items-center justify-center">
+                      <CreditCard className="w-6 h-6 text-gray-600" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900">
+                        {paymentMethod.card?.brand?.toUpperCase() || 'Card'} ending in {paymentMethod.card?.last4}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Expires {paymentMethod.card?.exp_month?.toString().padStart(2, '0')}/{paymentMethod.card?.exp_year}
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <div>
+                    <p className="text-gray-600">Loading payment method...</p>
+                  </div>
+                )}
+              </div>
+              <Button
+                onClick={handleManagePaymentMethods}
+                disabled={loadingPortal}
+                variant="outline"
+                className="gap-2"
+              >
+                <ExternalLink className="w-4 h-4" />
+                {loadingPortal ? 'Opening...' : 'Manage Payment Methods'}
+              </Button>
+            </div>
+            <p className="text-sm text-gray-500 mt-4">
+              Manage your payment methods, view billing history, and download invoices through the Stripe Customer Portal.
+            </p>
           </CardContent>
         </Card>
       )}
@@ -436,12 +500,7 @@ function Plans() {
       {/* Payment Note */}
       <Alert className="border-blue-200 bg-blue-50">
         <AlertDescription className="text-blue-900 text-center">
-          💳 Secure payments powered by Stripe. Your subscription will auto-renew each month.
-          {paymentMethod && (
-            <span className="block mt-2">
-              Card on file: •••• {paymentMethod.card?.last4} ({paymentMethod.card?.brand})
-            </span>
-          )}
+          💳 Secure payments powered by Stripe. Your subscription will auto-renew each billing period.
         </AlertDescription>
       </Alert>
 
