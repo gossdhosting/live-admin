@@ -3,6 +3,7 @@ import api from '../services/api';
 import MultiPlatformStreaming from './MultiPlatformStreaming';
 import ScheduleStreamDialog from './ScheduleStreamDialog';
 import WebcamStreamModal from './WebcamStreamModal';
+import ScreenShareModal from './ScreenShareModal';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader } from './ui/card';
 import { Badge } from './ui/badge';
@@ -26,6 +27,7 @@ const INPUT_TYPE_LABELS = {
   'youtube': 'YouTube URL',
   'rtmp': 'Custom RTMP',
   'webcam': 'Webcam',
+  'screen': 'Screen Share',
   'video': 'Prerecorded Video',
 };
 
@@ -40,6 +42,7 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
   const [configuredPlatforms, setConfiguredPlatforms] = useState([]);
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
   const [showWebcamModal, setShowWebcamModal] = useState(false);
+  const [showScreenShareModal, setShowScreenShareModal] = useState(false);
   const isAdmin = user && user.role === 'admin';
   const { showAlert } = useAlertDialog();
 
@@ -780,6 +783,16 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
               <Video className="w-4 h-4" />
               <span>Go Live</span>
             </Button>
+          ) : channel.input_type === 'screen' ? (
+            /* Screen Share Channels - Show Go Live Button */
+            <Button
+              onClick={() => setShowScreenShareModal(true)}
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold shadow-sm gap-2"
+              size="sm"
+            >
+              <Video className="w-4 h-4" />
+              <span>Go Live</span>
+            </Button>
           ) : (
             /* Non-Webcam Channels - Show Start/Stop/Restart */
             <>
@@ -959,6 +972,17 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
           channel={channel}
           isOpen={showWebcamModal}
           onClose={() => setShowWebcamModal(false)}
+          onUpdate={() => {
+            onUpdate && onUpdate();
+          }}
+        />
+      )}
+
+      {showScreenShareModal && (
+        <ScreenShareModal
+          channel={channel}
+          isOpen={showScreenShareModal}
+          onClose={() => setShowScreenShareModal(false)}
           onUpdate={() => {
             onUpdate && onUpdate();
           }}
