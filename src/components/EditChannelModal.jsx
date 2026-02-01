@@ -194,6 +194,16 @@ function EditChannelModal({ channel, onClose, onSuccess, isOpen }) {
                 />
                 Camera (Webcam/Mobile Camera)
               </label>
+              <label className="flex items-center gap-2 mb-0">
+                <input
+                  type="radio"
+                  name="input_type"
+                  value="screen"
+                  checked={formData.input_type === 'screen'}
+                  onChange={handleChange}
+                />
+                Screen Share (Desktop Only)
+              </label>
             </div>
             {!(userStats?.youtube_restreaming === true || userStats?.youtube_restreaming === 1) && formData.input_type === 'youtube' && (
               <p className="text-xs text-amber-600 mt-1">

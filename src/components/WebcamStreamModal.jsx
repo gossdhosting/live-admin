@@ -3,7 +3,7 @@ import api from '../services/api';
 import { Button } from './ui/button';
 import { Dialog, DialogContent } from './ui/dialog';
 import { Alert } from './ui/alert';
-import { Video, Mic, MicOff, VideoOff, Loader2, AlertCircle, CheckCircle2, Globe } from 'lucide-react';
+import { Video, Mic, MicOff, VideoOff, Loader2, AlertCircle, CheckCircle2, Globe, Monitor } from 'lucide-react';
 import { Badge } from './ui/badge';
 
 function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
@@ -19,10 +19,20 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
   const [streamStatus, setStreamStatus] = useState('idle'); // idle, connecting, connected, error
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
+  const [sourceType, setSourceType] = useState('camera'); // 'camera' or 'screen'
 
   const videoRef = useRef(null);
   const localStreamRef = useRef(null);
   const peerConnectionRef = useRef(null);
+
+  // Set initial source type based on channel input_type
+  useEffect(() => {
+    if (channel?.input_type === 'screen') {
+      setSourceType('screen');
+    } else {
+      setSourceType('camera');
+    }
+  }, [channel]);
 
   // Fetch platforms on mount
   useEffect(() => {
@@ -66,42 +76,64 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
     }
   };
 
+  // Screen sharing function
+  const startScreenShare = async () => {
+    try {
+      console.log('Requesting screen share...');
+
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: {
+          cursor: "always", // Show cursor in screen recording
+          displaySurface: "monitor", // Can be "monitor", "window", or "browser"
+          logicalSurface: true,
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+          frameRate: { ideal: 30, max: 60 }
+        },
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        } // System audio + microphone
+      });
+
+      console.log('Screen share obtained:', stream);
+
+      // Log actual stream resolution
+      const videoTrack = stream.getVideoTracks()[0];
+      if (videoTrack) {
+        const settings = videoTrack.getSettings();
+        console.log('Screen share settings:', settings);
+        console.log(`Actual resolution: ${settings.width}x${settings.height}, frameRate: ${settings.frameRate}`);
+      }
+
+      return stream;
+    } catch (err) {
+      console.error("Screen share error:", err);
+
+      // Handle user cancellation gracefully
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        throw new Error('Screen sharing was cancelled or denied. Please try again and select a screen/window to share.');
+      } else if (err.name === 'NotSupportedError') {
+        throw new Error('Screen sharing is not supported in this browser. Please use Chrome, Firefox, or Edge.');
+      }
+
+      throw err;
+    }
+  };
+
   const requestPermissions = async () => {
     setPermissionError('');
     setError('');
 
     try {
-      // Check if page is served over HTTPS (required for getUserMedia except localhost)
+      // Check if page is served over HTTPS (required for getUserMedia/getDisplayMedia except localhost)
       const isSecure = window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
       if (!isSecure) {
-        throw new Error('Camera access requires HTTPS. Please access this page using https:// instead of http://');
+        throw new Error('Media access requires HTTPS. Please access this page using https:// instead of http://');
       }
-
-      // Check if getUserMedia is supported
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        throw new Error('Your browser does not support camera/microphone access. Please use a modern browser like Chrome, Firefox, or Edge.');
-      }
-
-      console.log('Browser supports getUserMedia');
-      console.log('Current protocol:', window.location.protocol);
-
-      // First, check if devices exist before requesting permission
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      console.log('Enumerated devices before permission:', devices);
-
-      const hasCamera = devices.some(d => d.kind === 'videoinput');
-      const hasMicrophone = devices.some(d => d.kind === 'audioinput');
-
-      console.log('Has camera:', hasCamera, 'Has microphone:', hasMicrophone);
-
-      if (!hasCamera && !hasMicrophone) {
-        throw new Error('No camera or microphone found. Please connect a device and try again.');
-      }
-
-      console.log('Requesting camera and microphone permissions...');
 
       // CRITICAL: Stop any existing tracks before requesting new media
-      // This prevents reusing old 640x360 streams that cause resolution mismatch
       if (localStreamRef.current) {
         console.log('Stopping existing tracks before requesting new media');
         localStreamRef.current.getTracks().forEach(track => {
@@ -111,21 +143,52 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
         localStreamRef.current = null;
       }
 
-      // Request camera and microphone permissions
-      // Use 'min' constraint to REQUIRE 1280x720 (hard requirement)
-      // This prevents resolution mismatches that cause color corruption
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: hasCamera ? {
-          width: { min: 1280, ideal: 1280 },
-          height: { min: 720, ideal: 720 },
-          frameRate: { ideal: 30, max: 30 }
-        } : false,
-        audio: hasMicrophone ? {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true
-        } : false
-      });
+      let stream;
+
+      if (sourceType === 'screen') {
+        // Screen sharing
+        stream = await startScreenShare();
+      } else {
+        // Camera
+        // Check if getUserMedia is supported
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error('Your browser does not support camera/microphone access. Please use a modern browser like Chrome, Firefox, or Edge.');
+        }
+
+        console.log('Browser supports getUserMedia');
+        console.log('Current protocol:', window.location.protocol);
+
+        // First, check if devices exist before requesting permission
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        console.log('Enumerated devices before permission:', devices);
+
+        const hasCamera = devices.some(d => d.kind === 'videoinput');
+        const hasMicrophone = devices.some(d => d.kind === 'audioinput');
+
+        console.log('Has camera:', hasCamera, 'Has microphone:', hasMicrophone);
+
+        if (!hasCamera && !hasMicrophone) {
+          throw new Error('No camera or microphone found. Please connect a device and try again.');
+        }
+
+        console.log('Requesting camera and microphone permissions...');
+
+        // Request camera and microphone permissions
+        // Use 'min' constraint to REQUIRE 1280x720 (hard requirement)
+        // This prevents resolution mismatches that cause color corruption
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: hasCamera ? {
+            width: { min: 1280, ideal: 1280 },
+            height: { min: 720, ideal: 720 },
+            frameRate: { ideal: 30, max: 30 }
+          } : false,
+          audio: hasMicrophone ? {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true
+          } : false
+        });
+      }
 
       console.log('Permissions granted, stream obtained:', stream);
 
@@ -136,12 +199,16 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
         console.log('Video track settings:', settings);
         console.log(`Actual resolution: ${settings.width}x${settings.height}, frameRate: ${settings.frameRate}`);
 
-        // Verify we got 1280x720 as required
-        if (settings.width !== 1280 || settings.height !== 720) {
-          console.error(`❌ WARNING: Got ${settings.width}x${settings.height} instead of required 1280x720!`);
-          console.error('Camera may not support 1280x720. This will cause green tint issues.');
+        // Verify we got 1280x720 as required (only for camera, screen share can be any resolution)
+        if (sourceType === 'camera') {
+          if (settings.width !== 1280 || settings.height !== 720) {
+            console.error(`❌ WARNING: Got ${settings.width}x${settings.height} instead of required 1280x720!`);
+            console.error('Camera may not support 1280x720. This will cause green tint issues.');
+          } else {
+            console.log('✅ Resolution verified: 1280x720 as required');
+          }
         } else {
-          console.log('✅ Resolution verified: 1280x720 as required');
+          console.log(`✅ Screen share resolution: ${settings.width}x${settings.height}`);
         }
       }
 
@@ -738,10 +805,31 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
               {!permissionsGranted ? (
                 <div className="text-center p-8">
                   <Video className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-white text-lg font-semibold mb-2">Camera Access Required</h3>
+                  <h3 className="text-white text-lg font-semibold mb-2">Select Input Source</h3>
                   <p className="text-gray-400 text-sm mb-4 max-w-md">
-                    We need access to your camera and microphone to start streaming
+                    Choose between camera or screen sharing to start streaming
                   </p>
+
+                  {/* Source Type Toggle */}
+                  <div className="flex gap-2 justify-center mb-6">
+                    <Button
+                      variant={sourceType === 'camera' ? 'default' : 'outline'}
+                      onClick={() => setSourceType('camera')}
+                      className={sourceType === 'camera' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-700 hover:bg-gray-600 text-white border-gray-600'}
+                    >
+                      <Video className="w-4 h-4 mr-2" />
+                      Camera
+                    </Button>
+                    <Button
+                      variant={sourceType === 'screen' ? 'default' : 'outline'}
+                      onClick={() => setSourceType('screen')}
+                      className={sourceType === 'screen' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-700 hover:bg-gray-600 text-white border-gray-600'}
+                    >
+                      <Monitor className="w-4 h-4 mr-2" />
+                      Screen Share
+                    </Button>
+                  </div>
+
                   {permissionError && (
                     <Alert className="bg-red-900/50 border-red-700 text-red-200 mb-4 max-w-md mx-auto">
                       <AlertCircle className="w-4 h-4" />
@@ -749,8 +837,17 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
                     </Alert>
                   )}
                   <Button onClick={requestPermissions} className="bg-blue-600 hover:bg-blue-700">
-                    <Video className="w-4 h-4 mr-2" />
-                    Allow Camera & Microphone
+                    {sourceType === 'camera' ? (
+                      <>
+                        <Video className="w-4 h-4 mr-2" />
+                        Allow Camera & Microphone
+                      </>
+                    ) : (
+                      <>
+                        <Monitor className="w-4 h-4 mr-2" />
+                        Start Screen Sharing
+                      </>
+                    )}
                   </Button>
                 </div>
               ) : (
