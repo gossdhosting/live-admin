@@ -205,6 +205,14 @@ function Navbar({ user, onLogout }) {
 
                   {/* Menu Items */}
                   <div className="px-2 py-2 border-b border-gray-100">
+                    <Link
+                      to="/settings"
+                      onClick={() => setAccountDropdownOpen(false)}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                    >
+                      <Settings className="w-4 h-4" />
+                      Profile & Settings
+                    </Link>
                     <a
                       href="https://www.rexstream.net/app/"
                       target="_blank"
@@ -360,13 +368,20 @@ function Navbar({ user, onLogout }) {
           )}
         </div>
 
+        <Link to="/settings" onClick={() => setMobileMenuOpen(false)}>
+          <Button className="w-full mt-6 bg-gray-700 hover:bg-gray-600 font-semibold gap-2">
+            <Settings className="w-4 h-4" />
+            Profile & Settings
+          </Button>
+        </Link>
+
         <a
           href="https://www.rexstream.net/app/"
           target="_blank"
           rel="noopener noreferrer"
           onClick={() => setMobileMenuOpen(false)}
         >
-          <Button className="w-full mt-6 bg-blue-600 hover:bg-blue-700 font-semibold gap-2">
+          <Button className="w-full mt-3 bg-blue-600 hover:bg-blue-700 font-semibold gap-2">
             <Smartphone className="w-4 h-4" />
             Download Our App
           </Button>
