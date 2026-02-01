@@ -195,16 +195,6 @@ function CreateChannelModal({ onClose, onSuccess, isOpen }) {
                 />
                 Camera (Webcam/Mobile Camera)
               </label>
-              <label className="flex items-center gap-2 mb-0">
-                <input
-                  type="radio"
-                  name="input_type"
-                  value="screen"
-                  checked={formData.input_type === 'screen'}
-                  onChange={handleChange}
-                />
-                Screen Share (Desktop Only)
-              </label>
             </div>
             {!(userStats?.youtube_restreaming === true || userStats?.youtube_restreaming === 1) && (
               <p className="text-xs text-slate-500 mt-1">
@@ -295,26 +285,6 @@ function CreateChannelModal({ onClose, onSuccess, isOpen }) {
                     <li>• You'll need to grant camera and microphone permissions in your browser</li>
                     <li>• Your camera feed will be instantly streamed to all connected platforms</li>
                     <li>• Works with webcam on desktop or mobile camera on phones/tablets</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {formData.input_type === 'screen' && (
-            <div className="space-y-3 bg-purple-50 border border-purple-200 rounded-lg p-4">
-              <div className="flex items-start gap-2">
-                <span className="text-purple-600 text-lg">🖥️</span>
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-purple-900 mb-2">
-                    Screen Share Streaming
-                  </p>
-                  <ul className="text-xs text-purple-800 space-y-1.5">
-                    <li>• After creating this channel, click "Go Live" to start screen sharing</li>
-                    <li>• You'll be able to select which screen, window, or tab to share</li>
-                    <li>• Your screen feed will be instantly streamed to all connected platforms</li>
-                    <li>• Desktop browsers only (Chrome, Firefox, Edge). Not available on mobile.</li>
-                    <li>• You can optionally include system audio in the stream</li>
                   </ul>
                 </div>
               </div>

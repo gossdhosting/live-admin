@@ -26,7 +26,6 @@ const INPUT_TYPE_LABELS = {
   'youtube': 'YouTube URL',
   'rtmp': 'Custom RTMP',
   'webcam': 'Webcam',
-  'screen': 'Screen Share',
   'video': 'Prerecorded Video',
 };
 
@@ -781,11 +780,6 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
               <Video className="w-4 h-4" />
               <span>Go Live</span>
             </Button>
-          ) : channel.input_type === 'screen' ? (
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-900">
-              <p className="font-semibold mb-1">Screen Share Not Yet Implemented</p>
-              <p className="text-xs">Screen sharing modal is under development. Please use webcam for now or change input type to webcam in Edit Stream.</p>
-            </div>
           ) : (
             /* Non-Webcam Channels - Show Start/Stop/Restart */
             <>

@@ -66,26 +66,15 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
     }
   };
 
-
   const requestPermissions = async () => {
     setPermissionError('');
     setError('');
 
     try {
-      // Check if page is served over HTTPS (required for getUserMedia/getDisplayMedia except localhost)
+      // Check if page is served over HTTPS (required for getUserMedia except localhost)
       const isSecure = window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
       if (!isSecure) {
-        throw new Error('Media access requires HTTPS. Please access this page using https:// instead of http://');
-      }
-
-      // CRITICAL: Stop any existing tracks before requesting new media
-      if (localStreamRef.current) {
-        console.log('Stopping existing tracks before requesting new media');
-        localStreamRef.current.getTracks().forEach(track => {
-          console.log(`Stopping old ${track.kind} track: ${track.label}, settings:`, track.getSettings());
-          track.stop();
-        });
-        localStreamRef.current = null;
+        throw new Error('Camera access requires HTTPS. Please access this page using https:// instead of http://');
       }
 
       // Check if getUserMedia is supported
@@ -110,6 +99,17 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
       }
 
       console.log('Requesting camera and microphone permissions...');
+
+      // CRITICAL: Stop any existing tracks before requesting new media
+      // This prevents reusing old 640x360 streams that cause resolution mismatch
+      if (localStreamRef.current) {
+        console.log('Stopping existing tracks before requesting new media');
+        localStreamRef.current.getTracks().forEach(track => {
+          console.log(`Stopping old ${track.kind} track: ${track.label}, settings:`, track.getSettings());
+          track.stop();
+        });
+        localStreamRef.current = null;
+      }
 
       // Request camera and microphone permissions
       // Use 'min' constraint to REQUIRE 1280x720 (hard requirement)
@@ -560,64 +560,54 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
 
   const stopStreaming = async () => {
     try {
-      console.log('[Stop Streaming] Initiating graceful stop');
-
-      // Stop channel stream (platform streaming) and WebRTC bridge
+      // Stop channel stream (platform streaming)
       if (isStreaming) {
         try {
-          console.log('[Stop Streaming] Stopping channel and WebRTC bridge on backend');
-          // Wait for both to complete before proceeding
-          await Promise.all([
-            api.post(`/channels/${channel.id}/stop`),
-            api.post(`/webrtc/stop/${channel.id}`)
-          ]);
-          console.log('[Stop Streaming] Backend stopped successfully');
+          console.log('Stopping channel stream...');
+          await api.post(`/channels/${channel.id}/stop`);
+          console.log('Channel stream stopped');
         } catch (err) {
-          console.error('[Stop Streaming] Backend stop failed:', err);
-          // Continue with local cleanup even if backend fails
+          console.error('Failed to stop channel stream:', err);
+        }
+
+        // Stop WebRTC on server
+        try {
+          console.log('Stopping WebRTC bridge...');
+          await api.post(`/webrtc/stop/${channel.id}`);
+          console.log('WebRTC bridge stopped');
+        } catch (err) {
+          console.error('Failed to stop WebRTC:', err);
         }
       }
 
       // Close peer connection
       if (peerConnectionRef.current) {
-        console.log('[Stop Streaming] Closing peer connection');
         peerConnectionRef.current.close();
         peerConnectionRef.current = null;
       }
 
       // Stop local tracks
       if (localStreamRef.current) {
-        console.log('[Stop Streaming] Stopping local media tracks');
-        localStreamRef.current.getTracks().forEach(track => {
-          track.stop();
-          console.log(`[Stop Streaming] Stopped ${track.kind} track`);
-        });
+        localStreamRef.current.getTracks().forEach(track => track.stop());
         localStreamRef.current = null;
       }
 
       // Clear video element
       if (videoRef.current) {
-        console.log('[Stop Streaming] Clearing video element');
         videoRef.current.srcObject = null;
       }
 
       setIsStreaming(false);
       setStreamStatus('idle');
       setPermissionsGranted(false);
-      setError('');
-      setIsMuted(false);
-      setIsVideoOff(false);
 
       // Update parent component
       if (onUpdate) {
         onUpdate();
       }
 
-      console.log('[Stop Streaming] Graceful stop complete');
-
     } catch (err) {
-      console.error('[Stop Streaming] Failed to stop streaming:', err);
-      setError('Failed to stop streaming. Please use Force Disconnect if needed.');
+      console.error('Failed to stop streaming:', err);
     }
   };
 
@@ -738,9 +728,7 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
           {/* Header */}
           <div className="px-4 sm:px-6 py-3 sm:py-4 border-b bg-gradient-to-r from-slate-50 to-gray-50">
             <h2 className="text-lg sm:text-xl font-bold text-gray-900">Go Live: {channel.name}</h2>
-            <p className="text-xs sm:text-sm text-gray-600 mt-1">
-              Stream directly from your camera to all connected platforms
-            </p>
+            <p className="text-xs sm:text-sm text-gray-600 mt-1">Stream directly from your camera to all connected platforms</p>
           </div>
 
           {/* Main Content - Responsive Layout */}
@@ -752,9 +740,8 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
                   <Video className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-white text-lg font-semibold mb-2">Camera Access Required</h3>
                   <p className="text-gray-400 text-sm mb-4 max-w-md">
-                    Allow access to your camera and microphone to start streaming
+                    We need access to your camera and microphone to start streaming
                   </p>
-
                   {permissionError && (
                     <Alert className="bg-red-900/50 border-red-700 text-red-200 mb-4 max-w-md mx-auto">
                       <AlertCircle className="w-4 h-4" />
@@ -847,7 +834,6 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
                     </div>
                   </div>
                 )}
-
 
                 {/* Platform List */}
                 <div>
