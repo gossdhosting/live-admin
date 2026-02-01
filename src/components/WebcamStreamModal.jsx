@@ -897,8 +897,8 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
             {/* Right Side - Controls and Info (1/3 width on desktop, full width on mobile) */}
             <div className="w-full md:w-96 border-l md:border-l border-t md:border-t-0 bg-white flex flex-col">
               <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
-                {/* Device Selection */}
-                {permissionsGranted && !isStreaming && (
+                {/* Device Selection - Only for camera, not screen share */}
+                {permissionsGranted && !isStreaming && sourceType === 'camera' && (
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Camera</label>
@@ -929,6 +929,21 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
                         ))}
                       </select>
                     </div>
+                  </div>
+                )}
+
+                {/* Screen Share Info */}
+                {permissionsGranted && !isStreaming && sourceType === 'screen' && (
+                  <div className="space-y-3">
+                    <Alert className="bg-purple-50 border-purple-200">
+                      <Monitor className="w-4 h-4 text-purple-600" />
+                      <div className="ml-2">
+                        <p className="text-sm font-semibold text-purple-900">Screen Share Active</p>
+                        <p className="text-xs text-purple-700 mt-1">
+                          Your screen, window, or tab is being captured. System audio may be included if you selected it.
+                        </p>
+                      </div>
+                    </Alert>
                   </div>
                 )}
 
