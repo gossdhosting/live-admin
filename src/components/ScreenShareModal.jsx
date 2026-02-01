@@ -36,6 +36,13 @@ function ScreenShareModal({ channel, isOpen, onClose, onUpdate }) {
     };
   }, []);
 
+  // Update video element when stream is ready
+  useEffect(() => {
+    if (videoRef.current && localStreamRef.current && permissionsGranted) {
+      videoRef.current.srcObject = localStreamRef.current;
+    }
+  }, [permissionsGranted]);
+
   const fetchPlatforms = async () => {
     try {
       const [streamsRes, destinationsRes] = await Promise.all([
