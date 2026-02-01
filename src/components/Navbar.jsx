@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { LayoutDashboard, Clapperboard, Gem, Settings, Crown, LogOut, ArrowUpCircle, CreditCard, Globe, ChevronDown, User, HelpCircle, Smartphone, MessageSquare } from 'lucide-react';
+import { LayoutDashboard, Clapperboard, Gem, Settings, Crown, LogOut, ArrowUpCircle, CreditCard, Globe, ChevronDown, User, HelpCircle, Smartphone, MessageSquare, Users } from 'lucide-react';
 import logoSvg from '/logo.svg';
 
 function Navbar({ user, onLogout }) {
@@ -10,14 +10,19 @@ function Navbar({ user, onLogout }) {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [accountDropdownOpen, setAccountDropdownOpen] = useState(false);
+  const [adminDropdownOpen, setAdminDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const adminDropdownRef = useRef(null);
   const isAdminSession = localStorage.getItem('adminToken') !== null;
 
-  // Close dropdown when clicking outside
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setAccountDropdownOpen(false);
+      }
+      if (adminDropdownRef.current && !adminDropdownRef.current.contains(event.target)) {
+        setAdminDropdownOpen(false);
       }
     };
 
@@ -52,12 +57,14 @@ function Navbar({ user, onLogout }) {
     { path: '/media', label: 'Media', icon: Clapperboard },
     { path: '/platforms', label: 'Platforms', icon: Globe },
     { path: '/plans', label: 'Plans', icon: Gem },
-    { path: '/settings', label: 'Settings', icon: Settings },
-    ...(user && user.role === 'admin' ? [
-      { path: '/admin', label: 'Admin', icon: Crown },
-      { path: '/tickets', label: 'Tickets', icon: MessageSquare },
-      { path: '/subscriptions', label: 'Subscriptions', icon: CreditCard }
-    ] : [])
+    { path: '/settings', label: 'Settings', icon: Settings }
+  ];
+
+  const adminLinks = [
+    { path: '/users', label: 'Users', icon: Users },
+    { path: '/tickets', label: 'Tickets', icon: MessageSquare },
+    { path: '/subscriptions', label: 'Subscriptions', icon: CreditCard },
+    { path: '/admin', label: 'Admin Settings', icon: Settings }
   ];
 
   return (
@@ -88,6 +95,48 @@ function Navbar({ user, onLogout }) {
                 </Link>
               );
             })}
+
+            {/* Admin Dropdown */}
+            {user && user.role === 'admin' && (
+              <div className="relative" ref={adminDropdownRef}>
+                <button
+                  onClick={() => setAdminDropdownOpen(!adminDropdownOpen)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all font-medium text-sm ${
+                    adminLinks.some(link => isActive(link.path))
+                      ? 'bg-white/20 text-white font-semibold'
+                      : 'text-white/90 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  <Crown className="w-4 h-4" />
+                  <span>Admin</span>
+                  <ChevronDown className={`w-3 h-3 transition-transform ${adminDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* Admin Dropdown Menu */}
+                {adminDropdownOpen && (
+                  <div className="absolute left-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                    {adminLinks.map((link) => {
+                      const IconComponent = link.icon;
+                      return (
+                        <Link
+                          key={link.path}
+                          to={link.path}
+                          onClick={() => setAdminDropdownOpen(false)}
+                          className={`flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
+                            isActive(link.path)
+                              ? 'bg-primary/10 text-primary font-semibold'
+                              : 'text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          <IconComponent className="w-4 h-4" />
+                          <span>{link.label}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Desktop User Menu */}
@@ -278,6 +327,36 @@ function Navbar({ user, onLogout }) {
               </Link>
             );
           })}
+
+          {/* Admin Links in Mobile Menu */}
+          {user && user.role === 'admin' && (
+            <>
+              <div className="pt-4 pb-2 px-3">
+                <div className="flex items-center gap-2 text-gray-400 text-xs font-semibold uppercase tracking-wider">
+                  <Crown className="w-3 h-3" />
+                  <span>Admin</span>
+                </div>
+              </div>
+              {adminLinks.map((link) => {
+                const IconComponent = link.icon;
+                return (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-all font-medium ${
+                      isActive(link.path)
+                        ? 'bg-gray-700 text-white font-semibold'
+                        : 'text-gray-200 hover:bg-gray-800 hover:text-white'
+                    }`}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <IconComponent className="w-5 h-5" />
+                    <span>{link.label}</span>
+                  </Link>
+                );
+              })}
+            </>
+          )}
         </div>
 
         <a
