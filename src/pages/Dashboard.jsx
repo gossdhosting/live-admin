@@ -246,21 +246,6 @@ function Dashboard({ user }) {
                 requiredLimit={userStats.plan?.name === 'Free' ? '5 GB storage' : userStats.plan?.name === 'Basic' ? '50 GB storage' : '200 GB storage'}
               />
             )}
-
-            {/* Show upgrade prompt for duration limit (Free plan only) */}
-            {userStats && userStats.plan?.name === 'Free' && userStats.limits.max_stream_duration && (
-              <div className="mt-4 p-3 bg-blue-50 border border-blue-300 rounded-lg text-blue-900 text-sm">
-                ℹ️ Your streams will auto-stop after {userStats.limits.max_stream_duration} minutes. Upgrade to Basic or higher for unlimited streaming.
-              </div>
-            )}
-
-            {/* Show upgrade prompt for quality limit */}
-            {userStats && userStats.limits.max_bitrate < 6000 && (
-              <div className="mt-4 p-3 bg-purple-50 border border-purple-300 rounded-lg text-purple-900 text-sm">
-                ℹ️ Your plan supports up to {userStats.limits.max_bitrate >= 4000 ? '720p' : '480p'} quality.
-                {userStats.limits.max_bitrate < 6000 && ' Upgrade to Pro for 1080p streaming!'}
-              </div>
-            )}
           </CardContent>
         </Card>
       )}
