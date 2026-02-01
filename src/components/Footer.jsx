@@ -12,11 +12,21 @@ function Footer() {
       try {
         const response = await api.get('/status');
         if (response.data && response.data.services) {
+          // Services is now an object like { backend: 'online', rtmp: 'online', webrtc: 'online' }
+          const services = response.data.services;
+          const serviceStatuses = Object.values(services);
+
           // Check if all services are online
-          const allOnline = response.data.services.every(
-            service => service.status === 'online'
-          );
-          setBackendStatus(allOnline ? 'online' : 'degraded');
+          const allOnline = serviceStatuses.every(status => status === 'online');
+          const anyOffline = serviceStatuses.some(status => status === 'offline');
+
+          if (allOnline) {
+            setBackendStatus('online');
+          } else if (anyOffline) {
+            setBackendStatus('degraded');
+          } else {
+            setBackendStatus('online');
+          }
           setStatusDetails(response.data);
         } else {
           setBackendStatus('online');
