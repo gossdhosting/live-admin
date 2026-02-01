@@ -26,6 +26,7 @@ const INPUT_TYPE_LABELS = {
   'youtube': 'YouTube URL',
   'rtmp': 'Custom RTMP',
   'webcam': 'Webcam',
+  'screen': 'Screen Share',
   'video': 'Prerecorded Video',
 };
 
@@ -770,8 +771,8 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
       {/* Action Buttons - Always Visible */}
       <CardContent className="pt-0 pb-3 px-6">
         <div className="flex gap-2 flex-wrap items-center">
-          {/* Webcam Channels - Show Go Live Button */}
-          {channel.input_type === 'webcam' ? (
+          {/* Webcam/Screen Channels - Show Go Live Button */}
+          {(channel.input_type === 'webcam' || channel.input_type === 'screen') ? (
             <Button
               onClick={() => setShowWebcamModal(true)}
               className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold shadow-sm gap-2"

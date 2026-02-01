@@ -627,54 +627,64 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
 
   const stopStreaming = async () => {
     try {
-      // Stop channel stream (platform streaming)
+      console.log('[Stop Streaming] Initiating graceful stop');
+
+      // Stop channel stream (platform streaming) and WebRTC bridge
       if (isStreaming) {
         try {
-          console.log('Stopping channel stream...');
-          await api.post(`/channels/${channel.id}/stop`);
-          console.log('Channel stream stopped');
+          console.log('[Stop Streaming] Stopping channel and WebRTC bridge on backend');
+          // Wait for both to complete before proceeding
+          await Promise.all([
+            api.post(`/channels/${channel.id}/stop`),
+            api.post(`/webrtc/stop/${channel.id}`)
+          ]);
+          console.log('[Stop Streaming] Backend stopped successfully');
         } catch (err) {
-          console.error('Failed to stop channel stream:', err);
-        }
-
-        // Stop WebRTC on server
-        try {
-          console.log('Stopping WebRTC bridge...');
-          await api.post(`/webrtc/stop/${channel.id}`);
-          console.log('WebRTC bridge stopped');
-        } catch (err) {
-          console.error('Failed to stop WebRTC:', err);
+          console.error('[Stop Streaming] Backend stop failed:', err);
+          // Continue with local cleanup even if backend fails
         }
       }
 
       // Close peer connection
       if (peerConnectionRef.current) {
+        console.log('[Stop Streaming] Closing peer connection');
         peerConnectionRef.current.close();
         peerConnectionRef.current = null;
       }
 
       // Stop local tracks
       if (localStreamRef.current) {
-        localStreamRef.current.getTracks().forEach(track => track.stop());
+        console.log('[Stop Streaming] Stopping local media tracks');
+        localStreamRef.current.getTracks().forEach(track => {
+          track.stop();
+          console.log(`[Stop Streaming] Stopped ${track.kind} track`);
+        });
         localStreamRef.current = null;
       }
 
       // Clear video element
       if (videoRef.current) {
+        console.log('[Stop Streaming] Clearing video element');
         videoRef.current.srcObject = null;
       }
 
       setIsStreaming(false);
       setStreamStatus('idle');
       setPermissionsGranted(false);
+      setError('');
+      setIsMuted(false);
+      setIsVideoOff(false);
 
       // Update parent component
       if (onUpdate) {
         onUpdate();
       }
 
+      console.log('[Stop Streaming] Graceful stop complete');
+
     } catch (err) {
-      console.error('Failed to stop streaming:', err);
+      console.error('[Stop Streaming] Failed to stop streaming:', err);
+      setError('Failed to stop streaming. Please use Force Disconnect if needed.');
     }
   };
 
@@ -814,7 +824,17 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
                   <div className="flex gap-2 justify-center mb-6">
                     <Button
                       variant={sourceType === 'camera' ? 'default' : 'outline'}
-                      onClick={() => setSourceType('camera')}
+                      onClick={async () => {
+                        setSourceType('camera');
+                        // Update channel input_type in database
+                        try {
+                          await api.put(`/channels/${channel.id}`, { input_type: 'webcam' });
+                          console.log('[Source Type] Updated channel to webcam in DB');
+                          if (onUpdate) onUpdate();
+                        } catch (err) {
+                          console.error('[Source Type] Failed to update DB:', err);
+                        }
+                      }}
                       className={sourceType === 'camera' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-700 hover:bg-gray-600 text-white border-gray-600'}
                     >
                       <Video className="w-4 h-4 mr-2" />
@@ -822,7 +842,17 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
                     </Button>
                     <Button
                       variant={sourceType === 'screen' ? 'default' : 'outline'}
-                      onClick={() => setSourceType('screen')}
+                      onClick={async () => {
+                        setSourceType('screen');
+                        // Update channel input_type in database
+                        try {
+                          await api.put(`/channels/${channel.id}`, { input_type: 'screen' });
+                          console.log('[Source Type] Updated channel to screen in DB');
+                          if (onUpdate) onUpdate();
+                        } catch (err) {
+                          console.error('[Source Type] Failed to update DB:', err);
+                        }
+                      }}
                       className={sourceType === 'screen' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-700 hover:bg-gray-600 text-white border-gray-600'}
                     >
                       <Monitor className="w-4 h-4 mr-2" />
