@@ -805,7 +805,11 @@ function WebcamStreamModal({ channel, isOpen, onClose, onUpdate }) {
           {/* Header */}
           <div className="px-4 sm:px-6 py-3 sm:py-4 border-b bg-gradient-to-r from-slate-50 to-gray-50">
             <h2 className="text-lg sm:text-xl font-bold text-gray-900">Go Live: {channel.name}</h2>
-            <p className="text-xs sm:text-sm text-gray-600 mt-1">Stream directly from your camera to all connected platforms</p>
+            <p className="text-xs sm:text-sm text-gray-600 mt-1">
+              {sourceType === 'screen'
+                ? 'Stream your screen or application window to all connected platforms'
+                : 'Stream directly from your camera to all connected platforms'}
+            </p>
           </div>
 
           {/* Main Content - Responsive Layout */}
