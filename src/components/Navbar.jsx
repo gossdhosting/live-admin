@@ -62,6 +62,7 @@ function Navbar({ user, onLogout }) {
 
   const adminLinks = [
     { path: '/users', label: 'Users', icon: Users },
+    { path: '/plans-management', label: 'Plans', icon: Gem },
     { path: '/tickets', label: 'Tickets', icon: MessageSquare },
     { path: '/subscriptions', label: 'Subscriptions', icon: CreditCard },
     { path: '/admin', label: 'Admin Settings', icon: Settings }

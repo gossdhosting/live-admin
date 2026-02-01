@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import UserManagement from '../components/UserManagement';
-import PlanManagement from '../components/PlanManagement';
 import FAQManagement from '../components/FAQManagement';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
@@ -10,7 +8,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Alert, AlertDescription } from '../components/ui/alert';
-import { Settings as SettingsIcon, Users, Gem, Mail, FileText, Bell, CreditCard, Ticket, HelpCircle, Database, ChevronLeft, ChevronRight, AlertTriangle, Radio, ShieldAlert } from 'lucide-react';
+import { Settings as SettingsIcon, Gem, Mail, FileText, Bell, CreditCard, Ticket, HelpCircle, Database, ChevronLeft, ChevronRight, AlertTriangle, Radio, ShieldAlert } from 'lucide-react';
 
 function AdminSettings({ user }) {
   const navigate = useNavigate();
@@ -422,8 +420,6 @@ function AdminSettings({ user }) {
     { value: 'payment', icon: CreditCard, label: 'Payment Settings' },
     { value: 'coupons', icon: Ticket, label: 'Coupons', onClick: fetchCoupons },
     { value: 'cache', icon: Database, label: 'Media Cache', onClick: fetchCacheStats },
-    { value: 'users', icon: Users, label: 'User Management' },
-    { value: 'plans', icon: Gem, label: 'Plan Management' },
     { value: 'faq', icon: HelpCircle, label: 'FAQ Management' },
   ];
 
@@ -1709,15 +1705,6 @@ function AdminSettings({ user }) {
               </Card>
             </TabsContent>
 
-            {/* Users Tab */}
-            <TabsContent value="users" className="mt-6">
-              <Card>
-                <CardContent className="pt-6">
-                  <UserManagement />
-                </CardContent>
-              </Card>
-            </TabsContent>
-
             {/* Plans Tab */}
             {/* Coupons Tab */}
             <TabsContent value="coupons" className="mt-6">
@@ -1924,14 +1911,6 @@ function AdminSettings({ user }) {
                   </CardContent>
                 </Card>
               </div>
-            </TabsContent>
-
-            <TabsContent value="plans" className="mt-6">
-              <Card>
-                <CardContent className="pt-6">
-                  <PlanManagement />
-                </CardContent>
-              </Card>
             </TabsContent>
 
             {/* Cache Management Tab */}

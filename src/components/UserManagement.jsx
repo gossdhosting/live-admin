@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { Check, X } from 'lucide-react';
 
-function UserManagement() {
+function UserManagement({ searchQuery = '' }) {
   const [users, setUsers] = useState([]);
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,6 +13,8 @@ function UserManagement() {
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [modalMode, setModalMode] = useState('create'); // 'create' or 'edit'
   const [selectedUser, setSelectedUser] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [usersPerPage] = useState(10);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -175,6 +177,24 @@ function UserManagement() {
     }
   };
 
+  // Filter users based on search query
+  const filteredUsers = users.filter(user => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      user.email.toLowerCase().includes(query) ||
+      (user.name && user.name.toLowerCase().includes(query))
+    );
+  });
+
+  // Pagination logic
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
   if (loading) {
     return <div>Loading users...</div>;
   }
@@ -210,11 +230,11 @@ function UserManagement() {
             </tr>
           </thead>
           <tbody>
-            {users.map(user => (
+            {currentUsers.map(user => (
               <tr key={user.id} style={{ borderBottom: '1px solid #dee2e6' }}>
                 <td style={{ padding: '0.75rem' }}>{user.id}</td>
-                <td style={{ padding: '0.75rem' }}>{user.email}</td>
-                <td style={{ padding: '0.75rem' }}>{user.name || '-'}</td>
+                <td style={{ padding: '0.75rem', maxWidth: '200px', wordBreak: 'break-word', whiteSpace: 'normal' }}>{user.email}</td>
+                <td style={{ padding: '0.75rem', maxWidth: '150px', wordBreak: 'break-word', whiteSpace: 'normal' }}>{user.name || '-'}</td>
                 <td style={{ padding: '0.75rem' }}>
                   {user.auth_provider && user.auth_provider !== 'local' ? (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -317,9 +337,82 @@ function UserManagement() {
         </table>
       </div>
 
-      {users.length === 0 && (
+      {filteredUsers.length === 0 && (
         <div style={{ textAlign: 'center', padding: '2rem', color: '#7f8c8d' }}>
-          No users found. Create your first user to get started.
+          {searchQuery ? 'No users found matching your search.' : 'No users found. Create your first user to get started.'}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', marginTop: '1.5rem', flexWrap: 'wrap' }}>
+          <button
+            onClick={() => paginate(currentPage - 1)}
+            disabled={currentPage === 1}
+            style={{
+              padding: '0.5rem 1rem',
+              border: '1px solid #dee2e6',
+              borderRadius: '4px',
+              backgroundColor: currentPage === 1 ? '#f8f9fa' : '#fff',
+              cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+              opacity: currentPage === 1 ? 0.5 : 1
+            }}
+          >
+            Previous
+          </button>
+
+          {[...Array(totalPages)].map((_, index) => {
+            const pageNumber = index + 1;
+            // Show first page, last page, current page, and pages around current
+            if (
+              pageNumber === 1 ||
+              pageNumber === totalPages ||
+              (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
+            ) {
+              return (
+                <button
+                  key={pageNumber}
+                  onClick={() => paginate(pageNumber)}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    border: '1px solid #dee2e6',
+                    borderRadius: '4px',
+                    backgroundColor: currentPage === pageNumber ? '#3498db' : '#fff',
+                    color: currentPage === pageNumber ? '#fff' : '#000',
+                    fontWeight: currentPage === pageNumber ? 'bold' : 'normal',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {pageNumber}
+                </button>
+              );
+            } else if (
+              pageNumber === currentPage - 2 ||
+              pageNumber === currentPage + 2
+            ) {
+              return <span key={pageNumber}>...</span>;
+            }
+            return null;
+          })}
+
+          <button
+            onClick={() => paginate(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            style={{
+              padding: '0.5rem 1rem',
+              border: '1px solid #dee2e6',
+              borderRadius: '4px',
+              backgroundColor: currentPage === totalPages ? '#f8f9fa' : '#fff',
+              cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+              opacity: currentPage === totalPages ? 0.5 : 1
+            }}
+          >
+            Next
+          </button>
+
+          <span style={{ marginLeft: '1rem', color: '#7f8c8d', fontSize: '0.9rem' }}>
+            Showing {indexOfFirstUser + 1}-{Math.min(indexOfLastUser, filteredUsers.length)} of {filteredUsers.length} users
+          </span>
         </div>
       )}
 

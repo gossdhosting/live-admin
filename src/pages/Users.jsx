@@ -1,11 +1,13 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UserManagement from '../components/UserManagement';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Users as UsersIcon } from 'lucide-react';
+import { Input } from '../components/ui/input';
+import { Users as UsersIcon, Search } from 'lucide-react';
 
 function Users({ user }) {
   const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     // Redirect if not admin
@@ -34,10 +36,22 @@ function Users({ user }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>All Users</CardTitle>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <CardTitle>All Users</CardTitle>
+            <div className="relative w-full sm:w-64">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                type="text"
+                placeholder="Search by email or name..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
-          <UserManagement />
+          <UserManagement searchQuery={searchQuery} />
         </CardContent>
       </Card>
     </div>
