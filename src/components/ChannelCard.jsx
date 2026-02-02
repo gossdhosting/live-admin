@@ -43,7 +43,6 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
   const [showWebcamModal, setShowWebcamModal] = useState(false);
   const [showScreenShareModal, setShowScreenShareModal] = useState(false);
-  const logsEndRef = useRef(null);
   const isAdmin = user && user.role === 'admin';
   const { showAlert } = useAlertDialog();
 
@@ -157,11 +156,6 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
     try {
       const response = await api.get(`/channels/${channel.id}/logs`);
       setLogs(response.data.logs);
-
-      // Auto-scroll to bottom when new logs arrive
-      setTimeout(() => {
-        logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
     } catch (error) {
       console.error('Failed to load logs');
     }
@@ -738,8 +732,6 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
                       </div>
                     );
                   })}
-                  {/* Scroll target */}
-                  <div ref={logsEndRef} />
                 </div>
               )}
             </div>
