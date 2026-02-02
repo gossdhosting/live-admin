@@ -43,6 +43,7 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
   const [showWebcamModal, setShowWebcamModal] = useState(false);
   const [showScreenShareModal, setShowScreenShareModal] = useState(false);
+  const logsEndRef = useRef(null);
   const isAdmin = user && user.role === 'admin';
   const { showAlert } = useAlertDialog();
 
@@ -55,11 +56,20 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
     setWatermarkEnabled(Boolean(channel.watermark_enabled));
   }, [channel.watermark_enabled]);
 
+  // Live log polling when logs tab is active
   useEffect(() => {
     if (activeTab === 'logs') {
+      // Initial fetch
       fetchLogs();
+
+      // Poll for new logs every 2 seconds
+      const interval = setInterval(() => {
+        fetchLogs();
+      }, 2000);
+
+      return () => clearInterval(interval);
     }
-  }, [activeTab]);
+  }, [activeTab, channel.id]);
 
   // Fetch user stats for plan limits
   useEffect(() => {
@@ -147,6 +157,11 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
     try {
       const response = await api.get(`/channels/${channel.id}/logs`);
       setLogs(response.data.logs);
+
+      // Auto-scroll to bottom when new logs arrive
+      setTimeout(() => {
+        logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
     } catch (error) {
       console.error('Failed to load logs');
     }
@@ -674,6 +689,15 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
       case 'logs':
         return (
           <div className="p-6">
+            {/* Live Indicator */}
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2 text-sm">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                <span className="text-gray-600 font-medium">Live Logs (Auto-updating)</span>
+              </div>
+              <span className="text-xs text-gray-500">Updates every 2 seconds</span>
+            </div>
+
             <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl p-5 max-h-96 overflow-y-auto font-mono text-sm shadow-inner border border-gray-700">
               {logs.length === 0 ? (
                 <div className="text-gray-400 text-center p-12 flex flex-col items-center gap-3">
@@ -714,6 +738,8 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
                       </div>
                     );
                   })}
+                  {/* Scroll target */}
+                  <div ref={logsEndRef} />
                 </div>
               )}
             </div>
