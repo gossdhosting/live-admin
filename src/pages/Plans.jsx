@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Alert, AlertDescription } from '../components/ui/alert';
-import { Check, X, Cloud, HardDrive, CreditCard, ExternalLink, Gem } from 'lucide-react';
+import { Check, X, Cloud, HardDrive, CreditCard, ExternalLink, Gem, Video } from 'lucide-react';
 
 function Plans() {
   const [plans, setPlans] = useState([]);
@@ -415,6 +415,18 @@ function Plans() {
                     )}
                     <span className={plan.custom_watermark ? '' : 'text-gray-500'}>
                       Custom Watermarks
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-sm">
+                    {plan.hls_embed_enabled ? (
+                      <Check className="w-5 h-5 text-green-600" />
+                    ) : (
+                      <X className="w-5 h-5 text-red-600" />
+                    )}
+                    <span className={`flex items-center gap-1 ${plan.hls_embed_enabled ? '' : 'text-gray-500'}`}>
+                      <Video className="w-4 h-4" />
+                      HLS Embed Player
                     </span>
                   </div>
 
