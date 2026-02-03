@@ -578,26 +578,30 @@ function Settings({ user }) {
             </TabsContent>
 
             <TabsContent value="watermark" className="mt-6">
-              {/* Watermark Settings Section */}
-              <WatermarkSettingsUser onUpdate={fetchUserSettings} />
+              {/* 2-Column Layout: Settings on Left, Preview on Right */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Left Column - Watermark & Title Settings */}
+                <div className="space-y-8">
+                  {/* Watermark Settings Section */}
+                  <WatermarkSettingsUser onUpdate={fetchUserSettings} />
 
-              {/* Title Settings Section */}
-              <div className="mt-12 pt-8 border-t border-gray-200">
-                <Alert className="border-green-200 bg-green-50 mb-6">
-                  <AlertDescription className="text-green-800">
-                    <strong>ℹ️ Title Settings:</strong> Customize how titles appear on your streams.
-                  </AlertDescription>
-                </Alert>
+                  {/* Title Settings Section */}
+                  <div className="pt-8 border-t border-gray-200">
+                    <Alert className="border-green-200 bg-green-50 mb-6">
+                      <AlertDescription className="text-green-800">
+                        <strong>ℹ️ Title Settings:</strong> Customize how titles appear on your streams.
+                      </AlertDescription>
+                    </Alert>
 
-                {userSettingsMessage && (
-                  <Alert className={userSettingsMessage.includes('success') ? 'border-green-200 bg-green-50 mb-6' : 'border-red-200 bg-red-50 mb-6'}>
-                    <AlertDescription className={userSettingsMessage.includes('success') ? 'text-green-800' : 'text-red-800'}>
-                      {userSettingsMessage}
-                    </AlertDescription>
-                  </Alert>
-                )}
+                    {userSettingsMessage && (
+                      <Alert className={userSettingsMessage.includes('success') ? 'border-green-200 bg-green-50 mb-6' : 'border-red-200 bg-red-50 mb-6'}>
+                        <AlertDescription className={userSettingsMessage.includes('success') ? 'text-green-800' : 'text-red-800'}>
+                          {userSettingsMessage}
+                        </AlertDescription>
+                      </Alert>
+                    )}
 
-                <form onSubmit={handleUserSettingsSubmit} className="space-y-6">
+                    <form onSubmit={handleUserSettingsSubmit} className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="title_bg_color">Background Color</Label>
                   <div className="flex gap-4 items-center">
@@ -742,24 +746,29 @@ function Settings({ user }) {
                   </p>
                 </div>
 
-                <div className="flex justify-end gap-2">
-                  <Button type="submit" disabled={savingUserSettings}>
-                    {savingUserSettings ? 'Saving...' : 'Save My Settings'}
-                  </Button>
+                      <div className="flex justify-end gap-2">
+                        <Button type="submit" disabled={savingUserSettings}>
+                          {savingUserSettings ? 'Saving...' : 'Save Title Settings'}
+                        </Button>
+                      </div>
+                    </form>
+                  </div>
                 </div>
-              </form>
 
-              <div className="mt-8 pt-8 border-t border-gray-200">
-                <h3 className="text-lg font-semibold mb-4">Stream Preview (Title & Watermark)</h3>
-                <StreamPreview
-                  titleSettings={userSettings}
-                  watermarkSettings={userSettings}
-                  sampleTitle="Example News Title Here"
-                />
-                <p className="text-sm text-gray-500 mt-2">
-                  This preview shows how both the title overlay and watermark will appear on your stream. Enable these features when creating/editing a channel.
-                </p>
-              </div>
+                {/* Right Column - Live Preview */}
+                <div className="lg:sticky lg:top-4 h-fit">
+                  <h3 className="text-lg font-semibold mb-4">Live Preview</h3>
+                  <StreamPreview
+                    titleSettings={userSettings}
+                    watermarkSettings={userSettings}
+                    sampleTitle="Example News Title Here"
+                  />
+                  <Alert className="border-blue-200 bg-blue-50 mt-4">
+                    <AlertDescription className="text-blue-800 text-sm">
+                      ℹ️ This preview shows how both the title overlay and watermark will appear on your stream. Changes are reflected in real-time as you adjust settings.
+                    </AlertDescription>
+                  </Alert>
+                </div>
               </div>
             </TabsContent>
           </Tabs>

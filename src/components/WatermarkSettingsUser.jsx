@@ -285,21 +285,7 @@ function WatermarkSettingsUser({ onUpdate }) {
                 </div>
               </div>
 
-              <div className="mb-6">
-                <h4 className="text-md font-semibold mb-3">Watermark Preview</h4>
-                <StreamPreview
-                  titleSettings={{}}
-                  watermarkSettings={{
-                    watermark_path: settings.watermark_path,
-                    watermark_position: settings.watermark_position,
-                    watermark_opacity: settings.watermark_opacity,
-                    watermark_scale: settings.watermark_scale
-                  }}
-                  sampleTitle=""
-                />
-              </div>
-
-              <div className="flex justify-end">
+              <div className="flex justify-end mt-6">
                 <Button
                   onClick={handleSaveSettings}
                   disabled={!hasChanges || saving}
