@@ -175,7 +175,7 @@ function PlatformConnections() {
         </div>
       )}
 
-      <div style={{ display: 'grid', gap: '1rem' }}>
+      <div className="grid gap-4">
         {['facebook', 'youtube', 'twitch'].map((platform) => {
           const connection = connections.find((c) => c.platform === platform);
           const isConnected = !!connection;
@@ -184,67 +184,38 @@ function PlatformConnections() {
           return (
             <div
               key={platform}
-              style={{
-                border: '1px solid #e0e0e0',
-                borderRadius: '8px',
-                padding: '1.5rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                backgroundColor: isConnected ? '#f9f9f9' : '#fff',
-              }}
+              className="border border-gray-200 rounded-lg p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+              style={{ backgroundColor: isConnected ? '#f9f9f9' : '#fff' }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div className="flex items-start sm:items-center gap-3 sm:gap-4 flex-1 min-w-0">
                 <div
-                  style={{
-                    width: '50px',
-                    height: '50px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: getPlatformColor(platform) + '20',
-                    borderRadius: '8px',
-                  }}
+                  className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-lg flex-shrink-0"
+                  style={{ backgroundColor: getPlatformColor(platform) + '20' }}
                 >
-                  <PlatformIcon size={32} color={getPlatformColor(platform)} />
+                  <PlatformIcon className="w-6 h-6 sm:w-8 sm:h-8" color={getPlatformColor(platform)} />
                 </div>
-                <div>
-                  <h4
-                    style={{
-                      margin: 0,
-                      fontSize: '1.1rem',
-                      fontWeight: '600',
-                      textTransform: 'capitalize',
-                    }}
-                  >
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-base sm:text-lg font-semibold capitalize m-0">
                     {platform}
                   </h4>
                   {isConnected ? (
                     <div>
-                      <p style={{ margin: '0.25rem 0 0 0', color: '#2ecc71', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <CheckCircle size={16} />
-                        Connected as {platform === 'facebook' && connection.platform_page_name
+                      <p className="mt-1 mb-0 text-green-500 text-sm flex items-center gap-1.5 flex-wrap">
+                        <CheckCircle size={16} className="flex-shrink-0" />
+                        <span className="break-words">Connected as {platform === 'facebook' && connection.platform_page_name
                           ? connection.platform_page_name
-                          : (connection.platform_user_name || connection.platform_user_email)}
+                          : (connection.platform_user_name || connection.platform_user_email)}</span>
                       </p>
                       {(platform === 'facebook' && facebookPages.length > 0) && (
-                        <div style={{ marginTop: '0.5rem' }}>
-                          <label style={{ display: 'block', fontSize: '0.85rem', color: '#7f8c8d', marginBottom: '0.25rem' }}>
+                        <div className="mt-2">
+                          <label className="block text-xs sm:text-sm text-gray-500 mb-1">
                             Select Page:
                           </label>
                           <select
                             value={selectedFacebookPage || ''}
                             onChange={handlePageChange}
                             disabled={loadingPages}
-                            style={{
-                              padding: '0.4rem 0.6rem',
-                              fontSize: '0.85rem',
-                              border: '1px solid #e0e0e0',
-                              borderRadius: '4px',
-                              backgroundColor: loadingPages ? '#f5f5f5' : '#fff',
-                              cursor: loadingPages ? 'not-allowed' : 'pointer',
-                              minWidth: '200px'
-                            }}
+                            className="w-full sm:w-auto px-2 py-1.5 text-sm border border-gray-200 rounded bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
                           >
                             {facebookPages.map(page => (
                               <option key={page.id} value={page.id}>
@@ -255,39 +226,30 @@ function PlatformConnections() {
                         </div>
                       )}
                       {(platform !== 'facebook' && connection.platform_channel_name) && (
-                        <p style={{ margin: '0.25rem 0 0 0', color: '#7f8c8d', fontSize: '0.85rem' }}>
+                        <p className="mt-1 mb-0 text-gray-500 text-xs sm:text-sm">
                           Channel: {connection.platform_channel_name}
                         </p>
                       )}
                       {connection.is_expired && (
-                        <p style={{ margin: '0.25rem 0 0 0', color: '#e74c3c', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <AlertTriangle size={16} />
+                        <p className="mt-1 mb-0 text-red-500 text-xs sm:text-sm flex items-center gap-1.5">
+                          <AlertTriangle size={16} className="flex-shrink-0" />
                           Token expired - reconnect required
                         </p>
                       )}
                     </div>
                   ) : (
-                    <p style={{ margin: '0.25rem 0 0 0', color: '#7f8c8d', fontSize: '0.9rem' }}>
+                    <p className="mt-1 mb-0 text-gray-500 text-sm">
                       Not connected
                     </p>
                   )}
                 </div>
               </div>
 
-              <div>
+              <div className="flex-shrink-0 self-stretch sm:self-center">
                 {isConnected ? (
                   <button
                     onClick={() => handleDisconnect(connection.id, platform)}
-                    style={{
-                      padding: '0.5rem 1rem',
-                      backgroundColor: '#e74c3c',
-                      color: '#fff',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontSize: '0.9rem',
-                      fontWeight: '500',
-                    }}
+                    className="w-full sm:w-auto px-4 py-2 bg-red-500 hover:bg-red-600 text-white border-none rounded cursor-pointer text-sm font-medium transition-colors"
                   >
                     Disconnect
                   </button>
@@ -295,17 +257,8 @@ function PlatformConnections() {
                   <button
                     onClick={() => handleConnect(platform)}
                     disabled={connecting === platform}
-                    style={{
-                      padding: '0.5rem 1rem',
-                      backgroundColor: getPlatformColor(platform),
-                      color: '#fff',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: connecting === platform ? 'not-allowed' : 'pointer',
-                      fontSize: '0.9rem',
-                      fontWeight: '500',
-                      opacity: connecting === platform ? 0.6 : 1,
-                    }}
+                    className="w-full sm:w-auto px-4 py-2 text-white border-none rounded text-sm font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                    style={{ backgroundColor: getPlatformColor(platform) }}
                   >
                     {connecting === platform ? 'Connecting...' : 'Connect'}
                   </button>

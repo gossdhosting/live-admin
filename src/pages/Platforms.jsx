@@ -59,9 +59,9 @@ function Platforms() {
   return (
     <div className="container mx-auto px-4 py-8">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Platform Management</CardTitle>
-          <Button variant="outline" onClick={() => navigate('/')}>
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <CardTitle className="text-lg sm:text-xl">Platform Management</CardTitle>
+          <Button variant="outline" size="sm" onClick={() => navigate('/')}>
             Back to Dashboard
           </Button>
         </CardHeader>

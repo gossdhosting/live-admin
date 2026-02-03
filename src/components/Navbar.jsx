@@ -72,8 +72,13 @@ function Navbar({ user, onLogout }) {
     <nav className="bg-gradient-to-r from-[#212836] to-black text-white shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo/Brand */}
-          <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
+          {/* Mobile Menu Button - Left side on mobile */}
+          <div className="md:hidden w-10">
+            {/* Empty spacer for centering logo */}
+          </div>
+
+          {/* Logo/Brand - Centered on mobile */}
+          <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity md:flex-none">
             <img src={logoSvg} alt="RexStream" style={{ height: '1.8rem' }} />
           </Link>
 
@@ -251,9 +256,9 @@ function Navbar({ user, onLogout }) {
             </div>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu Button - Right side */}
           <button
-            className="md:hidden p-2 rounded-lg hover:bg-white/10 transition-colors"
+            className="md:hidden p-2 rounded-lg hover:bg-white/10 transition-colors w-10 flex justify-center"
             onClick={toggleMobileMenu}
           >
             <div className="w-6 h-5 flex flex-col justify-between">
