@@ -779,6 +779,12 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
             <Badge variant="outline" className="text-xs font-medium">
               {INPUT_TYPE_LABELS[channel.input_type] || channel.input_type}
             </Badge>
+            {channel.input_type === 'rtmp' && channel.rtmp_input_connected && channel.status !== 'running' && (
+              <Badge variant="success" className="text-xs font-medium gap-1">
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                Receiving Input
+              </Badge>
+            )}
             {channel.status === 'running' && runtime > 0 && (
               <Badge variant="secondary" className="text-xs font-mono font-semibold">
                 ⏱ {formatRuntime(runtime)}
