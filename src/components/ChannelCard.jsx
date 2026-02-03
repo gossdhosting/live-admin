@@ -596,7 +596,7 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
         return (
           <div className="p-6">
             {/* Show info for users without custom watermark permission */}
-            {!hasCustomWatermarkPermission ? (
+            {!hasCustomWatermarkPermission && (
               <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <div className="flex items-start gap-3">
                   <ImageIcon className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
@@ -608,90 +608,74 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
                   </div>
                 </div>
               </div>
+            )}
+
+            {/* Watermark toggle - only for users with custom watermark permission */}
+            {hasCustomWatermarkPermission ? (
+              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-1">Enable Custom Watermark</h4>
+                  <p className="text-sm text-gray-600">
+                    {watermarkEnabled ? 'Your custom watermark is enabled for this stream' : 'Custom watermark is disabled - default watermark will be used'}
+                  </p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={watermarkEnabled}
+                    onChange={async (e) => {
+                      const newValue = e.target.checked;
+                      // Optimistic update
+                      setWatermarkEnabled(newValue);
+
+                      try {
+                        await api.put(`/channels/${channel.id}`, {
+                          watermark_enabled: newValue ? 1 : 0
+                        });
+                        // Refresh to ensure we're in sync with server
+                        onUpdate();
+                      } catch (error) {
+                        // Revert on error
+                        setWatermarkEnabled(!newValue);
+                        await showAlert({
+                          title: 'Failed to Update Watermark',
+                          message: error.response?.data?.error || 'Failed to update watermark setting',
+                          type: 'error'
+                        });
+                      }
+                    }}
+                    disabled={channel.status === 'running'}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 peer-disabled:opacity-50 peer-disabled:cursor-not-allowed"></div>
+                </label>
+              </div>
             ) : (
-              <>
-                {/* Watermark toggle */}
-                <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 mb-6">
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-1">Enable Custom Watermark</h4>
-                    <p className="text-sm text-gray-600">
-                      {watermarkEnabled ? 'Your custom watermark is enabled for this stream' : 'Custom watermark is disabled - default watermark will be used'}
-                    </p>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={watermarkEnabled}
-                      onChange={async (e) => {
-                        const newValue = e.target.checked;
-                        setWatermarkEnabled(newValue);
-
-                        try {
-                          await api.put(`/channels/${channel.id}`, {
-                            watermark_enabled: newValue ? 1 : 0
-                          });
-                          onUpdate();
-                        } catch (error) {
-                          setWatermarkEnabled(!newValue);
-                          await showAlert({
-                            title: 'Failed to Update Watermark',
-                            message: error.response?.data?.error || 'Failed to update watermark setting',
-                            type: 'error'
-                          });
-                        }
-                      }}
-                      disabled={channel.status === 'running'}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 peer-disabled:opacity-50 peer-disabled:cursor-not-allowed"></div>
-                  </label>
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div>
+                  <h4 className="font-semibold text-gray-500 mb-1">Custom Watermark</h4>
+                  <p className="text-sm text-gray-400">
+                    Custom watermark feature is not available on your current plan
+                  </p>
                 </div>
+                <label className="relative inline-flex items-center cursor-not-allowed opacity-50">
+                  <input
+                    type="checkbox"
+                    checked={false}
+                    disabled={true}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 rounded-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5"></div>
+                </label>
+              </div>
+            )}
 
-                {channel.status === 'running' && (
-                  <div className="mb-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                    <p className="text-sm text-yellow-800 flex items-center gap-2">
-                      <AlertTriangle className="w-4 h-4" />
-                      Stop the stream to change watermark settings
-                    </p>
-                  </div>
-                )}
-
-                {/* 2-Column Layout: Settings on left, Preview on right */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Left Column: Watermark & Text Settings */}
-                  <div className="space-y-6">
-                    <p className="text-sm text-gray-600 bg-blue-50 border border-blue-200 rounded-lg p-3">
-                      💡 Configure your watermark and text overlay settings below. Changes are saved globally and applied to this channel.
-                    </p>
-
-                    <div className="text-sm text-gray-500">
-                      To configure watermark and text overlay settings, please visit the{' '}
-                      <a href="/settings?tab=watermark" className="text-blue-600 hover:underline font-medium">
-                        User Settings → Watermark & Overlay
-                      </a>{' '}
-                      page.
-                    </div>
-                  </div>
-
-                  {/* Right Column: Live Preview */}
-                  <div>
-                    <h4 className="text-md font-semibold mb-3 text-gray-900">Live Preview</h4>
-                    <StreamPreview
-                      titleSettings={{}}
-                      watermarkSettings={{
-                        watermark_path: '', // Will show placeholder if no watermark
-                        watermark_position: 'top-right',
-                        watermark_opacity: 1.0,
-                        watermark_scale: 0.15
-                      }}
-                      sampleTitle=""
-                    />
-                    <p className="text-xs text-gray-500 mt-3">
-                      This preview shows how your watermark and text overlay will appear on the stream. Configure settings in User Settings.
-                    </p>
-                  </div>
-                </div>
-              </>
+            {channel.status === 'running' && hasCustomWatermarkPermission && (
+              <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <p className="text-sm text-yellow-800">
+                  Stop the stream to change watermark settings
+                </p>
+              </div>
             )}
           </div>
         );
