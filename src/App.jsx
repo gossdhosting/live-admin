@@ -17,8 +17,10 @@ import Users from './pages/Users';
 import PlansManagement from './pages/PlansManagement';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import MinimizedStreamWidget from './components/MinimizedStreamWidget';
 import api from './services/api';
 import { AlertDialogProvider } from './components/ui/alert-dialog-modern';
+import { MinimizedStreamProvider, useMinimizedStream } from './contexts/MinimizedStreamContext';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -57,78 +59,95 @@ function App() {
 
   return (
     <AlertDialogProvider>
-      <Router>
-        <div className="flex flex-col min-h-screen">
-          {user && <Navbar user={user} onLogout={handleLogout} />}
-          <main className="flex-1">
-            <Routes>
-              <Route
-                path="/login"
-                element={user ? <Navigate to="/" /> : <Login onLogin={handleLogin} />}
-              />
-              <Route
-                path="/register"
-                element={user ? <Navigate to="/" /> : <Register />}
-              />
-              <Route
-                path="/forgot-password"
-                element={user ? <Navigate to="/" /> : <ForgotPassword />}
-              />
-              <Route
-                path="/reset-password"
-                element={user ? <Navigate to="/" /> : <ResetPassword />}
-              />
-              <Route
-                path="/"
-                element={user ? <Dashboard user={user} /> : <Navigate to="/login" />}
-              />
-              <Route
-                path="/settings"
-                element={user ? <Settings user={user} /> : <Navigate to="/login" />}
-              />
-              <Route
-                path="/admin"
-                element={user && user.role === 'admin' ? <AdminSettings user={user} /> : <Navigate to="/" />}
-              />
-              <Route
-                path="/media"
-                element={user ? <MediaManager user={user} /> : <Navigate to="/login" />}
-              />
-              <Route
-                path="/plans"
-                element={user ? <Plans user={user} /> : <Navigate to="/login" />}
-              />
-              <Route
-                path="/subscriptions"
-                element={user && user.role === 'admin' ? <Subscriptions user={user} /> : <Navigate to="/" />}
-              />
-              <Route
-                path="/platforms"
-                element={user ? <Platforms user={user} /> : <Navigate to="/login" />}
-              />
-              <Route
-                path="/help"
-                element={user ? <Help /> : <Navigate to="/login" />}
-              />
-              <Route
-                path="/tickets"
-                element={user && user.role === 'admin' ? <Tickets user={user} /> : <Navigate to="/" />}
-              />
-              <Route
-                path="/users"
-                element={user && user.role === 'admin' ? <Users user={user} /> : <Navigate to="/" />}
-              />
-              <Route
-                path="/plans-management"
-                element={user && user.role === 'admin' ? <PlansManagement user={user} /> : <Navigate to="/" />}
-              />
-            </Routes>
-          </main>
-          {user && <Footer />}
-        </div>
-      </Router>
+      <MinimizedStreamProvider>
+        <Router>
+          <div className="flex flex-col min-h-screen">
+            {user && <Navbar user={user} onLogout={handleLogout} />}
+            <main className="flex-1">
+              <Routes>
+                <Route
+                  path="/login"
+                  element={user ? <Navigate to="/" /> : <Login onLogin={handleLogin} />}
+                />
+                <Route
+                  path="/register"
+                  element={user ? <Navigate to="/" /> : <Register />}
+                />
+                <Route
+                  path="/forgot-password"
+                  element={user ? <Navigate to="/" /> : <ForgotPassword />}
+                />
+                <Route
+                  path="/reset-password"
+                  element={user ? <Navigate to="/" /> : <ResetPassword />}
+                />
+                <Route
+                  path="/"
+                  element={user ? <Dashboard user={user} /> : <Navigate to="/login" />}
+                />
+                <Route
+                  path="/settings"
+                  element={user ? <Settings user={user} /> : <Navigate to="/login" />}
+                />
+                <Route
+                  path="/admin"
+                  element={user && user.role === 'admin' ? <AdminSettings user={user} /> : <Navigate to="/" />}
+                />
+                <Route
+                  path="/media"
+                  element={user ? <MediaManager user={user} /> : <Navigate to="/login" />}
+                />
+                <Route
+                  path="/plans"
+                  element={user ? <Plans user={user} /> : <Navigate to="/login" />}
+                />
+                <Route
+                  path="/subscriptions"
+                  element={user && user.role === 'admin' ? <Subscriptions user={user} /> : <Navigate to="/" />}
+                />
+                <Route
+                  path="/platforms"
+                  element={user ? <Platforms user={user} /> : <Navigate to="/login" />}
+                />
+                <Route
+                  path="/help"
+                  element={user ? <Help /> : <Navigate to="/login" />}
+                />
+                <Route
+                  path="/tickets"
+                  element={user && user.role === 'admin' ? <Tickets user={user} /> : <Navigate to="/" />}
+                />
+                <Route
+                  path="/users"
+                  element={user && user.role === 'admin' ? <Users user={user} /> : <Navigate to="/login" />}
+                />
+                <Route
+                  path="/plans-management"
+                  element={user && user.role === 'admin' ? <PlansManagement user={user} /> : <Navigate to="/" />}
+                />
+              </Routes>
+            </main>
+            {user && <Footer />}
+            {user && <MinimizedStreamWidgetWrapper />}
+          </div>
+        </Router>
+      </MinimizedStreamProvider>
     </AlertDialogProvider>
   );
+}
+
+// Wrapper component to access context
+function MinimizedStreamWidgetWrapper() {
+  const { maximizeStream } = useMinimizedStream();
+
+  // Handler for maximizing a stream - this will be called from the widget
+  const handleMaximize = (stream) => {
+    // The modal components will automatically restore state when opened
+    // Just need to trigger opening the modal - this is handled by setting state in Dashboard
+    window.dispatchEvent(new CustomEvent('maximizeStream', { detail: stream }));
+  };
+
+  return <MinimizedStreamWidget onMaximize={handleMaximize} />;
 }
 
 export default App;

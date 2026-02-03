@@ -4,6 +4,8 @@ import ChannelCard from '../components/ChannelCard';
 import CreateChannelModal from '../components/CreateChannelModal';
 import EditChannelModal from '../components/EditChannelModal';
 import UpgradePrompt from '../components/UpgradePrompt';
+import WebcamStreamModal from '../components/WebcamStreamModal';
+import ScreenShareModal from '../components/ScreenShareModal';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { RefreshCw, Plus, CheckCircle, AlertTriangle, XCircle, Radio, AlertCircle } from 'lucide-react';
@@ -18,6 +20,7 @@ function Dashboard({ user }) {
   const [lastUpdate, setLastUpdate] = useState(new Date());
   const [serverStats, setServerStats] = useState(null);
   const [userStats, setUserStats] = useState(null);
+  const [maximizedStream, setMaximizedStream] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -83,6 +86,17 @@ function Dashboard({ user }) {
       isMounted = false;
       clearInterval(interval);
     };
+  }, []);
+
+  // Listen for maximize events from MinimizedStreamWidget
+  useEffect(() => {
+    const handleMaximize = (event) => {
+      const stream = event.detail;
+      setMaximizedStream(stream);
+    };
+
+    window.addEventListener('maximizeStream', handleMaximize);
+    return () => window.removeEventListener('maximizeStream', handleMaximize);
   }, []);
 
   const fetchChannels = async (silent = false) => {
@@ -464,6 +478,25 @@ function Dashboard({ user }) {
         }}
         onSuccess={fetchChannels}
       />
+
+      {/* Webcam/Screen Share Modals - opened when maximizing from widget */}
+      {maximizedStream && maximizedStream.type === 'webcam' && (
+        <WebcamStreamModal
+          channel={{ id: maximizedStream.channelId, name: maximizedStream.channelName }}
+          isOpen={true}
+          onClose={() => setMaximizedStream(null)}
+          onUpdate={fetchChannels}
+        />
+      )}
+
+      {maximizedStream && maximizedStream.type === 'screen' && (
+        <ScreenShareModal
+          channel={{ id: maximizedStream.channelId, name: maximizedStream.channelName }}
+          isOpen={true}
+          onClose={() => setMaximizedStream(null)}
+          onUpdate={fetchChannels}
+        />
+      )}
     </div>
   );
 }
