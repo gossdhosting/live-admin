@@ -7,7 +7,7 @@ import { Label } from './ui/label';
 import { Alert, AlertDescription } from './ui/alert';
 import { CheckCircle } from 'lucide-react';
 
-function WatermarkSettingsUser({ onUpdate }) {
+function WatermarkSettingsUser({ onUpdate, onSettingsChange }) {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
@@ -83,6 +83,11 @@ function WatermarkSettingsUser({ onUpdate }) {
       setMessage('Watermark uploaded successfully');
       setTimeout(() => setMessage(''), 3000);
 
+      // Update parent component's userSettings state in real-time for live preview
+      if (onSettingsChange) {
+        onSettingsChange('watermark_path', response.data.path);
+      }
+
       if (onUpdate) onUpdate();
     } catch (error) {
       setMessage(error.response?.data?.error || 'Failed to upload watermark');
@@ -94,6 +99,11 @@ function WatermarkSettingsUser({ onUpdate }) {
   const handleSettingChange = (key, value) => {
     setSettings((prev) => ({ ...prev, [key]: value }));
     setHasChanges(true);
+
+    // Update parent component's userSettings state in real-time for live preview
+    if (onSettingsChange) {
+      onSettingsChange(key, value);
+    }
   };
 
   const handleSaveSettings = async () => {
@@ -135,6 +145,14 @@ function WatermarkSettingsUser({ onUpdate }) {
       setHasChanges(false);
       setMessage('Watermark deleted successfully');
       setTimeout(() => setMessage(''), 3000);
+
+      // Clear parent component's userSettings state in real-time for live preview
+      if (onSettingsChange) {
+        onSettingsChange('watermark_path', '');
+        onSettingsChange('watermark_position', 'top-left');
+        onSettingsChange('watermark_opacity', 1.0);
+        onSettingsChange('watermark_scale', 1.0);
+      }
 
       if (onUpdate) onUpdate();
     } catch (error) {

@@ -583,7 +583,10 @@ function Settings({ user }) {
                 {/* Left Column - Watermark & Title Settings */}
                 <div className="space-y-8">
                   {/* Watermark Settings Section */}
-                  <WatermarkSettingsUser onUpdate={fetchUserSettings} />
+                  <WatermarkSettingsUser
+                    onUpdate={fetchUserSettings}
+                    onSettingsChange={handleUserSettingsChange}
+                  />
 
                   {/* Title Settings Section */}
                   <div className="pt-8 border-t border-gray-200">
