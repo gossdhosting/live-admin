@@ -290,9 +290,9 @@ function WatermarkSettings({ channel, onUpdate }) {
                 </label>
                 <input
                   type="range"
-                  min="0.1"
-                  max="2.0"
-                  step="0.1"
+                  min="0.05"
+                  max="0.5"
+                  step="0.05"
                   value={settings.watermark_scale}
                   onChange={(e) => handleSettingChange('watermark_scale', parseFloat(e.target.value))}
                   disabled={channel.status === 'running'}
@@ -305,8 +305,16 @@ function WatermarkSettings({ channel, onUpdate }) {
                   color: '#7f8c8d',
                   marginTop: '0.25rem',
                 }}>
-                  <span>10% (Smallest)</span>
-                  <span>200% (Largest)</span>
+                  <span>5% (Smallest)</span>
+                  <span>50% (Largest)</span>
+                </div>
+                <div style={{
+                  fontSize: '0.75rem',
+                  color: '#e74c3c',
+                  marginTop: '0.5rem',
+                  fontWeight: '500'
+                }}>
+                  ⚠️ Recommended: 10-20% for logos. The watermark scales from its original image size.
                 </div>
               </div>
 

@@ -67,13 +67,15 @@ function StreamPreview({ titleSettings = {}, watermarkSettings = {}, sampleTitle
           LIVE PREVIEW
         </div>
 
-        {/* Watermark */}
+        {/* Watermark - Scaled accurately to match FFmpeg behavior */}
         {watermarkSettings.watermark_path && (
           <div
             style={{
               ...watermarkPosition,
               opacity: watermarkSettings.watermark_opacity || 1.0,
-              zIndex: 20
+              zIndex: 20,
+              maxWidth: '90%', // Prevent overflow
+              maxHeight: '90%'
             }}
           >
             <img
@@ -81,9 +83,16 @@ function StreamPreview({ titleSettings = {}, watermarkSettings = {}, sampleTitle
               alt="Watermark"
               className="rounded shadow-lg"
               style={{
-                maxWidth: `${80 * (watermarkSettings.watermark_scale || 1.0)}px`,
-                maxHeight: `${80 * (watermarkSettings.watermark_scale || 1.0)}px`,
-                objectFit: 'contain'
+                // FFmpeg scales watermark by: scale=iw*scale:ih*scale
+                // So we apply scale directly to natural image dimensions
+                // Use CSS transform to scale from natural size
+                maxWidth: '100%',
+                maxHeight: '100%',
+                objectFit: 'contain',
+                transform: `scale(${watermarkSettings.watermark_scale || 1.0})`,
+                transformOrigin: watermarkPosition.top ? (watermarkPosition.left ? 'top left' : watermarkPosition.right ? 'top right' : 'top center') :
+                                 watermarkPosition.bottom ? (watermarkPosition.left ? 'bottom left' : watermarkPosition.right ? 'bottom right' : 'bottom center') :
+                                 'center'
               }}
               onError={(e) => {
                 // Fallback to placeholder if image fails to load
@@ -94,9 +103,13 @@ function StreamPreview({ titleSettings = {}, watermarkSettings = {}, sampleTitle
             <div
               className="bg-blue-500 text-white font-bold items-center justify-center rounded shadow-lg hidden"
               style={{
-                width: `${80 * (watermarkSettings.watermark_scale || 1.0)}px`,
-                height: `${80 * (watermarkSettings.watermark_scale || 1.0)}px`,
-                fontSize: `${12 * (watermarkSettings.watermark_scale || 1.0)}px`
+                width: '150px',
+                height: '150px',
+                fontSize: '16px',
+                transform: `scale(${watermarkSettings.watermark_scale || 1.0})`,
+                transformOrigin: watermarkPosition.top ? (watermarkPosition.left ? 'top left' : watermarkPosition.right ? 'top right' : 'top center') :
+                                 watermarkPosition.bottom ? (watermarkPosition.left ? 'bottom left' : watermarkPosition.right ? 'bottom right' : 'bottom center') :
+                                 'center'
               }}
             >
               LOGO
