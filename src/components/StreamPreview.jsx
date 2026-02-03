@@ -76,8 +76,23 @@ function StreamPreview({ titleSettings = {}, watermarkSettings = {}, sampleTitle
               zIndex: 20
             }}
           >
+            <img
+              src={`${import.meta.env.VITE_API_URL || ''}/uploads/watermarks/users/${watermarkSettings.watermark_path.split('/').pop()}`}
+              alt="Watermark"
+              className="rounded shadow-lg"
+              style={{
+                maxWidth: `${80 * (watermarkSettings.watermark_scale || 1.0)}px`,
+                maxHeight: `${80 * (watermarkSettings.watermark_scale || 1.0)}px`,
+                objectFit: 'contain'
+              }}
+              onError={(e) => {
+                // Fallback to placeholder if image fails to load
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
+            />
             <div
-              className="bg-blue-500 text-white font-bold flex items-center justify-center rounded shadow-lg"
+              className="bg-blue-500 text-white font-bold items-center justify-center rounded shadow-lg hidden"
               style={{
                 width: `${80 * (watermarkSettings.watermark_scale || 1.0)}px`,
                 height: `${80 * (watermarkSettings.watermark_scale || 1.0)}px`,

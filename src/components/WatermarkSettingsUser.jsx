@@ -193,18 +193,34 @@ function WatermarkSettingsUser({ onUpdate }) {
               </p>
             )}
             {settings.watermark_path && (
-              <div className="flex items-center gap-3 mt-2">
-                <span className="text-sm text-green-600 font-medium flex items-center gap-1">
-                  <CheckCircle className="w-4 h-4" />
-                  Watermark uploaded
-                </span>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={handleDelete}
-                >
-                  Delete
-                </Button>
+              <div className="mt-3 space-y-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-green-600 font-medium flex items-center gap-1">
+                    <CheckCircle className="w-4 h-4" />
+                    Watermark uploaded
+                  </span>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleDelete}
+                  >
+                    Delete
+                  </Button>
+                </div>
+                {/* Watermark Image Preview */}
+                <div className="border border-gray-200 rounded-lg p-3 bg-gray-50 inline-block">
+                  <p className="text-xs text-gray-500 mb-2">Current Watermark:</p>
+                  <img
+                    src={`${import.meta.env.VITE_API_URL || ''}/uploads/watermarks/users/${settings.watermark_path.split('/').pop()}`}
+                    alt="Watermark preview"
+                    className="max-h-32 max-w-48 object-contain rounded border border-gray-300 bg-white"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'block';
+                    }}
+                  />
+                  <p className="text-xs text-red-500 hidden">Failed to load watermark image</p>
+                </div>
               </div>
             )}
           </div>
