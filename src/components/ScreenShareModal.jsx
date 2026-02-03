@@ -307,13 +307,28 @@ function ScreenShareModal({ channel, isOpen, onClose, onUpdate }) {
   const forceDisconnect = async () => {
     try {
       if (isStreaming) {
-        await Promise.race([
-          api.post(`/webrtc/stop/${channel.id}`).catch(() => {}),
-          new Promise(resolve => setTimeout(resolve, 2000))
-        ]);
-      }
-    } catch (e) {}
+        // Stop WebRTC bridge first
+        try {
+          await api.post(`/webrtc/stop/${channel.id}`);
+        } catch (e) {
+          console.error('Failed to stop WebRTC bridge:', e);
+        }
 
+        // Then stop the channel streaming
+        try {
+          await api.post(`/channels/${channel.id}/stop`);
+        } catch (e) {
+          console.error('Failed to stop channel:', e);
+        }
+
+        // Wait a bit for backend to process
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+    } catch (e) {
+      console.error('Force disconnect error:', e);
+    }
+
+    // Clean up local resources
     if (peerConnectionRef.current) {
       peerConnectionRef.current.close();
       peerConnectionRef.current = null;
