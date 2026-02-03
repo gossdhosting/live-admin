@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import {
   Play, Square, RotateCw, Pencil, Trash2,
   CheckCircle, AlertTriangle, XCircle, Loader2, BarChart3, Globe, Image as ImageIcon,
-  FileText, Video, Check, X, ChevronDown, ChevronUp, Server, Key, Copy, Calendar
+  FileText, Video, Check, X, ChevronDown, ChevronUp, Server, Key, Copy, Calendar, Code
 } from 'lucide-react';
 import { useAlertDialog } from './ui/alert-dialog-modern';
 
@@ -680,6 +680,131 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
           </div>
         );
 
+      case 'embed':
+        const embedUrl = `https://streaming.rexstream.net/embed/${channel.id}?channel=${channel.id}`;
+        const iframeCode = `<iframe src="${embedUrl}" width="100%" height="500" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>`;
+
+        return (
+          <div className="p-6">
+            <div className="space-y-4">
+              {/* Player Preview */}
+              {channel.status === 'running' && (
+                <div className="bg-gradient-to-br from-purple-50 to-indigo-50 border-2 border-purple-200 rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Video className="w-5 h-5 text-purple-600" />
+                    <h3 className="font-semibold text-gray-900">Live Player Preview</h3>
+                  </div>
+                  <div className="bg-black rounded-lg overflow-hidden">
+                    <iframe
+                      src={embedUrl}
+                      width="100%"
+                      height="400"
+                      frameBorder="0"
+                      allowFullScreen
+                      allow="autoplay; encrypted-media"
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Embed Code Section */}
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Code className="w-5 h-5 text-blue-600" />
+                    <h3 className="font-semibold text-gray-900">Embed Code</h3>
+                  </div>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(iframeCode);
+                      showAlert({
+                        title: 'Copied!',
+                        message: 'Embed code copied to clipboard',
+                        type: 'success'
+                      });
+                    }}
+                    className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md flex items-center gap-2 transition-colors"
+                  >
+                    <Copy className="w-4 h-4" />
+                    Copy Code
+                  </button>
+                </div>
+
+                <div className="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+                  <code className="text-green-400 text-sm font-mono break-all">
+                    {iframeCode}
+                  </code>
+                </div>
+
+                <div className="mt-3 text-sm text-gray-700">
+                  <p className="font-medium mb-1">How to use:</p>
+                  <ol className="list-decimal list-inside space-y-1 text-gray-600">
+                    <li>Copy the embed code above</li>
+                    <li>Paste it into your website's HTML</li>
+                    <li>Adjust the width and height attributes as needed</li>
+                    <li>Your stream will play automatically when live</li>
+                  </ol>
+                </div>
+              </div>
+
+              {/* Direct Player Link */}
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Globe className="w-5 h-5 text-green-600" />
+                    <h3 className="font-semibold text-gray-900">Direct Player Link</h3>
+                  </div>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(embedUrl);
+                      showAlert({
+                        title: 'Copied!',
+                        message: 'Player link copied to clipboard',
+                        type: 'success'
+                      });
+                    }}
+                    className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-md flex items-center gap-2 transition-colors"
+                  >
+                    <Copy className="w-4 h-4" />
+                    Copy Link
+                  </button>
+                </div>
+
+                <div className="bg-white rounded-lg p-3 border border-green-200">
+                  <a
+                    href={embedUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline text-sm font-mono break-all"
+                  >
+                    {embedUrl}
+                  </a>
+                </div>
+
+                <div className="mt-3 text-sm text-gray-600">
+                  Share this link to let viewers watch your stream directly in their browser
+                </div>
+              </div>
+
+              {/* Stream Status Info */}
+              {channel.status !== 'running' && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-semibold text-yellow-900 mb-1">Stream Offline</h4>
+                      <p className="text-sm text-yellow-700">
+                        Start your stream to enable the embed player. Viewers will see a loading screen until the stream goes live.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+
       case 'logs':
         return (
           <div className="p-6">
@@ -937,7 +1062,7 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
           {/* Modern Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="border-t border-gray-200">
-              <TabsList className="grid w-full grid-cols-4 bg-gradient-to-b from-gray-50 to-white h-auto p-1">
+              <TabsList className="grid w-full grid-cols-5 bg-gradient-to-b from-gray-50 to-white h-auto p-1">
                 <TabsTrigger
                   value="overview"
                   className="data-[state=active]:bg-white data-[state=active]:shadow-sm flex flex-col sm:flex-row items-center gap-1.5 py-2.5 text-xs sm:text-sm font-medium"
@@ -954,11 +1079,19 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
                   <span className="sm:hidden">Multi</span>
                 </TabsTrigger>
                 <TabsTrigger
+                  value="embed"
+                  className="data-[state=active]:bg-white data-[state=active]:shadow-sm flex flex-col sm:flex-row items-center gap-1.5 py-2.5 text-xs sm:text-sm font-medium"
+                >
+                  <Code className="w-4 h-4" />
+                  <span>Embed</span>
+                </TabsTrigger>
+                <TabsTrigger
                   value="watermark"
                   className="data-[state=active]:bg-white data-[state=active]:shadow-sm flex flex-col sm:flex-row items-center gap-1.5 py-2.5 text-xs sm:text-sm font-medium"
                 >
                   <ImageIcon className="w-4 h-4" />
-                  <span>Watermark</span>
+                  <span className="hidden sm:inline">Watermark</span>
+                  <span className="sm:hidden">WM</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="logs"
@@ -975,6 +1108,10 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
             </TabsContent>
 
             <TabsContent value="platforms" className="m-0 border-t">
+              {renderTabContent()}
+            </TabsContent>
+
+            <TabsContent value="embed" className="m-0 border-t">
               {renderTabContent()}
             </TabsContent>
 
