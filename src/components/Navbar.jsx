@@ -79,7 +79,7 @@ function Navbar({ user, onLogout }) {
 
           {/* Logo/Brand - Centered on mobile */}
           <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity md:flex-none">
-            <img src={logoSvg} alt="RexStream" style={{ height: '1.8rem' }} />
+            <img src={logoSvg} alt="RexStream" className="h-5 sm:h-7" />
           </Link>
 
           {/* Desktop Navigation Links */}
