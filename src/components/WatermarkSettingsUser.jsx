@@ -211,7 +211,7 @@ function WatermarkSettingsUser({ onUpdate }) {
                 <div className="border border-gray-200 rounded-lg p-3 bg-gray-50 inline-block">
                   <p className="text-xs text-gray-500 mb-2">Current Watermark:</p>
                   <img
-                    src={`${import.meta.env.VITE_API_URL || ''}/uploads/watermarks/users/${settings.watermark_path.split('/').pop()}`}
+                    src={`${(import.meta.env.VITE_API_URL || '').replace('/api', '')}/uploads/watermarks/users/${settings.watermark_path.split('/').pop()}`}
                     alt="Watermark preview"
                     className="max-h-32 max-w-48 object-contain rounded border border-gray-300 bg-white"
                     onError={(e) => {

@@ -77,7 +77,7 @@ function StreamPreview({ titleSettings = {}, watermarkSettings = {}, sampleTitle
             }}
           >
             <img
-              src={`${import.meta.env.VITE_API_URL || ''}/uploads/watermarks/users/${watermarkSettings.watermark_path.split('/').pop()}`}
+              src={`${(import.meta.env.VITE_API_URL || '').replace('/api', '')}/uploads/watermarks/users/${watermarkSettings.watermark_path.split('/').pop()}`}
               alt="Watermark"
               className="rounded shadow-lg"
               style={{
