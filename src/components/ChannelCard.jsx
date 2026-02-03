@@ -702,6 +702,16 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
               ) : (
                 <div className="space-y-2">
                   {logs.map((log) => {
+                    // Filter out generic FFmpeg exit errors that don't provide useful information
+                    const cleanMessage = log.message
+                      .replace(/rtmp:\/\/[^\s]+:\s*Immediate exit requested/g, 'Stream stopped')
+                      .replace(/av_interleaved_write_frame\(\):\s*Immediate exit requested/g, '')
+                      .replace(/Error writing trailer of rtmp:\/\/[^\s]+/g, 'Stream connection closed')
+                      .trim();
+
+                    // Skip empty logs after cleaning
+                    if (!cleanMessage) return null;
+
                     const borderColor = log.log_type === 'error' ? 'border-red-500' :
                                        log.log_type === 'warning' ? 'border-yellow-400' :
                                        log.log_type === 'info' ? 'border-blue-400' : 'border-gray-500';
@@ -727,11 +737,11 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
                           </span>
                         </div>
                         <div className={`${textColor} text-sm leading-relaxed`}>
-                          {log.message}
+                          {cleanMessage}
                         </div>
                       </div>
                     );
-                  })}
+                  }).filter(Boolean)}
                 </div>
               )}
             </div>
