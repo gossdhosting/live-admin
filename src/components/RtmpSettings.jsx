@@ -251,7 +251,7 @@ function RtmpSettings({ channelId, channelName }) {
           borderRadius: '8px',
           color: '#7f8c8d',
         }}>
-          <p>No RTMP destinations configured.</p>
+          <p>No Destination configured for this channel.</p>
           <p style={{ fontSize: '0.9rem' }}>Add Facebook, YouTube, or Twitch to stream to multiple platforms simultaneously.</p>
         </div>
       ) : (

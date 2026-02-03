@@ -456,11 +456,11 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
                           <div className="text-xs font-semibold text-gray-600 mb-1">Server URL</div>
                           <div className="flex items-center gap-2">
                             <code className="text-xs bg-indigo-50 px-2 py-1 rounded border border-indigo-200 font-mono text-indigo-900 break-all flex-1">
-                              rtmp://live.telanganatribune.com:1935/live
+                              rtmp://streaming.rexstream.net:1935/live
                             </code>
                             <button
                               onClick={() => {
-                                navigator.clipboard.writeText('rtmp://live.telanganatribune.com:1935/live');
+                                navigator.clipboard.writeText('rtmp://streaming.rexstream.net:1935/live');
                               }}
                               className="p-1.5 hover:bg-indigo-100 rounded transition-colors flex-shrink-0"
                               title="Copy Server URL"
