@@ -49,6 +49,7 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
   // Check if channel has scheduled stream
   const hasSchedule = channel.scheduled_stream && channel.scheduled_stream.status === 'pending';
   const canSchedule = userStats?.limits?.schedule_enabled === true;
+  const hasHlsEmbedAccess = userStats?.limits?.hls_embed_enabled === true;
 
   // Update local watermark state when channel prop changes
   useEffect(() => {
@@ -1062,7 +1063,7 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
           {/* Modern Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="border-t border-gray-200">
-              <TabsList className="grid w-full grid-cols-5 bg-gradient-to-b from-gray-50 to-white h-auto p-1">
+              <TabsList className={`grid w-full ${hasHlsEmbedAccess ? 'grid-cols-5' : 'grid-cols-4'} bg-gradient-to-b from-gray-50 to-white h-auto p-1`}>
                 <TabsTrigger
                   value="overview"
                   className="data-[state=active]:bg-white data-[state=active]:shadow-sm flex flex-col sm:flex-row items-center gap-1.5 py-2.5 text-xs sm:text-sm font-medium"
@@ -1078,13 +1079,15 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
                   <span className="hidden sm:inline">Platforms</span>
                   <span className="sm:hidden">Multi</span>
                 </TabsTrigger>
-                <TabsTrigger
-                  value="embed"
-                  className="data-[state=active]:bg-white data-[state=active]:shadow-sm flex flex-col sm:flex-row items-center gap-1.5 py-2.5 text-xs sm:text-sm font-medium"
-                >
-                  <Code className="w-4 h-4" />
-                  <span>Embed</span>
-                </TabsTrigger>
+                {hasHlsEmbedAccess && (
+                  <TabsTrigger
+                    value="embed"
+                    className="data-[state=active]:bg-white data-[state=active]:shadow-sm flex flex-col sm:flex-row items-center gap-1.5 py-2.5 text-xs sm:text-sm font-medium"
+                  >
+                    <Code className="w-4 h-4" />
+                    <span>Embed</span>
+                  </TabsTrigger>
+                )}
                 <TabsTrigger
                   value="watermark"
                   className="data-[state=active]:bg-white data-[state=active]:shadow-sm flex flex-col sm:flex-row items-center gap-1.5 py-2.5 text-xs sm:text-sm font-medium"
@@ -1111,9 +1114,11 @@ function ChannelCard({ channel, onUpdate, onDelete, onEdit, user }) {
               {renderTabContent()}
             </TabsContent>
 
-            <TabsContent value="embed" className="m-0 border-t">
-              {renderTabContent()}
-            </TabsContent>
+            {hasHlsEmbedAccess && (
+              <TabsContent value="embed" className="m-0 border-t">
+                {renderTabContent()}
+              </TabsContent>
+            )}
 
             <TabsContent value="watermark" className="m-0 border-t">
               {renderTabContent()}

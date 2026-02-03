@@ -27,6 +27,7 @@ function PlanManagement() {
     youtube_restreaming: false,
     schedule_enabled: false,
     cloud_storage_enabled: false,
+    hls_embed_enabled: false,
     android_product_id_monthly: '',
     android_product_id_yearly: '',
     ios_product_id_monthly: '',
@@ -89,6 +90,7 @@ function PlanManagement() {
       youtube_restreaming: false,
       schedule_enabled: false,
       cloud_storage_enabled: false,
+      hls_embed_enabled: false,
       android_product_id_monthly: '',
       android_product_id_yearly: '',
       ios_product_id_monthly: '',
@@ -117,6 +119,7 @@ function PlanManagement() {
       youtube_restreaming: plan.youtube_restreaming === 1 || plan.youtube_restreaming === true,
       schedule_enabled: plan.schedule_enabled === 1 || plan.schedule_enabled === true,
       cloud_storage_enabled: plan.cloud_storage_enabled === 1 || plan.cloud_storage_enabled === true,
+      hls_embed_enabled: plan.hls_embed_enabled === 1 || plan.hls_embed_enabled === true,
       android_product_id_monthly: plan.android_product_id_monthly || '',
       android_product_id_yearly: plan.android_product_id_yearly || '',
       ios_product_id_monthly: plan.ios_product_id_monthly || '',
@@ -146,6 +149,7 @@ function PlanManagement() {
         youtube_restreaming: formData.youtube_restreaming ? 1 : 0,
         schedule_enabled: formData.schedule_enabled ? 1 : 0,
         cloud_storage_enabled: formData.cloud_storage_enabled ? 1 : 0,
+        hls_embed_enabled: formData.hls_embed_enabled ? 1 : 0,
         android_product_id_monthly: formData.android_product_id_monthly || null,
         android_product_id_yearly: formData.android_product_id_yearly || null,
         ios_product_id_monthly: formData.ios_product_id_monthly || null,
@@ -681,6 +685,24 @@ function PlanManagement() {
                   </label>
                   <small style={{ color: '#666', display: 'block', marginLeft: '1.5rem' }}>
                     Enable AWS S3 cloud storage for media files. If disabled, uses local storage instead
+                  </small>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <div className="checkbox-group">
+                  <input
+                    type="checkbox"
+                    id="hls_embed_enabled"
+                    name="hls_embed_enabled"
+                    checked={formData.hls_embed_enabled}
+                    onChange={handleInputChange}
+                  />
+                  <label htmlFor="hls_embed_enabled" style={{ marginBottom: 0 }}>
+                    HLS Embed Player
+                  </label>
+                  <small style={{ color: '#666', display: 'block', marginLeft: '1.5rem' }}>
+                    Enable HLS streaming and embeddable player for users on this plan. Disabling saves CPU resources.
                   </small>
                 </div>
               </div>
