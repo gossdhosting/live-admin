@@ -172,7 +172,20 @@ function Navbar({ user, onLogout }) {
                 onClick={() => setAccountDropdownOpen(!accountDropdownOpen)}
                 className="flex items-center gap-2 px-2 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
               >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-red-500 flex items-center justify-center font-bold text-white text-sm">
+                {user.profile_picture ? (
+                  <img
+                    src={user.profile_picture}
+                    alt={user.name || 'User'}
+                    className="w-8 h-8 rounded-full object-cover"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <div
+                  className={`w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-red-500 items-center justify-center font-bold text-white text-sm ${user.profile_picture ? 'hidden' : 'flex'}`}
+                >
                   {user.email.charAt(0).toUpperCase()}
                 </div>
                 <div className="hidden lg:flex flex-col items-start">
@@ -192,9 +205,17 @@ function Navbar({ user, onLogout }) {
                   {/* User Info */}
                   <div className="px-4 py-3 border-b border-gray-100">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-red-500 flex items-center justify-center font-bold text-white">
-                        {user.email.charAt(0).toUpperCase()}
-                      </div>
+                      {user.profile_picture ? (
+                        <img
+                          src={user.profile_picture}
+                          alt={user.name || 'User'}
+                          className="w-10 h-10 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-red-500 flex items-center justify-center font-bold text-white">
+                          {user.email.charAt(0).toUpperCase()}
+                        </div>
+                      )}
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-gray-900 truncate">
                           {user.name || user.email}
@@ -297,11 +318,21 @@ function Navbar({ user, onLogout }) {
         }`}
       >
         <div className="flex items-center gap-3 p-3 bg-gray-800 rounded-lg mb-4">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-red-500 flex items-center justify-center font-bold text-white">
-            {user.email.charAt(0).toUpperCase()}
-          </div>
+          {user.profile_picture ? (
+            <img
+              src={user.profile_picture}
+              alt={user.name || 'User'}
+              className="w-10 h-10 rounded-full object-cover"
+            />
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-red-500 flex items-center justify-center font-bold text-white">
+              {user.email.charAt(0).toUpperCase()}
+            </div>
+          )}
           <div className="flex flex-col">
-            <span className="text-sm font-medium text-white">{user.plan_name || 'Free'} Plan</span>
+            <span className="text-sm font-medium text-white truncate max-w-[140px]">
+              {user.name || user.email.split('@')[0]}
+            </span>
             <Badge variant="secondary" className="text-xs w-fit">
               {user.plan_name || 'Free'}
             </Badge>
