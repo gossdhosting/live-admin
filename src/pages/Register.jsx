@@ -7,7 +7,7 @@ import { Label } from '../components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { signInWithGoogle, signInWithFacebook, signInWithApple, isFirebaseAvailable } from '../config/firebase';
-import { executeRecaptcha } from '../utils/recaptcha';
+import { executeRecaptcha, loadRecaptcha, hideRecaptchaBadge } from '../utils/recaptcha';
 import logoSvg from '/logo.svg';
 
 function Register() {
@@ -27,8 +27,13 @@ function Register() {
   const [success, setSuccess] = useState(false);
   const [socialLoading, setSocialLoading] = useState(null);
 
+  // Load reCAPTCHA and fetch plans on mount, hide badge on unmount
   useEffect(() => {
+    loadRecaptcha();
     fetchPlans();
+    return () => {
+      hideRecaptchaBadge();
+    };
   }, []);
 
   const fetchPlans = async () => {

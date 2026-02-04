@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
 import { Button } from '../components/ui/button';
@@ -7,7 +7,7 @@ import { Label } from '../components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { signInWithGoogle, signInWithFacebook, signInWithApple, isFirebaseAvailable } from '../config/firebase';
-import { executeRecaptcha } from '../utils/recaptcha';
+import { executeRecaptcha, loadRecaptcha, hideRecaptchaBadge } from '../utils/recaptcha';
 import logoSvg from '/logo.svg';
 
 function Login({ onLogin }) {
@@ -18,6 +18,14 @@ function Login({ onLogin }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [socialLoading, setSocialLoading] = useState(null);
+
+  // Load reCAPTCHA on mount, hide badge on unmount
+  useEffect(() => {
+    loadRecaptcha();
+    return () => {
+      hideRecaptchaBadge();
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
