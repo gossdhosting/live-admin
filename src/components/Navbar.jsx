@@ -170,10 +170,18 @@ function Navbar({ user, onLogout }) {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setAccountDropdownOpen(!accountDropdownOpen)}
-                className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+                className="flex items-center gap-2 px-2 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
               >
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-red-500 flex items-center justify-center font-bold text-white text-sm">
                   {user.email.charAt(0).toUpperCase()}
+                </div>
+                <div className="hidden lg:flex flex-col items-start">
+                  <span className="text-sm font-medium text-white max-w-[120px] truncate">
+                    {user.name || user.email.split('@')[0]}
+                  </span>
+                  <span className="text-xs text-white/60">
+                    {user.plan_name || 'Free'} Plan
+                  </span>
                 </div>
                 <ChevronDown className={`w-4 h-4 transition-transform ${accountDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
