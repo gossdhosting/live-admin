@@ -270,6 +270,11 @@ function Plans() {
                 <p className="text-sm text-gray-600">
                   {formatStorage(userStats.storage_used_mb || 0)} / {formatStorage(userStats.limits?.storage_limit_mb || 0)} Storage
                 </p>
+                {userStats.account_credit > 0 && (
+                  <p className="text-sm text-green-600 font-semibold mt-1">
+                    ${parseFloat(userStats.account_credit).toFixed(2)} Available Credit
+                  </p>
+                )}
               </div>
             </div>
           </CardContent>
