@@ -27,6 +27,11 @@ function CreditManagement() {
     reason: ''
   });
 
+  // User search
+  const [userSearch, setUserSearch] = useState('');
+  const [userSearchResults, setUserSearchResults] = useState([]);
+  const [searchingUsers, setSearchingUsers] = useState(false);
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -82,10 +87,48 @@ function CreditManagement() {
         amount: '',
         reason: ''
       });
+      setUserSearch('');
+      setUserSearchResults([]);
     } else {
       setAdjustmentData({ userId: '', userEmail: '', amount: '', reason: '' });
+      setUserSearch('');
+      setUserSearchResults([]);
     }
     setShowAdjustModal(true);
+  };
+
+  const searchUsers = async (query) => {
+    if (query.length < 2) {
+      setUserSearchResults([]);
+      return;
+    }
+
+    setSearchingUsers(true);
+    try {
+      const response = await api.get('/users', { params: { search: query, limit: 10 } });
+      setUserSearchResults(response.data.users || []);
+    } catch (error) {
+      console.error('Failed to search users:', error);
+      setUserSearchResults([]);
+    } finally {
+      setSearchingUsers(false);
+    }
+  };
+
+  const handleUserSearchChange = (e) => {
+    const value = e.target.value;
+    setUserSearch(value);
+    searchUsers(value);
+  };
+
+  const selectUser = (user) => {
+    setAdjustmentData(prev => ({
+      ...prev,
+      userId: user.id.toString(),
+      userEmail: user.email
+    }));
+    setUserSearch(`${user.name || user.email} (${user.email})`);
+    setUserSearchResults([]);
   };
 
   const getTransactionTypeColor = (type) => {
@@ -367,16 +410,82 @@ function CreditManagement() {
             <CardContent>
               <form onSubmit={handleAdjustCredit} className="space-y-4">
                 <div>
-                  <Label>User ID</Label>
-                  <Input
-                    type="number"
-                    value={adjustmentData.userId}
-                    onChange={(e) => setAdjustmentData(prev => ({ ...prev, userId: e.target.value }))}
-                    placeholder="Enter user ID"
-                    required
-                  />
-                  {adjustmentData.userEmail && (
-                    <p className="text-sm text-gray-500 mt-1">{adjustmentData.userEmail}</p>
+                  <Label>Search User</Label>
+                  <div style={{ position: 'relative' }}>
+                    <Input
+                      type="text"
+                      value={userSearch}
+                      onChange={handleUserSearchChange}
+                      placeholder="Type name or email to search..."
+                      disabled={!!adjustmentData.userId}
+                    />
+                    {searchingUsers && (
+                      <div style={{ position: 'absolute', right: '10px', top: '10px' }}>
+                        <div className="spinner" style={{ width: '16px', height: '16px', border: '2px solid #ccc', borderTopColor: '#333', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+                      </div>
+                    )}
+                    {userSearchResults.length > 0 && !adjustmentData.userId && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: 0,
+                        right: 0,
+                        backgroundColor: 'white',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '6px',
+                        marginTop: '4px',
+                        maxHeight: '200px',
+                        overflowY: 'auto',
+                        zIndex: 10,
+                        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                      }}>
+                        {userSearchResults.map(user => (
+                          <div
+                            key={user.id}
+                            onClick={() => selectUser(user)}
+                            style={{
+                              padding: '10px',
+                              cursor: 'pointer',
+                              borderBottom: '1px solid #f3f4f6'
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                          >
+                            <div style={{ fontWeight: 500, fontSize: '14px' }}>
+                              {user.name || user.email}
+                            </div>
+                            <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                              {user.email} • {user.plan_name || 'Free'}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  {adjustmentData.userId && (
+                    <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <p className="text-sm text-gray-500">
+                        Selected: {adjustmentData.userEmail} (ID: {adjustmentData.userId})
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAdjustmentData(prev => ({ ...prev, userId: '', userEmail: '' }));
+                          setUserSearch('');
+                        }}
+                        style={{
+                          fontSize: '12px',
+                          color: '#ef4444',
+                          textDecoration: 'underline',
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          padding: 0
+                        }}
+                      >
+                        Clear
+                      </button>
+                    </div>
                   )}
                 </div>
                 <div>
