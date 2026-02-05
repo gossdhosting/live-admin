@@ -15,6 +15,7 @@ import Help from './pages/Help';
 import Tickets from './pages/Tickets';
 import Users from './pages/Users';
 import PlansManagement from './pages/PlansManagement';
+import CreditManagement from './pages/CreditManagement';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import MinimizedStreamWidget from './components/MinimizedStreamWidget';
@@ -124,6 +125,10 @@ function App() {
                 <Route
                   path="/plans-management"
                   element={user && user.role === 'admin' ? <PlansManagement user={user} /> : <Navigate to="/" />}
+                />
+                <Route
+                  path="/credits"
+                  element={user && user.role === 'admin' ? <CreditManagement user={user} /> : <Navigate to="/" />}
                 />
               </Routes>
             </main>
