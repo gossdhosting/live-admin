@@ -192,7 +192,7 @@ function EditChannelModal({ channel, onClose, onSuccess, isOpen }) {
                   checked={formData.input_type === 'webcam'}
                   onChange={handleChange}
                 />
-                Camera (Webcam/Mobile Camera)
+                Camera (Webcam/Mobile Camera) <span className="text-xs text-amber-600 font-medium">(Beta)</span>
               </label>
               <label className="flex items-center gap-2 mb-0">
                 <input
@@ -202,7 +202,7 @@ function EditChannelModal({ channel, onClose, onSuccess, isOpen }) {
                   checked={formData.input_type === 'screen'}
                   onChange={handleChange}
                 />
-                Screen Share (Desktop/Browser Screen)
+                Screen Share (Desktop/Browser Screen) <span className="text-xs text-amber-600 font-medium">(Beta)</span>
               </label>
             </div>
             {!(userStats?.youtube_restreaming === true || userStats?.youtube_restreaming === 1) && formData.input_type === 'youtube' && (
