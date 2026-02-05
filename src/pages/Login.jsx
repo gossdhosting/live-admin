@@ -84,8 +84,8 @@ function Login({ onLogin }) {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[#212836] to-black p-4">
-      <div className="flex justify-center mb-8">
-        <img src={logoSvg} alt="Rexstream" className="h-16" />
+      <div className="flex justify-center mb-6">
+        <img src={logoSvg} alt="Rexstream" className="h-10" />
       </div>
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">

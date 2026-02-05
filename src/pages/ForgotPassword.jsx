@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Alert, AlertDescription } from '../components/ui/alert';
+import logoSvg from '/logo.svg';
 
 function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -36,15 +37,18 @@ function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[#212836] to-black p-4">
+      <div className="flex justify-center mb-6">
+        <img src={logoSvg} alt="Rexstream" className="h-10" />
+      </div>
       <Card className="w-full max-w-md">
-        <CardHeader>
+        <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">Forgot Password</CardTitle>
+          <CardDescription className="text-center">
+            Enter your email address and we'll send you a link to reset your password.
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-gray-600 mb-6 text-center">
-            Enter your email address and we'll send you a link to reset your password.
-          </p>
 
           {message && (
             <Alert className="mb-4 border-green-200 bg-green-50">
