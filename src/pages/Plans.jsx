@@ -545,6 +545,12 @@ function Plans() {
                     <span>Credit for unused time:</span>
                     <span>-${upgradePreview.proration.credit?.toFixed(2)}</span>
                   </div>
+                  {upgradePreview.proration.creditApplied > 0 && (
+                    <div className="flex justify-between text-sm text-green-600">
+                      <span>Account credit applied:</span>
+                      <span>-${upgradePreview.proration.creditApplied?.toFixed(2)}</span>
+                    </div>
+                  )}
                   <div className="border-t pt-2 mt-2 flex justify-between font-bold text-lg">
                     <span>Amount to charge today:</span>
                     <span className="text-blue-600">${upgradePreview.proration.dueNow?.toFixed(2)}</span>
